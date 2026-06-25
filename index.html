@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RadioCalc - Planejamento de Radiofármacos</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☢️</text></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0 10px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .header .subtitle {
+            color: #aaa;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .header .version {
+            display: inline-block;
+            background: rgba(255, 215, 0, 0.15);
+            color: #ffd700;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin: 20px 0 25px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 12px 28px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            color: #ffd700;
+            border-bottom-color: #ffd700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 25px;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card-title {
+            margin-bottom: 15px;
+            color: #ffd700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #ccc;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .input-group input[type="datetime-local"] {
+            color-scheme: dark;
+        }
+
+        .input-group small {
+            display: block;
+            margin-top: 4px;
+        }
+
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffd700' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        select option,
+        select optgroup {
+            background-color: #4a4a5a !important;
+            color: #ffffff !important;
+            padding: 8px 12px;
+        }
+
+        select optgroup {
+            background-color: #3a3a4a !important;
+            color: #ffd700 !important;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ffd700, #f7971e);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 30px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px dashed rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 215, 0, 0.25);
+        }
+
+        .btn-success {
+            background: rgba(0, 255, 100, 0.15);
+            border: 1px solid rgba(0, 255, 100, 0.3);
+            color: #00ff64;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-success:hover {
+            background: rgba(0, 255, 100, 0.25);
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.15);
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.3s;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255, 215, 0, 0.08);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 215, 0, 0.12);
+        }
+
+        .stat-card .valor {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin-top: 3px;
+        }
+
+        .stat-card .rotulo {
+            font-size: 0.7rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.destaque .valor { color: #ffd700; }
+        .stat-card.vermelho .valor { color: #ff6b6b; }
+        .stat-card.verde .valor { color: #00ff64; }
+        .stat-card.tc .valor { color: #00d2ff; }
+        .stat-card.f18 .valor { color: #00ff88; }
+        .stat-card.planejamento .valor { color: #ff6b9d; }
+
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 15px 0;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+        }
+
+        th {
+            background: rgba(255, 215, 0, 0.12);
+            padding: 10px 8px;
+            text-align: center;
+            font-weight: 600;
+            color: #ffd700;
+            white-space: nowrap;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.15);
+        }
+
+        td {
+            padding: 8px 6px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #ddd;
+            font-size: 0.78rem;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .paciente-table {
+            font-size: 0.72rem;
+            min-width: 1400px;
+        }
+
+        .paciente-table th {
+            background: rgba(255, 215, 0, 0.12);
+            padding: 8px 6px;
+            text-align: center;
+            font-weight: 600;
+            color: #ffd700;
+            white-space: nowrap;
+            font-size: 0.6rem;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.15);
+        }
+
+        .paciente-table td {
+            padding: 6px 4px;
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #ddd;
+            font-size: 0.72rem;
+        }
+
+        .paciente-table tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .paciente-table td input {
+            width: 100%;
+            padding: 5px 6px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 0.7rem;
+            min-width: 55px;
+            transition: 0.3s;
+        }
+
+        .paciente-table td input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+
+        .paciente-table td input[type="datetime-local"] {
+            min-width: 130px;
+        }
+
+        .paciente-table td input[type="number"] {
+            min-width: 50px;
+        }
+
+        .paciente-table .num-paciente {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .paciente-table .dose-calculada {
+            color: #00d2ff;
+            font-weight: 600;
+        }
+
+        .paciente-table .dose-administrada {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .paciente-table .resultado-calc {
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        .paciente-table .resultado-calc.ok { color: #00ff64; }
+        .paciente-table .resultado-calc.alerta { color: #ffd700; }
+        .paciente-table .resultado-calc.erro { color: #ff6b6b; }
+
+        .paciente-table .linha-ultimo-paciente {
+            background: rgba(255, 215, 0, 0.08) !important;
+            border-left: 3px solid #ffd700;
+        }
+
+        .paciente-table .linha-ultimo-paciente td {
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .controles-pacientes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .controles-pacientes .info-pacientes {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .controles-pacientes .info-pacientes strong {
+            color: #ffd700;
+        }
+
+        .info-isotopo {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .info-isotopo.tc {
+            background: rgba(0, 210, 255, 0.15);
+            color: #00d2ff;
+            border: 1px solid rgba(0, 210, 255, 0.3);
+        }
+
+        .info-isotopo.f18 {
+            background: rgba(0, 255, 136, 0.15);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .info-box {
+            background: rgba(255, 193, 7, 0.08);
+            border-left: 4px solid #ffd700;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .info-box strong {
+            color: #ffd700;
+        }
+
+        .info-box.tc {
+            border-left-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.08);
+        }
+
+        .info-box.tc strong {
+            color: #00d2ff;
+        }
+
+        .info-box.f18 {
+            border-left-color: #00ff88;
+            background: rgba(0, 255, 136, 0.08);
+        }
+
+        .info-box.f18 strong {
+            color: #00ff88;
+        }
+
+        .resultado-box {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .resultado-box.ativo {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .planejamento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .planejamento-grid .stat-card {
+            background: rgba(255, 107, 157, 0.08);
+            border-color: rgba(255, 107, 157, 0.2);
+        }
+
+        .planejamento-grid .stat-card .valor {
+            font-size: 2rem;
+        }
+
+        .planejamento-grid .stat-card .rotulo {
+            font-size: 0.75rem;
+        }
+
+        .grafico-wrapper {
+            margin-top: 20px;
+            height: 380px;
+            position: relative;
+        }
+
+        .grafico-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .legenda-grafico {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legenda-grafico .item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .legenda-grafico .cor {
+            width: 20px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .legenda-grafico .cor-ponto {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0 10px 0;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+        }
+
+        .footer a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .planejamento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .tab-btn {
+                flex: 1;
+                min-width: 80px;
+                text-align: center;
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+
+            .stat-card .valor {
+                font-size: 1.2rem;
+            }
+
+            .grafico-wrapper {
+                height: 280px;
+            }
+
+            .paciente-table {
+                font-size: 0.55rem;
+                min-width: 1200px;
+            }
+
+            .paciente-table td input {
+                font-size: 0.55rem;
+                padding: 3px 4px;
+                min-width: 40px;
+            }
+
+            .paciente-table td input[type="datetime-local"] {
+                min-width: 100px;
+            }
+
+            .controles-pacientes {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .controles-pacientes .btn-primary {
+                width: 100%;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .tab-btn {
+                font-size: 0.7rem;
+                padding: 8px 10px;
+            }
+
+            .grafico-wrapper {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+    <div class="container">
+        <h1>☢️ RadioCalc</h1>
+        <p class="subtitle">Planejamento de Radiofármacos · Tc-99m · F-18</p>
+        <span class="version">v2.5 · Planejamento em Primeiro</span>
+    </div>
+</header>
+
+<!-- ===== CONTAINER PRINCIPAL ===== -->
+<div class="container">
+
+    <!-- ===== TABS ===== -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="trocarAba('planejamento')">📋 Planejamento</button>
+        <button class="tab-btn" onclick="trocarAba('marcacao')">🧪 Marcação</button>
+        <button class="tab-btn" onclick="trocarAba('pacientes')">👥 Pacientes</button>
+    </div>
+
+    <!-- ===== ABA 1: PLANEJAMENTO ===== -->
+    <div id="aba-planejamento" class="tab-content active">
+        <div class="card">
+            <h3 class="card-title" style="color: #ff6b9d;">📋 Planejamento de Atividade</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;">
+                Calcule a atividade inicial necessária para marcar o frasco e atender todos os pacientes.
+            </p>
+
+            <div class="grid-2">
+                <div>
+                    <div class="input-group">
+                        <label>Número de Pacientes</label>
+                        <input type="number" id="planNumPacientes" value="8" min="1" max="50" onchange="calcularPlanejamento()">
+                    </div>
+                    <div class="input-group">
+                        <label>Peso Médio (kg)</label>
+                        <input type="number" id="planPesoMedio" value="72" step="0.1" min="1" onchange="calcularPlanejamento()">
+                        <small style="color: #888; font-size: 0.7rem;">Use a média dos pacientes ou insira manualmente</small>
+                    </div>
+                    <div class="input-group">
+                        <label>Dose por kg (mCi/kg)</label>
+                        <input type="number" id="planDoseKg" value="0.15" step="0.01" min="0.01" onchange="calcularPlanejamento()">
+                        <small style="color: #888; font-size: 0.7rem;">Tc-99m: 0.15 | F-18: 0.18</small>
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label>Horário da Marcação</label>
+                        <input type="datetime-local" id="planHorarioMarcacao" onchange="calcularPlanejamento()">
+                    </div>
+                    <div class="input-group">
+                        <label>Horário do Último Paciente</label>
+                        <input type="datetime-local" id="planHorarioUltimo" onchange="calcularPlanejamento()">
+                    </div>
+                    <div class="input-group">
+                        <label>Margem de Segurança (%)</label>
+                        <input type="number" id="planMargemSeguranca" value="15" step="1" min="0" max="50" onchange="calcularPlanejamento()">
+                        <small style="color: #888; font-size: 0.7rem;">Compensa perdas e erros de medição</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 5px;">
+                <div>
+                    <div class="input-group">
+                        <label>Tempo entre Injeções (minutos)</label>
+                        <input type="number" id="planIntervaloInjecoes" value="15" step="1" min="0" onchange="calcularPlanejamento()">
+                        <small style="color: #888; font-size: 0.7rem;">Tempo médio entre cada paciente</small>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: flex-end; gap: 10px;">
+                    <button class="btn-primary" onclick="calcularPlanejamento()" style="margin-top: 0; flex: 1;">
+                        🎯 Calcular
+                    </button>
+                    <button class="btn-success" onclick="aplicarPlanejamento()" style="flex: 1; padding: 14px;">
+                        ⚡ Aplicar à Marcação
+                    </button>
+                </div>
+            </div>
+
+            <div id="resultadoPlanejamento" style="display: none;">
+                <div class="planejamento-grid" id="planejamentoStats">
+                    <div class="stat-card">
+                        <div class="rotulo">Pacientes</div>
+                        <div class="valor" id="planPacientes" style="font-size: 1.5rem;">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="rotulo">Dose Alvo por Paciente</div>
+                        <div class="valor" id="planDosePaciente" style="font-size: 1.5rem; color: #00d2ff;">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="rotulo">Dose Total Alvo</div>
+                        <div class="valor" id="planDoseTotal">--</div>
+                    </div>
+                    <div class="stat-card" style="border-color: rgba(255, 100, 100, 0.3);">
+                        <div class="rotulo">Fator de Decaimento</div>
+                        <div class="valor" id="planFatorDecaimento" style="color: #ff6b6b;">--</div>
+                    </div>
+                    <div class="stat-card destaque">
+                        <div class="rotulo">Atividade Necessária no Frasco</div>
+                        <div class="valor" id="planAtividadeBase" style="font-size: 2rem; color: #ffd700;">--</div>
+                    </div>
+                    <div class="stat-card verde">
+                        <div class="rotulo">Atividade com Margem</div>
+                        <div class="valor" id="planAtividadeFinal" style="font-size: 2.2rem; color: #00ff64;">--</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 15px; border-color: rgba(255, 107, 157, 0.2);">
+                    <h4 style="color: #ff6b9d; margin-bottom: 10px;">📉 Curva de Decaimento do Frasco</h4>
+                    <div class="grafico-wrapper">
+                        <canvas id="graficoDecaimento"></canvas>
+                    </div>
+                    <div class="legenda-grafico">
+                        <div class="item">
+                            <div class="cor" style="background: #00d2ff;"></div>
+                            <span>Decaimento do Frasco</span>
+                        </div>
+                        <div class="item">
+                            <div class="cor-ponto" style="background: #ff6b6b;"></div>
+                            <span>Dose Medida (Injeção)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-box" style="border-left-color: #ff6b9d; background: rgba(255, 107, 157, 0.08); margin-top: 15px;">
+                    <strong style="color: #ff6b9d;">💡 Recomendação:</strong> 
+                    <span id="recomendacaoPlanejamento">Preencha os dados e clique em "Calcular".</span>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin-top: 15px; border-left-color: #ff6b9d; background: rgba(255, 107, 157, 0.05);">
+                <strong style="color: #ff6b9d;">📌 Como funciona:</strong><br>
+                <span style="color: #aaa; font-size: 0.85rem;">
+                    1. Informe o número de pacientes, peso médio e dose/kg<br>
+                    2. Defina o horário da marcação e do último paciente<br>
+                    3. O sistema calcula o decaimento ao longo do tempo<br>
+                    4. O gráfico mostra a curva de decaimento e os pontos de injeção<br>
+                    5. A margem de segurança é aplicada sobre o valor final<br>
+                    6. Clique em "Aplicar à Marcação" para usar o valor calculado
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ABA 2: MARCAÇÃO ===== -->
+    <div id="aba-marcacao" class="tab-content">
+        <div class="card">
+            <h3 class="card-title">🧪 Marcação de Radiofármacos</h3>
+
+            <div class="grid-2">
+                <div>
+                    <div class="input-group">
+                        <label>Radiofármaco</label>
+                        <select id="radiofarmacoMestre" onchange="atualizarInfoIsotopo()">
+                            <optgroup label="🔵 Tc-99m (SPECT) - Meia-vida: 6h">
+                                <option value="DMSA" data-isotopo="tc">DMSA</option>
+                                <option value="DTPA" data-isotopo="tc">DTPA</option>
+                                <option value="FITATO" data-isotopo="tc">FITATO</option>
+                                <option value="MDP" data-isotopo="tc">MDP</option>
+                                <option value="MIBI" data-isotopo="tc">MIBI</option>
+                                <option value="PIRO" data-isotopo="tc">PIRO</option>
+                            </optgroup>
+                            <optgroup label="🟢 F-18 (PET-CT) - Meia-vida: 110 min">
+                                <option value="FDG" data-isotopo="f18">FDG</option>
+                                <option value="FES" data-isotopo="f18">FES</option>
+                                <option value="F-PSMA" data-isotopo="f18">F-PSMA</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    <div id="infoIsotopoSelecionado" class="info-isotopo tc">
+                        🔬 Isótopo: Tc-99m | Meia-vida: 6 horas
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label>Horário da Marcação</label>
+                        <input type="datetime-local" id="horarioMarcacaoMestre" onchange="calcularPacientes()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="input-group">
+                        <label>Atividade Total de Marcação (mCi)</label>
+                        <input type="number" id="atividadeMarcacaoMestre" value="100" step="any" min="0.1" onchange="calcularPacientes()">
+                    </div>
+                </div>
+                <div>
+                    <div class="input-group">
+                        <label>Atividade Disponível (mCi)</label>
+                        <input type="number" id="atividadeDisponivelMestre" value="95" step="any" min="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="calcularMarcacao()">
+                📊 Calcular Marcação
+            </button>
+        </div>
+
+        <div id="resultadoMarcacaoContainer" class="resultado-box">
+            <div class="card">
+                <h3 class="card-title">📊 Resultados da Marcação</h3>
+                <div class="grid-3" id="resultadoMarcacaoInfo">
+                    <div class="stat-card destaque">
+                        <div class="rotulo">Atividade Total Marcada</div>
+                        <div class="valor" id="totalMarcado">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="rotulo">Disponível</div>
+                        <div class="valor" id="disponivelGerador">--</div>
+                    </div>
+                    <div class="stat-card vermelho">
+                        <div class="rotulo">Diferença</div>
+                        <div class="valor" id="diferencaMarcacao">--</div>
+                    </div>
+                </div>
+                <div class="info-box" id="infoBoxMarcacao">
+                    <strong>⚠️ Atenção:</strong> <span id="infoTextoMarcacao">A atividade de marcação não deve exceder a atividade disponível.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ABA 3: PACIENTES ===== -->
+    <div id="aba-pacientes" class="tab-content">
+        <div class="card">
+            <h3 class="card-title">👥 Administração de Pacientes</h3>
+
+            <div class="controles-pacientes">
+                <div class="info-pacientes">
+                    Total de Pacientes: <strong id="totalPacientes">0</strong> (máximo 30)
+                </div>
+                <button class="btn-secondary" onclick="adicionarPaciente()">+ Adicionar Paciente</button>
+                <button class="btn-secondary" onclick="adicionarPacientesLote()" style="border-color: rgba(255,215,0,0.3);">
+                    + Adicionar 5 Pacientes
+                </button>
+                <button class="btn-primary" onclick="calcularPacientes()" style="width: auto; padding: 8px 24px; margin-top: 0;">
+                    📊 Calcular Todos
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="paciente-table" id="tabelaPacientes">
+                    <thead>
+                        <tr>
+                            <th style="width: 25px;">#</th>
+                            <th style="min-width: 75px;">Nome</th>
+                            <th style="min-width: 55px;">ID</th>
+                            <th style="min-width: 45px;">Peso (kg)</th>
+                            <th style="min-width: 60px;">Dose/kg (mCi/kg)</th>
+                            <th style="min-width: 70px;">Dose Calculada (mCi)</th>
+                            <th style="min-width: 110px;">Hora Injeção</th>
+                            <th style="min-width: 70px;">Dose Medida (mCi)</th>
+                            <th style="min-width: 75px;">Dose Administrada (mCi)</th>
+                            <th style="min-width: 80px;">Dose Medida Pós-Admin (mCi)</th>
+                            <th style="min-width: 75px;">Intervalo (h)</th>
+                            <th style="min-width: 85px;">Atividade Restante (mCi)</th>
+                            <th style="min-width: 65px;">Status</th>
+                            <th style="width: 25px;">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoPacientes">
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="resumoPacientes" style="display: none;">
+                <div class="stats-grid" id="statsPacientes"></div>
+            </div>
+
+            <div class="info-box" id="infoBoxPacientes">
+                <strong>📌 Fórmulas:</strong><br>
+                <span id="infoTextoPacientes">
+                    <strong>Dose Calculada</strong> = Peso × Dose/kg (atividade ideal a ser administrada)<br>
+                    <strong>Dose Administrada</strong> = Dose Medida - Dose Medida Pós-Admin (quantidade efetivamente injetada)<br>
+                    <strong>Decaimento Total</strong> = Atividade_Inicial × (1 - e<sup>-λ × Δt</sup>)<br>
+                    <strong>Atividade Restante</strong> = Atividade_Inicial - SOMA(Dose Medida) - Decaimento_Total
+                </span>
+                <br><br>
+                <span style="color: #aaa; font-size: 0.85rem;">
+                    ⏱️ Meia-vida atual: <strong id="meiaVidaDisplay">6 horas</strong> (Tc-99m)
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <p>
+            ☢️ RadioCalc &bull; Ferramenta para planejamento de radiofármacos em medicina nuclear
+            <br>
+            Desenvolvido para uso profissional &bull; <a href="#">Voltar ao topo</a>
+        </p>
+    </footer>
+</div>
+
+<script>
+    // ====== CONFIGURAÇÕES ======
+    const MEIA_VIDA = {
+        'tc': 6,
+        'f18': 1.833
+    };
+
+    const NOME_ISOTOPO = {
+        'tc': 'Tc-99m',
+        'f18': 'F-18'
+    };
+
+    const COR_ISOTOPO = {
+        'tc': '#00d2ff',
+        'f18': '#00ff88'
+    };
+
+    const MAX_PACIENTES = 30;
+    let contadorPacientes = 0;
+    let isotopoAtual = 'tc';
+    let graficoDecaimento = null;
+
+    // ====== FUNÇÃO PARA DETECTAR ISÓTOPO ======
+    function atualizarInfoIsotopo() {
+        const select = document.getElementById('radiofarmacoMestre');
+        const selectedOption = select.options[select.selectedIndex];
+        const isotopo = selectedOption.getAttribute('data-isotopo') || 'tc';
+
+        isotopoAtual = isotopo;
+
+        const infoDiv = document.getElementById('infoIsotopoSelecionado');
+        const meiaVida = MEIA_VIDA[isotopo];
+        const nome = NOME_ISOTOPO[isotopo];
+        const cor = COR_ISOTOPO[isotopo];
+
+        const meiaVidaTexto = isotopo === 'tc' ? `${meiaVida} horas` : `${meiaVida} horas (110 minutos)`;
+
+        infoDiv.textContent = `🔬 Isótopo: ${nome} | Meia-vida: ${meiaVidaTexto}`;
+        infoDiv.className = `info-isotopo ${isotopo}`;
+
+        document.getElementById('meiaVidaDisplay').textContent = meiaVidaTexto;
+        document.getElementById('meiaVidaDisplay').style.color = cor;
+
+        const infoBox = document.getElementById('infoBoxPacientes');
+        infoBox.className = `info-box ${isotopo}`;
+
+        const doseKgPadrao = isotopo === 'f18' ? '0.18' : '0.15';
+        const planDoseKg = document.getElementById('planDoseKg');
+        if (planDoseKg) planDoseKg.value = doseKgPadrao;
+
+        const horarioMarcacao = document.getElementById('planHorarioMarcacao');
+        const horarioUltimo = document.getElementById('planHorarioUltimo');
+        const agora = new Date();
+
+        if (horarioMarcacao && !horarioMarcacao.value) {
+            const marc = new Date(agora);
+            marc.setHours(8, 0, 0, 0);
+            horarioMarcacao.value = marc.toISOString().slice(0, 16);
+        }
+
+        if (horarioUltimo && !horarioUltimo.value) {
+            const ultimo = new Date(agora);
+            ultimo.setHours(12, 0, 0, 0);
+            horarioUltimo.value = ultimo.toISOString().slice(0, 16);
+        }
+
+        setTimeout(() => {
+            calcularPlanejamento();
+            calcularPacientes();
+        }, 100);
+    }
+
+    // ====== FUNÇÕES DE ABAS ======
+    function trocarAba(aba) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(`aba-${aba}`).classList.add('active');
+
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            if (el.textContent.includes(aba === 'marcacao' ? 'Marcação' : 
+                aba === 'pacientes' ? 'Pacientes' : 'Planejamento')) {
+                el.classList.add('active');
+            }
+        });
+
+        if (aba === 'pacientes') {
+            atualizarContadorPacientes();
+            calcularPacientes();
+        }
+
+        if (aba === 'planejamento') {
+            calcularPlanejamento();
+        }
+    }
+
+    // ====== FUNÇÕES DE PACIENTES ======
+    function adicionarPaciente() {
+        if (contadorPacientes >= MAX_PACIENTES) {
+            alert(`Limite máximo de ${MAX_PACIENTES} pacientes atingido!`);
+            return;
+        }
+
+        const index = contadorPacientes;
+        contadorPacientes++;
+        const tbody = document.getElementById('corpoPacientes');
+
+        const now = new Date();
+        const horaInjecao = new Date(now);
+        horaInjecao.setMinutes(now.getMinutes() + (contadorPacientes * 10));
+        const horaInjecaoStr = horaInjecao.toISOString().slice(0, 16);
+
+        const peso = (50 + Math.random() * 50).toFixed(0);
+        const doseKg = isotopoAtual === 'f18' ? '0.18' : '0.15';
+        const doseCalculada = (parseFloat(peso) * parseFloat(doseKg)).toFixed(1);
+        const doseMedida = doseCalculada;
+        const dosePosAdmin = (parseFloat(doseCalculada) * 0.05).toFixed(1);
+        const doseAdministrada = (parseFloat(doseMedida) - parseFloat(dosePosAdmin)).toFixed(1);
+
+        const tr = document.createElement('tr');
+        tr.dataset.index = index;
+        tr.innerHTML = `
+            <td class="num-paciente">${index + 1}</td>
+            <td><input type="text" id="nomePaciente_${index}" placeholder="Nome" value="Paciente ${index + 1}"></td>
+            <td><input type="text" id="idPaciente_${index}" placeholder="ID" value="P-${String(10000 + index).padStart(5, '0')}"></td>
+            <td><input type="number" id="pesoPaciente_${index}" value="${peso}" step="0.1" min="1"></td>
+            <td><input type="number" id="doseKgPaciente_${index}" value="${doseKg}" step="0.01" min="0.01"></td>
+            <td class="dose-calculada" id="doseCalculada_${index}">${doseCalculada}</td>
+            <td><input type="datetime-local" id="horaInjecao_${index}" value="${horaInjecaoStr}"></td>
+            <td><input type="number" id="doseMedida_${index}" value="${doseMedida}" step="0.1" min="0" class="dose-medida-input"></td>
+            <td class="dose-administrada" id="doseAdministrada_${index}">${doseAdministrada}</td>
+            <td><input type="number" id="dosePosAdmin_${index}" value="${dosePosAdmin}" step="0.1" min="0" class="dose-pos-admin-input"></td>
+            <td class="resultado-calc" id="intervaloInjecao_${index}">--</td>
+            <td class="resultado-calc" id="atividadeRestante_${index}">--</td>
+            <td id="statusPaciente_${index}">--</td>
+            <td><button class="btn-danger" onclick="removerPaciente(${index})">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+        atualizarContadorPacientes();
+
+        const inputs = tr.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                recalcularDosePaciente(index);
+                calcularPacientes();
+            });
+            input.addEventListener('input', () => {
+                recalcularDosePaciente(index);
+                calcularPacientes();
+            });
+        });
+    }
+
+    function recalcularDosePaciente(index) {
+        const pesoInput = document.getElementById(`pesoPaciente_${index}`);
+        const doseKgInput = document.getElementById(`doseKgPaciente_${index}`);
+        const doseCalculadaEl = document.getElementById(`doseCalculada_${index}`);
+        const doseMedidaInput = document.getElementById(`doseMedida_${index}`);
+        const dosePosAdminInput = document.getElementById(`dosePosAdmin_${index}`);
+        const doseAdministradaEl = document.getElementById(`doseAdministrada_${index}`);
+
+        if (pesoInput && doseKgInput && doseCalculadaEl) {
+            const peso = parseFloat(pesoInput.value) || 0;
+            const doseKg = parseFloat(doseKgInput.value) || 0;
+            const doseCalc = peso * doseKg;
+            doseCalculadaEl.textContent = doseCalc.toFixed(1);
+        }
+
+        if (doseMedidaInput && dosePosAdminInput && doseAdministradaEl) {
+            const doseMedida = parseFloat(doseMedidaInput.value) || 0;
+            const dosePosAdmin = parseFloat(dosePosAdminInput.value) || 0;
+            const doseAdmin = doseMedida - dosePosAdmin;
+            doseAdministradaEl.textContent = doseAdmin.toFixed(1);
+            
+            if (doseAdmin < 0) {
+                doseAdministradaEl.style.color = '#ff6b6b';
+            } else {
+                doseAdministradaEl.style.color = '#00ff88';
+            }
+        }
+    }
+
+    function adicionarPacientesLote() {
+        for (let i = 0; i < 5; i++) {
+            if (contadorPacientes >= MAX_PACIENTES) break;
+            adicionarPaciente();
+        }
+        setTimeout(() => calcularPacientes(), 100);
+    }
+
+    function removerPaciente(index) {
+        const tbody = document.getElementById('corpoPacientes');
+        const rows = tbody.querySelectorAll('tr');
+        if (rows.length <= 1) {
+            alert('É necessário manter pelo menos 1 paciente.');
+            return;
+        }
+        const row = tbody.querySelector(`tr[data-index="${index}"]`);
+        if (row) {
+            row.remove();
+            reordenarPacientes();
+            atualizarContadorPacientes();
+            calcularPacientes();
+        }
+    }
+
+    function reordenarPacientes() {
+        const tbody = document.getElementById('corpoPacientes');
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach((row, idx) => {
+            row.dataset.index = idx;
+            const numCell = row.querySelector('.num-paciente');
+            if (numCell) numCell.textContent = idx + 1;
+
+            const inputs = row.querySelectorAll('input');
+            inputs.forEach(input => {
+                const oldId = input.id;
+                if (oldId) {
+                    const parts = oldId.split('_');
+                    if (parts.length === 2) {
+                        input.id = `${parts[0]}_${idx}`;
+                    }
+                }
+            });
+
+            const doseCalc = row.querySelector('.dose-calculada');
+            if (doseCalc) doseCalc.id = `doseCalculada_${idx}`;
+
+            const doseAdmin = row.querySelector('.dose-administrada');
+            if (doseAdmin) doseAdmin.id = `doseAdministrada_${idx}`;
+
+            const resultCells = row.querySelectorAll('.resultado-calc');
+            resultCells.forEach(cell => {
+                const oldId = cell.id;
+                if (oldId) {
+                    const parts = oldId.split('_');
+                    if (parts.length === 2) {
+                        cell.id = `${parts[0]}_${idx}`;
+                    }
+                }
+            });
+
+            const statusCell = row.querySelector('td:last-child');
+            if (statusCell && statusCell.id) {
+                const parts = statusCell.id.split('_');
+                if (parts.length === 2) {
+                    statusCell.id = `statusPaciente_${idx}`;
+                }
+            }
+
+            const btn = row.querySelector('.btn-danger');
+            if (btn) {
+                btn.setAttribute('onclick', `removerPaciente(${idx})`);
+            }
+        });
+        contadorPacientes = rows.length;
+    }
+
+    function atualizarContadorPacientes() {
+        const tbody = document.getElementById('corpoPacientes');
+        const count = tbody.querySelectorAll('tr').length;
+        document.getElementById('totalPacientes').textContent = count;
+        contadorPacientes = count;
+    }
+
+    // ====== FUNÇÕES AUXILIARES ======
+    function calcularDiferencaHoras(data1, data2) {
+        return (data2 - data1) / (1000 * 60 * 60);
+    }
+
+    // ====== CÁLCULO DA MARCAÇÃO ======
+    function calcularMarcacao() {
+        const ativMarcacao = parseFloat(document.getElementById('atividadeMarcacaoMestre').value) || 0;
+        const ativDisponivel = parseFloat(document.getElementById('atividadeDisponivelMestre').value) || 0;
+
+        document.getElementById('totalMarcado').textContent = `${ativMarcacao.toFixed(2)} mCi`;
+        document.getElementById('disponivelGerador').textContent = `${ativDisponivel.toFixed(2)} mCi`;
+
+        const diferenca = ativDisponivel - ativMarcacao;
+        const diferencaEl = document.getElementById('diferencaMarcacao');
+        diferencaEl.textContent = `${diferenca.toFixed(2)} mCi`;
+        diferencaEl.style.color = diferenca >= 0 ? '#00ff64' : '#ff6b6b';
+
+        document.getElementById('resultadoMarcacaoContainer').classList.add('ativo');
+    }
+
+    // ====== PLANEJAMENTO DE ATIVIDADE ======
+    function calcularPlanejamento() {
+        const numPacientes = parseInt(document.getElementById('planNumPacientes').value) || 1;
+        const pesoMedio = parseFloat(document.getElementById('planPesoMedio').value) || 70;
+        const doseKg = parseFloat(document.getElementById('planDoseKg').value) || 0.15;
+        const margemPercent = parseFloat(document.getElementById('planMargemSeguranca').value) || 15;
+        const intervaloMin = parseFloat(document.getElementById('planIntervaloInjecoes').value) || 15;
+
+        const horarioMarcacao = new Date(document.getElementById('planHorarioMarcacao').value);
+        const horarioUltimo = new Date(document.getElementById('planHorarioUltimo').value);
+
+        const meiaVida = MEIA_VIDA[isotopoAtual] || 6;
+        const lambda = Math.LN2 / meiaVida;
+
+        const doseMedidaAlvo = pesoMedio * doseKg;
+        const doseTotalAlvo = doseMedidaAlvo * numPacientes;
+
+        let tempoTotalHoras = 0;
+        let fatorDecaimento = 1;
+        let atividadeBase = doseTotalAlvo;
+
+        if (horarioMarcacao && horarioUltimo && !isNaN(horarioMarcacao.getTime()) && !isNaN(horarioUltimo.getTime())) {
+            tempoTotalHoras = (horarioUltimo - horarioMarcacao) / (1000 * 60 * 60);
+            if (tempoTotalHoras > 0) {
+                fatorDecaimento = Math.exp(-lambda * tempoTotalHoras);
+                atividadeBase = doseTotalAlvo / fatorDecaimento;
+            }
+        }
+
+        const margem = atividadeBase * (margemPercent / 100);
+        const atividadeFinal = atividadeBase + margem;
+
+        document.getElementById('resultadoPlanejamento').style.display = 'block';
+        document.getElementById('planPacientes').textContent = numPacientes;
+        document.getElementById('planDosePaciente').textContent = `${doseMedidaAlvo.toFixed(2)} mCi`;
+        document.getElementById('planDoseTotal').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
+        document.getElementById('planFatorDecaimento').textContent = `${fatorDecaimento.toFixed(4)} (${(fatorDecaimento * 100).toFixed(1)}%)`;
+        document.getElementById('planAtividadeBase').textContent = `${atividadeBase.toFixed(2)} mCi`;
+        document.getElementById('planAtividadeFinal').textContent = `${atividadeFinal.toFixed(2)} mCi`;
+
+        // ===== GERAR DADOS PARA O GRÁFICO =====
+        const pontos = 100;
+        const dadosDecaimento = [];
+        const labels = [];
+        const horarioInicio = new Date(horarioMarcacao);
+        const duracaoTotal = Math.max(tempoTotalHoras * 1.4, 2);
+
+        for (let i = 0; i <= pontos; i++) {
+            const t = (i / pontos) * duracaoTotal;
+            const fator = Math.exp(-lambda * t);
+            const atividade = atividadeBase * fator;
+            dadosDecaimento.push(atividade);
+            
+            const horario = new Date(horarioInicio.getTime() + t * 3600000);
+            labels.push(horario.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+        }
+
+        let injecoesDoses = [];
+        let injecoesIndices = [];
+
+        for (let i = 0; i < numPacientes; i++) {
+            const minutosDesdeMarca = (i + 1) * intervaloMin;
+            const horasDesdeMarca = minutosDesdeMarca / 60;
+            const fatorDec = Math.exp(-lambda * horasDesdeMarca);
+            const atividadeDisponivel = atividadeBase * fatorDec;
+            
+            let doseMedida;
+            let ehUltimoPaciente = (i === numPacientes - 1);
+            
+            if (ehUltimoPaciente) {
+                doseMedida = atividadeDisponivel;
+            } else {
+                doseMedida = Math.min(doseMedidaAlvo, atividadeDisponivel);
+            }
+            
+            injecoesDoses.push(doseMedida);
+            
+            const idx = Math.round((minutosDesdeMarca / 60) / duracaoTotal * pontos);
+            injecoesIndices.push(Math.min(idx, pontos));
+        }
+
+        const dadosInjecoes = [];
+        for (let i = 0; i < injecoesIndices.length; i++) {
+            dadosInjecoes.push({
+                x: injecoesIndices[i],
+                y: injecoesDoses[i]
+            });
+        }
+
+        // ===== CRIAR GRÁFICO =====
+        const canvas = document.getElementById('graficoDecaimento');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (graficoDecaimento) {
+            graficoDecaimento.destroy();
+            graficoDecaimento = null;
+        }
+
+        try {
+            graficoDecaimento = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Decaimento do Frasco',
+                            data: dadosDecaimento,
+                            borderColor: '#00d2ff',
+                            backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                            borderWidth: 2.5,
+                            pointRadius: 0,
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Dose Medida (Injeção)',
+                            data: dadosInjecoes,
+                            borderColor: '#ff6b6b',
+                            backgroundColor: '#ff6b6b',
+                            borderWidth: 0,
+                            pointRadius: 8,
+                            pointBackgroundColor: '#ff6b6b',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            showLine: false,
+                            type: 'scatter',
+                            xAxisID: 'x',
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ccc',
+                                font: { size: 11 },
+                                boxWidth: 15,
+                                padding: 15
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.parsed.y;
+                                    if (label) label += ': ';
+                                    if (value !== undefined && value !== null) {
+                                        label += value.toFixed(2) + ' mCi';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#888',
+                                font: { size: 9 },
+                                maxTicksLimit: 15,
+                                autoSkip: true
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            title: {
+                                display: true,
+                                text: 'Horário',
+                                color: '#888',
+                                font: { size: 11 }
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#888',
+                                font: { size: 10 }
+                            },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            title: {
+                                display: true,
+                                text: 'Atividade (mCi)',
+                                color: '#888',
+                                font: { size: 11 }
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } catch(e) {
+            console.error('Erro ao criar gráfico:', e);
+        }
+
+        const recomendacao = document.getElementById('recomendacaoPlanejamento');
+        const nomeIsot = NOME_ISOTOPO[isotopoAtual] || 'Tc-99m';
+        const meiaVidaTexto = isotopoAtual === 'f18' ? '110 min' : '6h';
+
+        recomendacao.innerHTML = `
+            Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVidaTexto}):
+            <br><br>
+            <strong>Dose alvo por paciente:</strong> ${doseMedidaAlvo.toFixed(2)} mCi (peso médio ${pesoMedio} kg × ${doseKg} mCi/kg)
+            <br>
+            <strong>Dose total alvo:</strong> ${doseTotalAlvo.toFixed(2)} mCi
+            <br>
+            <strong>Tempo total até o último paciente:</strong> ${tempoTotalHoras.toFixed(2)} horas
+            <br>
+            <strong>Fator de decaimento do frasco:</strong> ${(fatorDecaimento * 100).toFixed(1)}% (o frasco perde ${((1 - fatorDecaimento) * 100).toFixed(1)}% da atividade)
+            <br>
+            <strong>Atividade necessária no frasco (compensando decaimento):</strong> ${atividadeBase.toFixed(2)} mCi
+            <br>
+            <strong style="color: #00ff64;">Atividade final com margem de ${margemPercent}%:</strong> ${atividadeFinal.toFixed(2)} mCi
+            <br><br>
+            <span style="color: #aaa; font-size: 0.85rem;">
+                💡 Margem adicionada: ${margem.toFixed(2)} mCi
+            </span>
+        `;
+    }
+
+    // ====== APLICAR PLANEJAMENTO À MARCAÇÃO ======
+    function aplicarPlanejamento() {
+        const ativFinal = document.getElementById('planAtividadeFinal').textContent;
+        const valor = parseFloat(ativFinal) || 0;
+
+        if (valor <= 0) {
+            alert('⚠️ Calcule o planejamento primeiro!');
+            return;
+        }
+
+        document.getElementById('atividadeMarcacaoMestre').value = valor.toFixed(1);
+        document.getElementById('atividadeDisponivelMestre').value = (valor * 1.05).toFixed(1);
+
+        const horarioMarcacao = document.getElementById('planHorarioMarcacao').value;
+        if (horarioMarcacao) {
+            document.getElementById('horarioMarcacaoMestre').value = horarioMarcacao;
+        }
+
+        trocarAba('marcacao');
+
+        setTimeout(() => {
+            calcularMarcacao();
+            calcularPacientes();
+        }, 100);
+
+        const btn = event?.target || document.querySelector('.btn-success');
+        const originalText = btn.textContent;
+        btn.textContent = '✅ Aplicado!';
+        btn.style.background = 'rgba(0, 255, 100, 0.3)';
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+        }, 2000);
+    }
+
+    // ====== CÁLCULO DOS PACIENTES ======
+    function calcularPacientes() {
+        const meiaVida = MEIA_VIDA[isotopoAtual] || 6;
+        const lambda = Math.LN2 / meiaVida;
+
+        const tbody = document.getElementById('corpoPacientes');
+        const rows = tbody.querySelectorAll('tr');
+
+        const horarioMarcacao = new Date(document.getElementById('horarioMarcacaoMestre').value);
+        const ativMarcacao = parseFloat(document.getElementById('atividadeMarcacaoMestre').value) || 0;
+
+        let totalAdmin = 0;
+        let totalMedido = 0;
+        let horasInjecoes = [];
+        let ultimaInjecao = null;
+        let totalPeso = 0;
+        let totalDoseCalculada = 0;
+        let totalDoseAdministrada = 0;
+
+        rows.forEach((row) => {
+            const index = parseInt(row.dataset.index);
+            const horaInjecaoInput = document.getElementById(`horaInjecao_${index}`);
+            const doseAdminEl = document.getElementById(`doseAdministrada_${index}`);
+            const pesoInput = document.getElementById(`pesoPaciente_${index}`);
+            const doseKgInput = document.getElementById(`doseKgPaciente_${index}`);
+            const doseCalcEl = document.getElementById(`doseCalculada_${index}`);
+            const doseMedidaInput = document.getElementById(`doseMedida_${index}`);
+            const dosePosAdminInput = document.getElementById(`dosePosAdmin_${index}`);
+
+            if (horaInjecaoInput && doseAdminEl) {
+                const horaInjecao = new Date(horaInjecaoInput.value);
+                const doseAdmin = parseFloat(doseAdminEl.textContent) || 0;
+                const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
+                const peso = parseFloat(pesoInput?.value) || 0;
+                const doseKg = parseFloat(doseKgInput?.value) || 0;
+                const doseCalc = peso * doseKg;
+
+                if (doseCalcEl) {
+                    doseCalcEl.textContent = doseCalc.toFixed(1);
+                }
+
+                if (doseMedidaInput && dosePosAdminInput && doseAdminEl) {
+                    const doseMedidaVal = parseFloat(doseMedidaInput.value) || 0;
+                    const dosePosAdmin = parseFloat(dosePosAdminInput.value) || 0;
+                    const doseAdminCalc = doseMedidaVal - dosePosAdmin;
+                    doseAdminEl.textContent = doseAdminCalc.toFixed(1);
+                }
+
+                if (!isNaN(horaInjecao.getTime())) {
+                    horasInjecoes.push({
+                        index: index,
+                        hora: horaInjecao,
+                        admin: parseFloat(doseAdminEl.textContent) || 0,
+                        medida: doseMedida,
+                        peso: peso,
+                        doseKg: doseKg,
+                        doseCalc: doseCalc
+                    });
+
+                    if (!ultimaInjecao || horaInjecao > ultimaInjecao) {
+                        ultimaInjecao = horaInjecao;
+                    }
+
+                    totalAdmin += parseFloat(doseAdminEl.textContent) || 0;
+                    totalMedido += doseMedida;
+                    totalPeso += peso;
+                    totalDoseCalculada += doseCalc;
+                    totalDoseAdministrada += parseFloat(doseAdminEl.textContent) || 0;
+                }
+            }
+        });
+
+        horasInjecoes.sort((a, b) => a.hora - b.hora);
+
+        let decaimentoTotal = 0;
+        let tempoTotal = 0;
+
+        if (ultimaInjecao && horarioMarcacao) {
+            tempoTotal = calcularDiferencaHoras(horarioMarcacao, ultimaInjecao);
+            if (tempoTotal > 0 && ativMarcacao > 0) {
+                decaimentoTotal = ativMarcacao * (1 - Math.exp(-lambda * tempoTotal));
+            }
+        }
+
+        const restanteFinal = ativMarcacao - totalMedido - decaimentoTotal;
+
+        let intervalos = {};
+        for (let i = 0; i < horasInjecoes.length; i++) {
+            if (i === 0) {
+                intervalos[horasInjecoes[i].index] = null;
+            } else {
+                const diff = calcularDiferencaHoras(horasInjecoes[i - 1].hora, horasInjecoes[i].hora);
+                intervalos[horasInjecoes[i].index] = diff;
+            }
+        }
+
+        rows.forEach((row) => {
+            const index = parseInt(row.dataset.index);
+            const dadosPaciente = horasInjecoes.find(item => item.index === index);
+
+            const intervaloCell = document.getElementById(`intervaloInjecao_${index}`);
+            const restanteCell = document.getElementById(`atividadeRestante_${index}`);
+            const statusCell = document.getElementById(`statusPaciente_${index}`);
+
+            if (intervaloCell) {
+                const intervalo = intervalos[index];
+                if (intervalo !== null && intervalo !== undefined) {
+                    intervaloCell.textContent = `${intervalo.toFixed(2)} h`;
+                    intervaloCell.className = 'resultado-calc';
+                    intervaloCell.style.color = intervalo < 0.5 ? '#ff6b6b' : intervalo < 1.5 ? '#ffd700' : '#00ff64';
+                } else {
+                    intervaloCell.textContent = '--';
+                    intervaloCell.className = 'resultado-calc';
+                    intervaloCell.style.color = '#888';
+                }
+            }
+
+            if (restanteCell && dadosPaciente) {
+                const idxAtual = horasInjecoes.indexOf(dadosPaciente);
+                let medidoAcumulado = 0;
+                for (let i = 0; i <= idxAtual; i++) {
+                    medidoAcumulado += horasInjecoes[i].medida;
+                }
+
+                const tempoAteAqui = calcularDiferencaHoras(horarioMarcacao, dadosPaciente.hora);
+                const decaimentoAteAqui = ativMarcacao * (1 - Math.exp(-lambda * Math.max(0, tempoAteAqui)));
+                const restanteAteAqui = ativMarcacao - medidoAcumulado - decaimentoAteAqui;
+
+                restanteCell.textContent = `${Math.max(0, restanteAteAqui).toFixed(2)} mCi`;
+
+                let statusClass = '';
+                if (restanteAteAqui >= ativMarcacao * 0.2) {
+                    statusClass = 'ok';
+                } else if (restanteAteAqui >= 0) {
+                    statusClass = 'alerta';
+                } else {
+                    statusClass = 'erro';
+                }
+                restanteCell.className = `resultado-calc ${statusClass}`;
+            }
+
+            if (statusCell && dadosPaciente) {
+                const idxAtual = horasInjecoes.indexOf(dadosPaciente);
+                let medidoAcumulado = 0;
+                for (let i = 0; i <= idxAtual; i++) {
+                    medidoAcumulado += horasInjecoes[i].medida;
+                }
+
+                const tempoAteAqui = calcularDiferencaHoras(horarioMarcacao, dadosPaciente.hora);
+                const decaimentoAteAqui = ativMarcacao * (1 - Math.exp(-lambda * Math.max(0, tempoAteAqui)));
+                const restanteAteAqui = ativMarcacao - medidoAcumulado - decaimentoAteAqui;
+
+                let status = '';
+                let statusClass = '';
+
+                if (tempoAteAqui >= 0 && ativMarcacao > 0) {
+                    if (restanteAteAqui >= ativMarcacao * 0.2) {
+                        status = '✅ Adequado';
+                        statusClass = 'ok';
+                    } else if (restanteAteAqui >= 0) {
+                        status = '⚠️ Baixo';
+                        statusClass = 'alerta';
+                    } else {
+                        status = '❌ Insuficiente';
+                        statusClass = 'erro';
+                    }
+                } else {
+                    status = tempoAteAqui < 0 ? '⏳ Aguardando' : '⚠️ Sem dados';
+                    statusClass = 'alerta';
+                }
+
+                statusCell.textContent = status;
+                statusCell.className = `resultado-calc ${statusClass}`;
+            }
+
+            row.classList.remove('linha-ultimo-paciente');
+            if (index === horasInjecoes[horasInjecoes.length - 1]?.index) {
+                row.classList.add('linha-ultimo-paciente');
+            }
+        });
+
+        const resumoDiv = document.getElementById('resumoPacientes');
+        resumoDiv.style.display = 'block';
+
+        const pesoMedio = horasInjecoes.length > 0 ? (totalPeso / horasInjecoes.length) : 0;
+        const doseMedia = horasInjecoes.length > 0 ? (totalDoseCalculada / horasInjecoes.length) : 0;
+        const doseAdminMedia = horasInjecoes.length > 0 ? (totalDoseAdministrada / horasInjecoes.length) : 0;
+
+        const cor = COR_ISOTOPO[isotopoAtual] || '#ffd700';
+        const nomeIsot = NOME_ISOTOPO[isotopoAtual] || 'Tc-99m';
+        const meiaVidaTexto = isotopoAtual === 'f18' ? '110 min' : '6h';
+
+        document.getElementById('statsPacientes').innerHTML = `
+            <div class="stat-card destaque">
+                <div class="rotulo">Total Medido (Retirado)</div>
+                <div class="valor">${totalMedido.toFixed(2)} mCi</div>
+            </div>
+            <div class="stat-card destaque">
+                <div class="rotulo">Total Administrado</div>
+                <div class="valor">${totalAdmin.toFixed(2)} mCi</div>
+            </div>
+            <div class="stat-card destaque">
+                <div class="rotulo">Total Restante no Frasco</div>
+                <div class="valor" style="color: ${restanteFinal >= 0 ? '#ffd700' : '#ff6b6b'};">${restanteFinal.toFixed(2)} mCi</div>
+            </div>
+            <div class="stat-card vermelho">
+                <div class="rotulo">Decaimento Total</div>
+                <div class="valor">${decaimentoTotal.toFixed(2)} mCi</div>
+            </div>
+            <div class="stat-card ${isotopoAtual}">
+                <div class="rotulo">Isótopo</div>
+                <div class="valor" style="font-size: 1.2rem; color: ${cor};">${nomeIsot}</div>
+            </div>
+            <div class="stat-card ${isotopoAtual}">
+                <div class="rotulo">Meia-vida</div>
+                <div class="valor" style="font-size: 1.2rem; color: ${cor};">${meiaVidaTexto}</div>
+            </div>
+            <div class="stat-card">
+                <div class="rotulo">Tempo até Última Injeção</div>
+                <div class="valor" style="font-size: 1.2rem;">${tempoTotal.toFixed(2)} h</div>
+            </div>
+            <div class="stat-card">
+                <div class="rotulo">Peso Médio</div>
+                <div class="valor" style="font-size: 1.2rem;">${pesoMedio.toFixed(1)} kg</div>
+            </div>
+            <div class="stat-card">
+                <div class="rotulo">Dose Média Calculada</div>
+                <div class="valor" style="font-size: 1.2rem;">${doseMedia.toFixed(1)} mCi</div>
+            </div>
+            <div class="stat-card verde">
+                <div class="rotulo">Dose Média Administrada</div>
+                <div class="valor" style="font-size: 1.2rem;">${doseAdminMedia.toFixed(1)} mCi</div>
+            </div>
+            <div class="stat-card">
+                <div class="rotulo">Pacientes</div>
+                <div class="valor" style="font-size: 1.2rem;">${horasInjecoes.length}</div>
+            </div>
+        `;
+
+        document.getElementById('meiaVidaDisplay').textContent = `${meiaVida} horas ${isotopoAtual === 'f18' ? '(110 min)' : ''}`;
+        document.getElementById('meiaVidaDisplay').style.color = cor;
+    }
+
+    // ====== INICIALIZAÇÃO ======
+    window.onload = function() {
+        const agora = new Date();
+        const hoje = new Date(agora);
+        hoje.setHours(8, 0, 0, 0);
+
+        const marc = new Date(hoje);
+        marc.setHours(9, 0, 0, 0);
+        document.getElementById('horarioMarcacaoMestre').value = marc.toISOString().slice(0, 16);
+
+        const planMarc = new Date(agora);
+        planMarc.setHours(8, 0, 0, 0);
+        document.getElementById('planHorarioMarcacao').value = planMarc.toISOString().slice(0, 16);
+
+        const planUltimo = new Date(agora);
+        planUltimo.setHours(12, 0, 0, 0);
+        document.getElementById('planHorarioUltimo').value = planUltimo.toISOString().slice(0, 16);
+
+        isotopoAtual = 'tc';
+
+        for (let i = 0; i < 5; i++) {
+            adicionarPaciente();
+        }
+
+        atualizarInfoIsotopo();
+
+        setTimeout(() => {
+            calcularMarcacao();
+            setTimeout(() => calcularPacientes(), 100);
+            setTimeout(() => calcularPlanejamento(), 200);
+        }, 300);
+    };
+</script>
+
+</body>
+</html>
