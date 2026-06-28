@@ -5,9 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioCalc - Planejamento de Radiofármacos</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☢️</text></svg>">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DPC2HP7XXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-DPC2HP7XXF', {
+            'page_title': 'RadioCalc',
+            'page_location': window.location.href,
+            'send_page_view': true
+        });
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
+        /* ===== RESET E ESTILOS GERAIS ===== */
         * {
             margin: 0;
             padding: 0;
@@ -804,7 +819,7 @@
             color: #00d2ff;
         }
 
-        /* Estilos para o PDF */
+        /* ===== PDF CONTENT ===== */
         .pdf-content {
             background: #fff;
             color: #000;
@@ -918,6 +933,17 @@
             flex-wrap: wrap;
         }
 
+        .ga-badge {
+            display: inline-block;
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d2ff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            margin-left: 10px;
+        }
+
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4, .grid-5, .planejamento-grid {
                 grid-template-columns: 1fr;
@@ -1005,7 +1031,7 @@
 <!-- ===== HEADER ===== -->
 <header class="header">
     <div class="container">
-        <h1>☢️ RadioCalc</h1>
+        <h1>☢️ RadioCalc <span class="ga-badge">📊 GA4</span></h1>
         <p class="subtitle">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
         <span class="version">v3.0 · Planejamento Avançado</span>
     </div>
@@ -1589,6 +1615,21 @@
 </div>
 
 <script>
+    // ====== INICIALIZAÇÃO DO GA4 ======
+    // O Google Analytics já está configurado no head
+
+    // ====== FUNÇÃO PARA RASTREAR EVENTOS ======
+    function trackEvent(eventName, eventCategory, eventLabel, value) {
+        if (typeof gtag !== 'undefined') {
+            gtag('event', eventName, {
+                'event_category': eventCategory || 'interacao',
+                'event_label': eventLabel || '',
+                'value': value || 0
+            });
+            console.log(`📊 GA Event: ${eventName} | ${eventCategory} | ${eventLabel}`);
+        }
+    }
+
     // ====== CONFIGURAÇÕES ======
     const MEIA_VIDA = {
         'tc': 6,
@@ -1628,6 +1669,7 @@
         const isotopo = selectedOption.getAttribute('data-isotopo') || 'tc';
 
         isotopoAtual = isotopo;
+        trackEvent('selecionar_isotopo', 'configuracao', isotopo);
 
         const infoDiv = document.getElementById('infoIsotopoSelecionado');
         const meiaVida = MEIA_VIDA[isotopo];
@@ -1691,6 +1733,9 @@
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(`aba-${aba}`).classList.add('active');
+
+        // Rastrear mudança de aba
+        trackEvent('trocar_aba', 'navegacao', aba);
 
         document.querySelectorAll('.tab-btn').forEach(el => {
             const text = el.textContent;
@@ -1760,6 +1805,9 @@
         tbody.appendChild(tr);
         atualizarContadorPacientes();
 
+        // Rastrear adição de paciente
+        trackEvent('adicionar_paciente', 'pacientes', `total_${contadorPacientes}`);
+
         const inputs = tr.querySelectorAll('input');
         inputs.forEach(input => {
             input.addEventListener('change', () => {
@@ -1803,10 +1851,13 @@
     }
 
     function adicionarPacientesLote() {
+        let count = 0;
         for (let i = 0; i < 5; i++) {
             if (contadorPacientes >= MAX_PACIENTES) break;
             adicionarPaciente();
+            count++;
         }
+        trackEvent('adicionar_lote', 'pacientes', `${count}_pacientes`);
         setTimeout(() => calcularPacientes(), 100);
     }
 
@@ -1823,6 +1874,7 @@
             reordenarPacientes();
             atualizarContadorPacientes();
             calcularPacientes();
+            trackEvent('remover_paciente', 'pacientes', `id_${index}`);
         }
     }
 
@@ -1904,6 +1956,8 @@
         diferencaEl.style.color = diferenca >= 0 ? '#00ff64' : '#ff6b6b';
 
         document.getElementById('resultadoMarcacaoContainer').classList.add('ativo');
+        
+        trackEvent('calcular_marcacao', 'marcacao', `ativ_${ativMarcacao.toFixed(1)}`);
     }
 
     // ====== PLANEJAMENTO DE ATIVIDADE ======
@@ -2013,6 +2067,10 @@
             statusEl.style.color = '#ff6b6b';
             document.getElementById('planStatusCard').className = 'stat-card status-erro';
         }
+
+        // Rastrear cálculo do planejamento
+        trackEvent('calcular_planejamento', 'planejamento', 
+            `${nomeIsot}_${numPacientes}pac_${atividadeFinal.toFixed(1)}mCi`);
 
         const alertContainer = document.getElementById('alertContainer');
         let alerts = '';
@@ -2283,6 +2341,8 @@
         const item = historicoPlanejamento[index];
         if (!item) return;
         
+        trackEvent('visualizar_historico', 'historico', `${item.isotopo}_${item.pacientes}pac`);
+        
         alert(`📋 Detalhes do Cálculo:\n\n` +
               `Isótopo: ${item.isotopo}\n` +
               `Pacientes: ${item.pacientes}\n` +
@@ -2298,6 +2358,7 @@
         if (confirm('Deseja limpar todo o histórico de cálculos?')) {
             historicoPlanejamento = [];
             atualizarHistorico();
+            trackEvent('limpar_historico', 'historico', 'todos');
         }
     }
 
@@ -2311,6 +2372,8 @@
         const atividadeFinal = document.getElementById('planAtividadeFinal').textContent;
         const status = document.getElementById('planStatus').textContent;
         const nomeIsot = NOME_ISOTOPO[isotopo] || 'Tc-99m';
+
+        trackEvent('gerar_relatorio_txt', 'relatorio', 'planejamento');
 
         const relatorio = `
 ===========================================
@@ -2370,6 +2433,8 @@ DISTRIBUIÇÃO POR PACIENTE
         const atividadeBase = document.getElementById('planAtividadeBase').textContent;
         const atividadeFinal = document.getElementById('planAtividadeFinal').textContent;
         const status = document.getElementById('planStatus').textContent;
+
+        trackEvent('gerar_pdf_planejamento', 'relatorio', `${nomeIsot}_${numPacientes}pac`);
 
         const pdfBody = document.getElementById('pdfBody');
         const dataHora = new Date().toLocaleString('pt-BR');
@@ -2477,7 +2542,6 @@ DISTRIBUIÇÃO POR PACIENTE
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Mostrar o elemento para gerar o PDF
         element.style.display = 'block';
         html2pdf().set(opt).from(element).save().then(() => {
             element.style.display = 'none';
@@ -2493,6 +2557,8 @@ DISTRIBUIÇÃO POR PACIENTE
             alert('⚠️ Não há pacientes para gerar o relatório!');
             return;
         }
+
+        trackEvent('gerar_pdf_pacientes', 'relatorio', `${rows.length}_pacientes`);
 
         const pdfBody = document.getElementById('pdfBody');
         const dataHora = new Date().toLocaleString('pt-BR');
@@ -2601,6 +2667,8 @@ DISTRIBUIÇÃO POR PACIENTE
             alert('⚠️ Calcule o planejamento primeiro!');
             return;
         }
+
+        trackEvent('aplicar_marcacao', 'planejamento', `${valor.toFixed(1)}mCi`);
 
         document.getElementById('atividadeMarcacaoMestre').value = valor.toFixed(1);
         document.getElementById('atividadeDisponivelMestre').value = (valor * 1.05).toFixed(1);
@@ -2885,6 +2953,8 @@ DISTRIBUIÇÃO POR PACIENTE
         const idade = parseFloat(document.getElementById('idadePediatrica').value) || 0;
         const fatorCorrecao = parseFloat(document.getElementById('fatorCorrecaoPediatrica').value) || 1;
 
+        trackEvent('calcular_dose_pediatrica', 'pediatrica', `${nomeRadio}_${peso}kg`);
+
         let doseCalculada = peso * doseKg;
         let doseFinal = doseCalculada * fatorCorrecao;
 
@@ -2975,6 +3045,9 @@ DISTRIBUIÇÃO POR PACIENTE
 
     // ====== INICIALIZAÇÃO ======
     window.onload = function() {
+        // Rastrear carregamento da página
+        trackEvent('pagina_carregada', 'sistema', 'radiocalc_v3.0');
+
         const agora = new Date();
         const hoje = new Date(agora);
         hoje.setHours(8, 0, 0, 0);
