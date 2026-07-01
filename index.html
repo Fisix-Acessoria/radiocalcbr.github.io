@@ -859,7 +859,8 @@ function calcularPlanejamento() {
         });
     }
 
-    // Calcular o decaimento total real    const decaimentoTotal = atividadeNecessaria - somaDosesRetiradas - (distribuicao.length > 0 ? distribuicao[distribuicao.length - 1].atividadeRestante : 0);
+    // ====== CALCULAR O DECAIMENTO TOTAL REAL (CORRIGIDO) ======
+    const decaimentoTotal = atividadeNecessaria - somaDosesRetiradas - (distribuicao.length > 0 ? distribuicao[distribuicao.length - 1].atividadeRestante : 0);
     const fatorDecaimentoReal = atividadeNecessaria > 0 ? (atividadeNecessaria - decaimentoTotal) / atividadeNecessaria : 0;
 
     if (statusGeral === 'erro') statusMsg = '❌ Planejamento insuficiente';
