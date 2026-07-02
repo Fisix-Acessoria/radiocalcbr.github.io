@@ -25,6 +25,26 @@
         .header .subtitle { color: #aaa; font-size: 1rem; margin-top: 5px; }
         .header .version { display: inline-block; background: rgba(255, 215, 0, 0.15); color: #ffd700; padding: 2px 12px; border-radius: 12px; font-size: 0.7rem; margin-top: 5px; border: 1px solid rgba(255, 215, 0, 0.2); }
         .container { max-width: 1600px; margin: 0 auto; }
+        
+        /* DISCLAIMER / AVISO DE RESPONSABILIDADE */
+        .disclaimer-box {
+            background: rgba(255, 215, 0, 0.04);
+            border: 1px solid rgba(255, 215, 0, 0.12);
+            border-radius: 10px;
+            padding: 14px 20px;
+            margin: 0 0 15px 0;
+            font-size: 0.75rem;
+            color: #888;
+            line-height: 1.6;
+        }
+        .disclaimer-box .disclaimer-icon { color: #ffd700; font-size: 1.2rem; }
+        .disclaimer-box .disclaimer-title { color: #ffd700; font-weight: 700; }
+        .disclaimer-box .disclaimer-highlight { color: #fff; }
+        .disclaimer-box ul { margin: 5px 0 0 20px; color: #888; }
+        .disclaimer-box ul li { list-style-type: disc; }
+        .disclaimer-box .disclaimer-note { color: #666; font-size: 0.7rem; display: block; margin-top: 5px; }
+        .disclaimer-box .disclaimer-flex { display: flex; align-items: flex-start; gap: 12px; }
+        
         .tabs { display: flex; gap: 5px; margin: 20px 0 25px 0; border-bottom: 2px solid rgba(255, 255, 255, 0.05); flex-wrap: wrap; }
         .tab-btn { background: transparent; border: none; color: #888; padding: 12px 28px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; border-radius: 8px 8px 0 0; }
         .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
@@ -125,9 +145,31 @@
         .legenda-grafico .item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: #aaa; }
         .legenda-grafico .cor { width: 20px; height: 3px; border-radius: 2px; }
         .legenda-grafico .cor-ponto { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; }
-        .footer { text-align: center; padding: 30px 0 10px 0; color: #555; font-size: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.05); margin-top: 30px; }
+        
+        /* FOOTER COM AVISO DE RESPONSABILIDADE */
+        .footer {
+            text-align: center;
+            padding: 25px 0 10px 0;
+            color: #555;
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            margin-top: 30px;
+        }
         .footer a { color: #ffd700; text-decoration: none; }
         .footer a:hover { text-decoration: underline; }
+        .footer .disclaimer-footer {
+            background: rgba(255, 215, 0, 0.03);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 15px;
+            font-size: 0.7rem;
+            color: #666;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 215, 0, 0.06);
+        }
+        .footer .disclaimer-footer strong { color: #ffd700; }
+        .footer .disclaimer-footer .highlight { color: #fff; }
+        
         .snmmi-badge { display: inline-block; background: rgba(0, 212, 255, 0.15); color: #00d4ff; padding: 2px 12px; border-radius: 12px; font-size: 0.6rem; border: 1px solid rgba(0, 212, 255, 0.2); margin-left: 8px; }
         .badge-tc { display: inline-block; background: rgba(0, 210, 255, 0.15); color: #00d2ff; padding: 2px 10px; border-radius: 10px; font-size: 0.6rem; border: 1px solid rgba(0, 210, 255, 0.2); }
         .badge-f18 { display: inline-block; background: rgba(0, 255, 136, 0.15); color: #00ff88; padding: 2px 10px; border-radius: 10px; font-size: 0.6rem; border: 1px solid rgba(0, 255, 136, 0.2); }
@@ -141,24 +183,31 @@
         .alert-box.warning { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); color: #ffd700; }
         .alert-box.danger { background: rgba(255, 107, 107, 0.1); border: 1px solid rgba(255, 107, 107, 0.3); color: #ff6b6b; }
         .alert-box.info { background: rgba(0, 210, 255, 0.1); border: 1px solid rgba(0, 210, 255, 0.3); color: #00d2ff; }
-        .pdf-content { background: #fff; color: #000; padding: 40px; font-family: 'Segoe UI', Arial, sans-serif; display: none; }
-        .pdf-content h1 { color: #1a237e; font-size: 24px; border-bottom: 3px solid #ffd700; padding-bottom: 10px; margin-bottom: 20px; }
-        .pdf-content h2 { color: #1a237e; font-size: 18px; margin-top: 20px; margin-bottom: 10px; }
-        .pdf-content .pdf-header { text-align: center; margin-bottom: 30px; }
-        .pdf-content .pdf-header .logo { font-size: 28px; font-weight: bold; color: #1a237e; }
-        .pdf-content .pdf-header .sub { color: #666; font-size: 14px; }
-        .pdf-content .pdf-section { margin-bottom: 20px; }
-        .pdf-content .pdf-card { background: #f5f5f5; border-radius: 8px; padding: 12px; text-align: center; border: 1px solid #ddd; }
-        .pdf-content .pdf-card .label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
-        .pdf-content .pdf-card .value { font-size: 18px; font-weight: bold; color: #1a237e; margin-top: 3px; }
+        
+        /* ===== PDF STYLES ===== */
+        .pdf-content { background: #fff; color: #000; padding: 30px; font-family: 'Segoe UI', Arial, sans-serif; display: none; font-size: 11px; }
+        .pdf-content h1 { color: #1a237e; font-size: 22px; border-bottom: 3px solid #ffd700; padding-bottom: 8px; margin-bottom: 15px; }
+        .pdf-content h2 { color: #1a237e; font-size: 16px; margin-top: 15px; margin-bottom: 8px; }
+        .pdf-content .pdf-header { text-align: center; margin-bottom: 20px; }
+        .pdf-content .pdf-header .logo { font-size: 24px; font-weight: bold; color: #1a237e; }
+        .pdf-content .pdf-header .sub { color: #666; font-size: 12px; }
+        .pdf-content .pdf-section { margin-bottom: 12px; }
+        .pdf-content .pdf-card { background: #f5f5f5; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid #ddd; }
+        .pdf-content .pdf-card .label { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pdf-content .pdf-card .value { font-size: 16px; font-weight: bold; color: #1a237e; margin-top: 2px; }
         .pdf-content .pdf-card .value.gold { color: #ffd700; }
         .pdf-content .pdf-card .value.green { color: #00c853; }
         .pdf-content .pdf-card .value.red { color: #d32f2f; }
         .pdf-content .pdf-card .value.blue { color: #1976d2; }
-        .pdf-content table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
-        .pdf-content th { background: #1a237e; color: #fff; padding: 8px; text-align: center; font-weight: 600; }
-        .pdf-content td { padding: 6px 8px; text-align: center; border-bottom: 1px solid #ddd; }
-        .pdf-content .footer-pdf { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 11px; color: #888; }
+        .pdf-content table { width: 100%; border-collapse: collapse; font-size: 9px; margin: 8px 0; }
+        .pdf-content table th { background: #1a237e; color: #fff; padding: 5px 6px; text-align: center; font-weight: 600; font-size: 8px; }
+        .pdf-content table td { padding: 4px 5px; text-align: center; border-bottom: 1px solid #ddd; font-size: 8px; }
+        .pdf-content .footer-pdf { text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd; font-size: 9px; color: #888; }
+        .pdf-content .disclaimer-pdf { background: #fff8e1; border: 1px solid #ffd700; border-radius: 4px; padding: 8px 12px; margin-top: 10px; font-size: 8px; color: #666; text-align: center; }
+        .pdf-content .disclaimer-pdf strong { color: #1a237e; }
+        .pdf-content .pdf-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 8px 0; }
+        .pdf-content .pdf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
+        
         @media (max-width: 768px) {
             .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
             .header h1 { font-size: 1.8rem; }
@@ -192,6 +241,27 @@
 </header>
 
 <div class="container">
+
+    <!-- ===== AVISO DE RESPONSABILIDADE ===== -->
+    <div class="disclaimer-box">
+        <div class="disclaimer-flex">
+            <span class="disclaimer-icon">⚠️</span>
+            <div>
+                <span class="disclaimer-title">Aviso de Responsabilidade</span><br>
+                Esta calculadora destina-se ao <span class="disclaimer-highlight">auxílio de profissionais habilitados</span> 
+                em medicina nuclear e <span class="disclaimer-highlight">não substitui</span>:
+                <ul>
+                    <li>Protocolos institucionais e diretrizes locais</li>
+                    <li>Julgamento clínico do médico nuclear</li>
+                    <li>Verificação manual dos cálculos e doses</li>
+                    <li>Recomendações do fabricante do radiofármaco</li>
+                </ul>
+                <span class="disclaimer-note">
+                    O usuário é o único responsável pela validação e aplicação dos resultados.
+                </span>
+            </div>
+        </div>
+    </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="trocarAba('planejamento')">📋 Planejamento</button>
@@ -599,7 +669,16 @@
         </div>
     </div>
 
+    <!-- ===== FOOTER COM AVISO DE RESPONSABILIDADE ===== -->
     <footer class="footer">
+        <div class="disclaimer-footer">
+            <span style="color: #ffd700;">⚠️</span> 
+            <strong>Aviso de Responsabilidade:</strong> 
+            Esta ferramenta destina-se ao <span class="highlight">auxílio de profissionais habilitados</span> em medicina nuclear. 
+            Os resultados devem ser validados clinicamente e 
+            <span class="highlight">não substituem protocolos institucionais, julgamento clínico ou recomendações do fabricante</span>. 
+            O usuário é o único responsável pela validação e aplicação dos resultados.
+        </div>
         <p>
             ☢️ RadioCalc &bull; Ferramenta para planejamento de radiofármacos em medicina nuclear
             <br>
@@ -615,9 +694,14 @@
     <div class="pdf-header">
         <div class="logo">☢️ RadioCalc</div>
         <div class="sub">Relatório de Planejamento de Radiofármacos</div>
-        <div style="font-size: 12px; color: #888; margin-top: 5px;">Gerado em: <span id="pdfDataHora"></span></div>
+        <div style="font-size: 11px; color: #888; margin-top: 4px;">Gerado em: <span id="pdfDataHora"></span></div>
     </div>
     <div id="pdfBody"></div>
+    <div class="disclaimer-pdf">
+        <strong>⚠️ Aviso de Responsabilidade:</strong> Esta ferramenta destina-se ao auxílio de profissionais habilitados. 
+        Os resultados não substituem protocolos institucionais, julgamento clínico ou recomendações do fabricante. 
+        O usuário é o único responsável pela validação e aplicação dos resultados.
+    </div>
     <div class="footer-pdf">RadioCalc &bull; Ferramenta para planejamento de radiofármacos em medicina nuclear</div>
 </div>
 
@@ -751,7 +835,7 @@ function atualizarInfoIsotopo() {
     }, 100);
 }
 
-// ====== PLANEJAMENTO DE ATIVIDADE (CORRIGIDO) ======
+// ====== PLANEJAMENTO DE ATIVIDADE ======
 function calcularPlanejamento() {
     const isotopo = document.getElementById('planIsotopo').value;
     const numPacientes = parseInt(document.getElementById('planNumPacientes').value) || 1;
@@ -768,72 +852,71 @@ function calcularPlanejamento() {
     const nomeIsot = NOME_ISOTOPO[isotopo];
     const cor = COR_ISOTOPO[isotopo];
 
-    // ====== 1. CALCULAR DOSE TOTAL ALVO ======
     const doseTotalAlvo = dosePorPaciente * numPacientes;
 
-    // ====== 2. CALCULAR TEMPO TOTAL ======
     let tempoTotalMin = 0;
     if (horarioPrimeira && horarioUltimo && 
         !isNaN(horarioPrimeira.getTime()) && !isNaN(horarioUltimo.getTime())) {
         tempoTotalMin = (horarioUltimo - horarioPrimeira) / (1000 * 60);
     } else {
-        // Se não tiver horário do último, calcula baseado no número de pacientes e intervalo
         tempoTotalMin = (numPacientes - 1) * intervaloMin;
     }
 
-    // ====== 3. CALCULAR ATIVIDADE NECESSÁRIA NO KIT ======
     let atividadeNecessaria = doseTotalAlvo;
     let fatorDecaimentoTotal = 1;
     
     if (tempoTotalMin > 0) {
-        // Fator de decaimento total do início ao fim
         fatorDecaimentoTotal = Math.exp(-lambda * tempoTotalMin);
-        // Atividade necessária no kit (compensando o decaimento)
         atividadeNecessaria = doseTotalAlvo / fatorDecaimentoTotal;
     }
 
-    // ====== 4. APLICAR MARGEM DE SEGURANÇA ======
     const margem = atividadeNecessaria * (margemPercent / 100);
     const atividadeFinal = atividadeNecessaria + margem;
 
-    // ====== 5. CALCULAR DISTRIBUIÇÃO POR PACIENTE (DECAIMENTO SEQUENCIAL) ======
     const distribuicao = [];
     let statusGeral = 'ok';
     let statusMsg = '✅ Planejamento adequado';
     
-    // Usar a mesma lógica da aba Pacientes
     let atividadeRestanteReal = atividadeNecessaria;
     let somaDosesRetiradas = 0;
     
+    const pacientesOrdenados = [];
     for (let i = 0; i < numPacientes; i++) {
-        const minutosDesdeMarca = (i + 1) * intervaloMin;
+        const horario = new Date(horarioPrimeira.getTime() + i * intervaloMin * 60000);
+        pacientesOrdenados.push({
+            index: i,
+            horario: horario,
+            doseAlvo: dosePorPaciente
+        });
+    }
+    
+    pacientesOrdenados.forEach((paciente, idx) => {
+        const horaInjecao = paciente.horario;
+        const doseAlvo = paciente.doseAlvo;
         
-        let dtPrimeiraInjecao = 0;
-        if (horarioPrimeira && !isNaN(horarioPrimeira.getTime()) && horarioMarcacao && !isNaN(horarioMarcacao.getTime())) {
-            dtPrimeiraInjecao = (horarioPrimeira - horarioMarcacao) / (1000 * 60);
-        }
+        const dtMin = (horaInjecao - horarioMarcacao) / (1000 * 60);
         
-        if (i === 0) {
-            // Primeiro paciente: decaimento da marcação até a 1ª injeção
-            const dtMin = dtPrimeiraInjecao;
+        if (idx === 0) {
             const fatorDec = Math.exp(-lambda * Math.max(0, dtMin));
             atividadeRestanteReal = atividadeNecessaria * fatorDec;
         } else {
-            // Próximos pacientes: decaimento entre injeções
-            const dtDiferenca = intervaloMin;
-            const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
-            atividadeRestanteReal = atividadeRestanteReal * fatorDecEntre;
+            const anterior = pacientesOrdenados[idx - 1];
+            const dtDiferenca = (horaInjecao - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeRestanteReal = atividadeRestanteReal * fatorDecEntre;
+            }
         }
         
-        const doseDisponivel = Math.min(dosePorPaciente, Math.max(0, atividadeRestanteReal));
-        const doseAlvo = dosePorPaciente;
-        
-        // Subtrai a dose alvo (simulando a retirada)
-        atividadeRestanteReal = atividadeRestanteReal - doseAlvo;
-        somaDosesRetiradas += doseAlvo;
+        const atividadeDisponivel = Math.max(0, atividadeRestanteReal);
+        const doseRetirada = Math.min(doseAlvo, atividadeDisponivel);
+        atividadeRestanteReal = atividadeRestanteReal - doseRetirada;
+        somaDosesRetiradas += doseRetirada;
         
         let status = '';
         let statusClass = '';
+        const doseDisponivel = atividadeDisponivel;
+        
         if (doseDisponivel >= doseAlvo * 0.95) {
             status = '✅ Adequado';
             statusClass = 'ok';
@@ -846,42 +929,42 @@ function calcularPlanejamento() {
             statusClass = 'erro';
             statusGeral = 'erro';
         }
-
-        const horario = new Date(horarioPrimeira.getTime() + i * intervaloMin * 60000);
+        
+        const fatorDecPaciente = Math.exp(-lambda * Math.max(0, dtMin));
+        
         distribuicao.push({
-            numero: i + 1,
-            horario: horario,
+            numero: paciente.index + 1,
+            horario: horaInjecao,
+            dtMin: dtMin,
             doseAlvo: doseAlvo,
             doseDisponivel: Math.max(0, doseDisponivel),
+            doseRetirada: doseRetirada,
             atividadeRestante: Math.max(0, atividadeRestanteReal),
+            fatorDecaimento: fatorDecPaciente,
             status: status,
             statusClass: statusClass
         });
-    }
+    });
 
-    // ====== CALCULAR O DECAIMENTO TOTAL REAL (CORRIGIDO) ======
-    const decaimentoTotal = atividadeNecessaria - somaDosesRetiradas - (distribuicao.length > 0 ? distribuicao[distribuicao.length - 1].atividadeRestante : 0);
+    const restanteFinal = distribuicao.length > 0 ? distribuicao[distribuicao.length - 1].atividadeRestante : 0;
+    const decaimentoTotal = atividadeNecessaria - somaDosesRetiradas - restanteFinal;
     const fatorDecaimentoReal = atividadeNecessaria > 0 ? (atividadeNecessaria - decaimentoTotal) / atividadeNecessaria : 0;
 
     if (statusGeral === 'erro') statusMsg = '❌ Planejamento insuficiente';
     else if (statusGeral === 'alerta') statusMsg = '⚠️ Planejamento com alerta';
     else statusMsg = '✅ Planejamento adequado';
 
-    // ====== 6. EXIBIR RESULTADOS ======
     document.getElementById('resultadoPlanejamento').style.display = 'block';
     
-    // Atualizar legenda do gráfico
     document.getElementById('isotopoLegenda').textContent = nomeIsot;
     document.getElementById('isotopoLegenda').className = `badge-${isotopo}`;
     document.getElementById('corDecaimento').style.background = cor;
     document.getElementById('labelDecaimento').textContent = `Decaimento do Kit (${nomeIsot})`;
     
-    // Cards principais
     document.getElementById('planAtividadeFinal').textContent = `${atividadeFinal.toFixed(2)} mCi`;
     document.getElementById('planDoseTotal').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
     document.getElementById('planFatorDecaimento').textContent = `${(fatorDecaimentoReal * 100).toFixed(1)}%`;
     
-    // Cards secundários
     document.getElementById('planPacientes').textContent = numPacientes;
     document.getElementById('planDosePaciente').textContent = `${dosePorPaciente.toFixed(2)} mCi`;
     document.getElementById('planDoseTotalSemDec').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
@@ -904,9 +987,6 @@ function calcularPlanejamento() {
         document.getElementById('planStatusCard').className = 'stat-card status-erro';
     }
 
-    trackEvent('calcular_planejamento', 'planejamento', `${nomeIsot}_${numPacientes}pac_${atividadeFinal.toFixed(1)}mCi`);
-
-    // Alertas
     const alertContainer = document.getElementById('alertContainer');
     let alerts = '';
     if (statusGeral === 'erro') {
@@ -923,7 +1003,7 @@ function calcularPlanejamento() {
     }
     alertContainer.innerHTML = alerts;
 
-    // ====== 7. GRÁFICO DE DECAIMENTO ======
+    // Gráfico
     const pontos = 100;
     const dadosDecaimento = [];
     const labels = [];
@@ -1015,7 +1095,7 @@ function calcularPlanejamento() {
         } catch(e) { console.error('Erro ao criar gráfico:', e); }
     }
 
-    // ====== 8. TABELA DE DISTRIBUIÇÃO ======
+    // Tabela
     const tbodyDist = document.getElementById('tabelaDistribuicao');
     tbodyDist.innerHTML = '';
     for (const d of distribuicao) {
@@ -1031,7 +1111,6 @@ function calcularPlanejamento() {
         tbodyDist.appendChild(tr);
     }
 
-    // ====== 9. RECOMENDAÇÃO ======
     const recomendacao = document.getElementById('recomendacaoPlanejamento');
     const atividadeSugerida = Math.ceil(atividadeFinal / 10) * 10;
     recomendacao.innerHTML = `
@@ -1052,7 +1131,6 @@ function calcularPlanejamento() {
         <span style="color: #ffd700;">💡 Sugestão: Marcar o kit com <strong>${atividadeSugerida} mCi</strong> para garantir segurança.</span>
     `;
 
-    // ====== 10. SALVAR HISTÓRICO ======
     const historicoItem = {
         data: new Date().toLocaleString('pt-BR'),
         isotopo: nomeIsot,
@@ -1116,7 +1194,7 @@ function limparHistorico() {
     }
 }
 
-// ====== GERAR PDF - PLANEJAMENTO ======
+// ====== GERAR PDF - PLANEJAMENTO (RETRATO - UMA PÁGINA) ======
 function gerarPDFPlanejamento() {
     trackEvent('gerar_pdf_planejamento', 'relatorio', 'planejamento');
 
@@ -1126,7 +1204,7 @@ function gerarPDFPlanejamento() {
     const html = `
         <div class="pdf-section">
             <h2>📋 Planejamento de Atividade</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+            <div class="pdf-grid-2">
                 <div><strong>Isótopo:</strong> ${document.getElementById('planIsotopo').options[document.getElementById('planIsotopo').selectedIndex].text}</div>
                 <div><strong>Pacientes:</strong> ${document.getElementById('planNumPacientes').value}</div>
                 <div><strong>Dose por Paciente:</strong> ${document.getElementById('planDosePorPaciente').value} mCi</div>
@@ -1137,8 +1215,8 @@ function gerarPDFPlanejamento() {
         </div>
         <div class="pdf-section">
             <h2>📊 Resultados</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 10px 0;">
-                <div class="pdf-card"><div class="label">Atividade Necessária no Kit</div><div class="value gold" style="font-size:24px;">${document.getElementById('planAtividadeFinal').textContent}</div></div>
+            <div class="pdf-grid-3">
+                <div class="pdf-card"><div class="label">Atividade Necessária no Kit</div><div class="value gold" style="font-size:20px;">${document.getElementById('planAtividadeFinal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">Dose Total Alvo</div><div class="value blue">${document.getElementById('planDoseTotal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">Fator de Decaimento</div><div class="value red">${document.getElementById('planFatorDecaimento').textContent}</div></div>
             </div>
@@ -1160,7 +1238,7 @@ function gerarPDFPlanejamento() {
         </div>
         <div class="pdf-section">
             <h2>💡 Recomendação</h2>
-            <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; border-left: 4px solid #ff6b9d;">
+            <div style="background: #f5f5f5; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #ff6b9d; font-size: 10px;">
                 ${document.getElementById('recomendacaoPlanejamento').innerHTML}
             </div>
         </div>
@@ -1171,7 +1249,7 @@ function gerarPDFPlanejamento() {
     const element = document.getElementById('pdfContent');
     element.style.display = 'block';
     html2pdf().set({
-        margin: 10,
+        margin: 8,
         filename: `Planejamento_RadioCalc_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
@@ -1181,7 +1259,7 @@ function gerarPDFPlanejamento() {
     });
 }
 
-// ====== GERAR PDF - PACIENTES ======
+// ====== GERAR PDF - PACIENTES (PAISAGEM - UMA PÁGINA) ======
 function gerarPDFPacientes() {
     const tbody = document.getElementById('corpoPacientes');
     const rows = tbody.querySelectorAll('tr');
@@ -1198,21 +1276,24 @@ function gerarPDFPacientes() {
     let html = `
         <div class="pdf-section">
             <h2>👥 Administração de Pacientes</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+            <div class="pdf-grid-2">
                 <div><strong>Total de Pacientes:</strong> ${rows.length}</div>
                 <div><strong>Isótopo:</strong> ${NOME_ISOTOPO[isotopoAtual]}</div>
                 <div><strong>Meia-vida:</strong> ${MEIA_VIDA_MIN[isotopoAtual]} min</div>
                 <div><strong>λ:</strong> ${getLambda(isotopoAtual).toFixed(6)} min⁻¹</div>
+                <div><strong>Atividade Inicial:</strong> ${document.getElementById('atividadeMarcacaoMestre').value || 0} mCi</div>
+                <div><strong>Horário Marcação:</strong> ${new Date(document.getElementById('horarioMarcacaoMestre').value).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>
             </div>
         </div>
         <div class="pdf-section">
             <h2>📋 Lista de Pacientes</h2>
-            <table>
+            <table style="font-size: 7.5px;">
                 <thead>
                     <tr>
                         <th>#</th><th>Nome</th><th>ID</th><th>Peso</th><th>Dose/kg</th>
-                        <th>Dose Calc.</th><th>Dose Admin.</th><th>Δt (min)</th>
-                        <th>Ativ. Restante</th><th>Status</th>
+                        <th>Dose Calc.</th><th>Hora Injeção</th><th>Dose Medida</th>
+                        <th>Dose Admin.</th><th>Rejeito</th><th>Δt</th>
+                        <th>Ativ. Restante</th><th>Ativ. Teórica</th><th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1224,9 +1305,14 @@ function gerarPDFPacientes() {
         const peso = document.getElementById(`pesoPaciente_${idx}`)?.value || '-';
         const doseKg = document.getElementById(`doseKgPaciente_${idx}`)?.value || '-';
         const doseCalc = document.getElementById(`doseCalculada_${idx}`)?.textContent || '-';
+        const horaInj = document.getElementById(`horaInjecao_${idx}`)?.value || '-';
+        const horaFormat = horaInj !== '-' ? new Date(horaInj).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) : '-';
+        const doseMedida = document.getElementById(`doseMedida_${idx}`)?.value || '-';
         const doseAdmin = document.getElementById(`doseAdministrada_${idx}`)?.textContent || '-';
+        const rejeito = document.getElementById(`rejeito_${idx}`)?.value || '-';
         const intervalo = document.getElementById(`intervaloInjecao_${idx}`)?.textContent || '-';
         const restante = document.getElementById(`atividadeRestante_${idx}`)?.textContent || '-';
+        const teorica = document.getElementById(`atividadeTeorica_${idx}`)?.textContent || '-';
         const status = document.getElementById(`statusPaciente_${idx}`)?.textContent || '-';
         
         const statusColor = status.includes('✅') ? '#00c853' : status.includes('⚠️') ? '#ffd700' : '#888';
@@ -1234,15 +1320,19 @@ function gerarPDFPacientes() {
         html += `
             <tr>
                 <td>${idx + 1}</td>
-                <td style="text-align: left;">${nome}</td>
-                <td>${id}</td>
+                <td style="text-align: left; font-size: 7px;">${nome}</td>
+                <td style="font-size: 7px;">${id}</td>
                 <td>${peso}</td>
                 <td>${doseKg}</td>
                 <td>${doseCalc}</td>
+                <td style="font-size: 7px;">${horaFormat}</td>
+                <td>${doseMedida}</td>
                 <td>${doseAdmin}</td>
+                <td>${rejeito}</td>
                 <td>${intervalo}</td>
                 <td>${restante}</td>
-                <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
+                <td>${teorica}</td>
+                <td style="color: ${statusColor}; font-weight: bold; font-size: 7px;">${status}</td>
             </tr>
         `;
     });
@@ -1253,7 +1343,9 @@ function gerarPDFPacientes() {
         </div>
         <div class="pdf-section">
             <h2>📊 Resumo</h2>
-            <div id="resumoPDF">${document.getElementById('statsPacientes').innerHTML}</div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 6px; font-size: 9px;">
+                ${document.getElementById('statsPacientes').innerHTML.replace(/stat-card/g, 'pdf-card').replace(/valor/g, 'value').replace(/rotulo/g, 'label')}
+            </div>
         </div>
     `;
 
@@ -1262,7 +1354,7 @@ function gerarPDFPacientes() {
     const element = document.getElementById('pdfContent');
     element.style.display = 'block';
     html2pdf().set({
-        margin: 10,
+        margin: 6,
         filename: `Pacientes_RadioCalc_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
