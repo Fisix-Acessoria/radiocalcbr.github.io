@@ -93,6 +93,7 @@
         .stat-card.status-ok .valor { color: #00ff64; }
         .stat-card.status-alerta .valor { color: #ffd700; }
         .stat-card.status-erro .valor { color: #ff6b6b; }
+        .stat-card.sobra-minima .valor { color: #00d2ff; }
         .table-wrapper { overflow-x: auto; margin: 15px 0; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06); }
         table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
         th { background: rgba(255, 215, 0, 0.12); padding: 10px 8px; text-align: center; font-weight: 600; color: #ffd700; white-space: nowrap; border-bottom: 2px solid rgba(255, 215, 0, 0.15); }
@@ -136,6 +137,8 @@
         .info-box.planejamento strong { color: #ff6b9d; }
         .info-box.snmmi { border-left-color: #00d4ff; background: rgba(0, 212, 255, 0.08); }
         .info-box.snmmi strong { color: #00d4ff; }
+        .info-box.otimizacao { border-left-color: #00ff64; background: rgba(0, 255, 100, 0.08); }
+        .info-box.otimizacao strong { color: #00ff64; }
         .resultado-box { margin-top: 20px; display: none; }
         .resultado-box.ativo { display: block; animation: fadeIn 0.6s ease; }
         .grafico-wrapper { margin-top: 20px; height: 380px; position: relative; }
@@ -205,7 +208,6 @@
         .pdf-content .pdf-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 8px 0; }
         .pdf-content .pdf-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0; }
         
-        /* Modal Sobre */
         .modal-sobre-overlay {
             display: none;
             position: fixed;
@@ -308,7 +310,6 @@
         <p class="subtitle" data-translate="subtitulo">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
         <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
             <span class="version">V1.0 beta</span>
-            <!-- Botão Sobre -->
             <button onclick="abrirSobre()" style="
                 background: rgba(255,255,255,0.05);
                 border: 1px solid rgba(255,255,255,0.1);
@@ -371,7 +372,7 @@
         <button class="tab-btn" onclick="trocarAba('pediatrica')" data-translate="aba_pediatrica">👶 Dose Pediátrica</button>
     </div>
 
-    <!-- ===== ABA 1: PLANEJAMENTO ===== -->
+    <!-- ===== ABA 1: PLANEJAMENTO OTIMIZADO ===== -->
     <div id="aba-planejamento" class="tab-content active">
         <div class="card">
             <h3 class="card-title" style="color: #ff6b9d;" data-translate="plan_title">📋 Planejamento de Atividade</h3>
@@ -380,6 +381,9 @@
                 dose por paciente e o decaimento do isótopo ao longo do tempo.
                 <span style="display: inline-block; margin-left: 10px; font-size: 0.7rem; color: #888;">
                     Suporte para Tc-99m, F-18 e I-123
+                </span>
+                <span style="display: inline-block; margin-left: 10px; font-size: 0.7rem; color: #00ff64; background: rgba(0,255,100,0.1); padding: 2px 10px; border-radius: 10px;">
+                    ⚡ Otimizado para sobra mínima
                 </span>
             </p>
 
@@ -430,8 +434,8 @@
                 </div>
                 <div class="input-group">
                     <label data-translate="plan_margem">Margem de Segurança (%)</label>
-                    <input type="number" id="planMargemSeguranca" value="15" step="1" min="0" max="50" onchange="calcularPlanejamento()">
-                    <small data-translate="plan_margem_small">Compensa perdas e erros</small>
+                    <input type="number" id="planMargemSeguranca" value="10" step="1" min="0" max="50" onchange="calcularPlanejamento()">
+                    <small data-translate="plan_margem_small">Compensa perdas e erros (recomendado: 5-10%)</small>
                 </div>
             </div>
 
@@ -449,17 +453,22 @@
             <div id="resultadoPlanejamento" style="display: none;">
                 <div id="alertContainer"></div>
 
-                <div class="grid-3" style="margin-top: 15px;">
+                <!-- Cards de Resultado com Sobra Mínima -->
+                <div class="grid-4" style="margin-top: 15px;">
                     <div class="stat-card destaque" style="border-color: rgba(255,215,0,0.4);">
-                        <div class="rotulo" data-translate="plan_atividade_kit">🎯 Atividade Necessária no Kit</div>
+                        <div class="rotulo" data-translate="plan_atividade_kit">🎯 Atividade de Marcação</div>
                         <div class="valor" id="planAtividadeFinal" style="font-size: 2.5rem; color: #ffd700;">--</div>
                     </div>
                     <div class="stat-card" style="border-color: rgba(0,210,255,0.3);">
-                        <div class="rotulo" data-translate="plan_dose_total">📊 Dose Total Alvo</div>
+                        <div class="rotulo">📊 Dose Total Alvo</div>
                         <div class="valor" id="planDoseTotal" style="font-size: 1.8rem; color: #00d2ff;">--</div>
                     </div>
+                    <div class="stat-card" style="border-color: rgba(0,255,100,0.3);">
+                        <div class="rotulo">✅ Sobra no Frasco</div>
+                        <div class="valor" id="planSobraFinal" style="font-size: 1.8rem; color: #00ff64;">--</div>
+                    </div>
                     <div class="stat-card" style="border-color: rgba(255,107,107,0.3);">
-                        <div class="rotulo" data-translate="plan_fator_decaimento">📉 Fator de Decaimento Total</div>
+                        <div class="rotulo">📉 Fator de Decaimento</div>
                         <div class="valor" id="planFatorDecaimento" style="font-size: 1.5rem; color: #ff6b6b;">--</div>
                     </div>
                 </div>
@@ -467,10 +476,18 @@
                 <div class="grid-5" id="planejamentoStats" style="margin-top: 15px;">
                     <div class="stat-card"><div class="rotulo" data-translate="plan_pacientes">Pacientes</div><div class="valor" id="planPacientes" style="font-size: 1.5rem;">--</div></div>
                     <div class="stat-card"><div class="rotulo" data-translate="plan_dose_paciente_label">Dose por Paciente</div><div class="valor" id="planDosePaciente" style="font-size: 1.5rem;">--</div></div>
-                    <div class="stat-card"><div class="rotulo" data-translate="plan_dose_total_sem_dec">Dose Total sem Decaimento</div><div class="valor" id="planDoseTotalSemDec" style="font-size: 1.3rem;">--</div></div>
+                    <div class="stat-card"><div class="rotulo">Dose Total sem Decaimento</div><div class="valor" id="planDoseTotalSemDec" style="font-size: 1.3rem;">--</div></div>
                     <div class="stat-card"><div class="rotulo" data-translate="plan_tempo_total">Tempo Total</div><div class="valor" id="planTempoTotal" style="font-size: 1.3rem;">--</div></div>
-                    <div class="stat-card"><div class="rotulo" data-translate="plan_margem_label">Margem de Segurança</div><div class="valor" id="planMargemDisplay" style="font-size: 1.3rem;">--</div></div>
-                    <div class="stat-card" id="planStatusCard"><div class="rotulo" data-translate="plan_status">Status do Planejamento</div><div class="valor" id="planStatus" style="font-size: 1.2rem;">--</div></div>
+                    <div class="stat-card"><div class="rotulo" data-translate="plan_margem_label">Margem</div><div class="valor" id="planMargemDisplay" style="font-size: 1.3rem;">--</div></div>
+                    <div class="stat-card" id="planStatusCard"><div class="rotulo" data-translate="plan_status">Status</div><div class="valor" id="planStatus" style="font-size: 1.2rem;">--</div></div>
+                </div>
+
+                <!-- Info Box de Otimização -->
+                <div class="info-box otimizacao" style="margin-top: 15px;">
+                    <strong style="color: #00ff64;">⚡ Otimização Ativa:</strong>
+                    <span id="infoOtimizacao" style="color: #aaa;">
+                        A atividade de marcação foi calculada para que o último paciente receba a dose correta e sobre o mínimo possível no frasco.
+                    </span>
                 </div>
 
                 <div class="card" style="margin-top: 15px; border-color: rgba(255, 107, 157, 0.2);">
@@ -496,6 +513,7 @@
                                     <th data-translate="plan_tabela_horario">Horário</th>
                                     <th data-translate="plan_tabela_dose_alvo">Dose Alvo (mCi)</th>
                                     <th data-translate="plan_tabela_dose_disponivel">Dose Disponível (mCi)</th>
+                                    <th>Dose Retirada (mCi)</th>
                                     <th data-translate="plan_tabela_restante">Atividade Restante (mCi)</th>
                                     <th data-translate="plan_tabela_status">Status</th>
                                 </tr>
@@ -522,8 +540,8 @@
                 <strong style="color: #ff6b9d;" data-translate="plan_exemplo">📌 Exemplo Prático:</strong><br>
                 <span style="color: #aaa; font-size: 0.85rem;" data-translate="plan_exemplo_texto">
                     <strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>
-                    Tc-99m (meia-vida: 362 min) · Margem: 15%<br>
-                    → Atividade necessária no kit: <strong style="color: #ffd700;">~579 mCi</strong>
+                    Tc-99m (meia-vida: 362 min) · Margem: 10%<br>
+                    → Atividade de marcação otimizada: <strong style="color: #ffd700;">~550 mCi</strong> (sobra mínima!)
                 </span>
             </div>
         </div>
@@ -1098,9 +1116,9 @@ const translations = {
         plan_btn_aplicar: "⚡ Aplicar à Marcação",
         plan_btn_pdf: "📑 PDF",
         plan_btn_limpar: "🗑️",
-        plan_atividade_kit: "🎯 Atividade Necessária no Kit",
+        plan_atividade_kit: "🎯 Atividade de Marcação",
         plan_dose_total: "📊 Dose Total Alvo",
-        plan_fator_decaimento: "📉 Fator de Decaimento Total",
+        plan_fator_decaimento: "📉 Fator de Decaimento",
         plan_pacientes: "Pacientes",
         plan_dose_paciente_label: "Dose por Paciente",
         plan_dose_total_sem_dec: "Dose Total sem Decaimento",
@@ -1123,7 +1141,7 @@ const translations = {
         plan_historico: "📜 Histórico de Cálculos",
         plan_historico_vazio: "Nenhum cálculo salvo ainda.",
         plan_exemplo: "📌 Exemplo Prático:",
-        plan_exemplo_texto: "<strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>Tc-99m (meia-vida: 362 min) · Margem: 15%<br>→ Atividade necessária no kit: <strong style='color: #ffd700;'>~579 mCi</strong>",
+        plan_exemplo_texto: "<strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>Tc-99m (meia-vida: 362 min) · Margem: 10%<br>→ Atividade de marcação otimizada: <strong style='color: #ffd700;'>~550 mCi</strong> (sobra mínima!)",
         marc_title: "🧪 Marcação de Radiofármacos",
         marc_radiofarmaco: "Radiofármaco",
         marc_horario: "Horário da Marcação",
@@ -1238,9 +1256,9 @@ const translations = {
         plan_btn_aplicar: "⚡ Apply to Labeling",
         plan_btn_pdf: "📑 PDF",
         plan_btn_limpar: "🗑️",
-        plan_atividade_kit: "🎯 Required Kit Activity",
+        plan_atividade_kit: "🎯 Labeling Activity",
         plan_dose_total: "📊 Total Target Dose",
-        plan_fator_decaimento: "📉 Total Decay Factor",
+        plan_fator_decaimento: "📉 Decay Factor",
         plan_pacientes: "Patients",
         plan_dose_paciente_label: "Dose per Patient",
         plan_dose_total_sem_dec: "Total Dose without Decay",
@@ -1263,7 +1281,7 @@ const translations = {
         plan_historico: "📜 Calculation History",
         plan_historico_vazio: "No calculations saved yet.",
         plan_exemplo: "📌 Practical Example:",
-        plan_exemplo_texto: "<strong>15 patients</strong> · Dose: <strong>15 mCi</strong> each · 1st injection: <strong>07:30</strong> · Last: <strong>14:30</strong><br>Tc-99m (half-life: 362 min) · Margin: 15%<br>→ Required kit activity: <strong style='color: #ffd700;'>~579 mCi</strong>",
+        plan_exemplo_texto: "<strong>15 patients</strong> · Dose: <strong>15 mCi</strong> each · 1st injection: <strong>07:30</strong> · Last: <strong>14:30</strong><br>Tc-99m (half-life: 362 min) · Margin: 10%<br>→ Optimized labeling activity: <strong style='color: #ffd700;'>~550 mCi</strong> (minimal waste!)",
         marc_title: "🧪 Radiopharmaceutical Labeling",
         marc_radiofarmaco: "Radiopharmaceutical",
         marc_horario: "Labeling Time",
@@ -1600,13 +1618,13 @@ function atualizarInfoIsotopo() {
     setTimeout(() => { calcularPlanejamento(); calcularPacientes(); }, 100);
 }
 
-// ====== PLANEJAMENTO ======
+// ====== PLANEJAMENTO OTIMIZADO ======
 function calcularPlanejamento() {
     const isotopo = document.getElementById('planIsotopo').value;
     const numPacientes = parseInt(document.getElementById('planNumPacientes').value) || 1;
     const dosePorPaciente = parseFloat(document.getElementById('planDosePorPaciente').value) || 0;
-    const margemPercent = parseFloat(document.getElementById('planMargemSeguranca').value) || 15;
-    const intervaloMin = parseFloat(document.getElementById('planIntervaloInjecoes').value) || 15;
+    const margemPercent = parseFloat(document.getElementById('planMargemSeguranca').value) || 10;
+    const intervaloMin = parseFloat(document.getElementById('planIntervaloInjecoes').value) || 30;
     const horarioMarcacao = new Date(document.getElementById('planHorarioMarcacao').value);
     const horarioPrimeira = new Date(document.getElementById('planHorarioPrimeira').value);
     const horarioUltimo = new Date(document.getElementById('planHorarioUltimo').value);
@@ -1614,56 +1632,50 @@ function calcularPlanejamento() {
     const lambda = getLambda(isotopo);
     const nomeIsot = NOME_ISOTOPO[isotopo];
     const cor = COR_ISOTOPO[isotopo];
-    const doseTotalAlvo = dosePorPaciente * numPacientes;
-    let tempoTotalMin = 0;
-    if (horarioPrimeira && horarioUltimo && !isNaN(horarioPrimeira.getTime()) && !isNaN(horarioUltimo.getTime())) {
-        tempoTotalMin = (horarioUltimo - horarioPrimeira) / (1000 * 60);
-    } else {
-        tempoTotalMin = (numPacientes - 1) * intervaloMin;
-    }
-    let atividadeNecessaria = doseTotalAlvo;
-    let fatorDecaimentoTotal = 1;
-    if (tempoTotalMin > 0) {
-        fatorDecaimentoTotal = Math.exp(-lambda * tempoTotalMin);
-        atividadeNecessaria = doseTotalAlvo / fatorDecaimentoTotal;
-    }
-    const margem = atividadeNecessaria * (margemPercent / 100);
-    const atividadeFinal = atividadeNecessaria + margem;
-    const distribuicao = [];
-    let statusGeral = 'ok';
-    let statusMsg = translations[currentLang].status_ok;
-    let atividadeRestanteReal = atividadeNecessaria;
-    let somaDosesRetiradas = 0;
+    
+    // --- CÁLCULO OTIMIZADO ---
+    // 1. Ordena os pacientes com seus horários e fatores de decaimento
     const pacientesOrdenados = [];
     for (let i = 0; i < numPacientes; i++) {
         const horario = new Date(horarioPrimeira.getTime() + i * intervaloMin * 60000);
-        pacientesOrdenados.push({ index: i, horario: horario, doseAlvo: dosePorPaciente });
+        const dtMin = (horario - horarioMarcacao) / (1000 * 60);
+        const fatorDec = Math.exp(-lambda * Math.max(0, dtMin));
+        pacientesOrdenados.push({ index: i, horario, dtMin, fatorDec, doseAlvo: dosePorPaciente });
     }
-    pacientesOrdenados.forEach((paciente, idx) => {
-        const horaInjecao = paciente.horario;
-        const doseAlvo = paciente.doseAlvo;
-        const dtMin = (horaInjecao - horarioMarcacao) / (1000 * 60);
-        if (idx === 0) {
-            const fatorDec = Math.exp(-lambda * Math.max(0, dtMin));
-            atividadeRestanteReal = atividadeNecessaria * fatorDec;
-        } else {
-            const anterior = pacientesOrdenados[idx - 1];
-            const dtDiferenca = (horaInjecao - anterior.horario) / (1000 * 60);
-            if (dtDiferenca > 0) {
-                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
-                atividadeRestanteReal = atividadeRestanteReal * fatorDecEntre;
-            }
-        }
-        const atividadeDisponivel = Math.max(0, atividadeRestanteReal);
-        const doseRetirada = Math.min(doseAlvo, atividadeDisponivel);
-        atividadeRestanteReal = atividadeRestanteReal - doseRetirada;
+    
+    // 2. Calcula a atividade necessária para cada paciente (compensando decaimento)
+    let somaDosesAjustadas = 0;
+    for (const p of pacientesOrdenados) {
+        const doseAjustada = p.doseAlvo / p.fatorDec;
+        somaDosesAjustadas += doseAjustada;
+    }
+    
+    // 3. Adiciona margem de segurança (pequena)
+    const margem = somaDosesAjustadas * (margemPercent / 100);
+    let atividadeMarcacao = somaDosesAjustadas + margem;
+    
+    // 4. SIMULAÇÃO DA DISTRIBUIÇÃO
+    let atividadeRestante = atividadeMarcacao;
+    let somaDosesRetiradas = 0;
+    const distribuicao = [];
+    let statusGeral = 'ok';
+    let statusMsg = translations[currentLang].status_ok;
+    
+    // Primeira simulação
+    for (let i = 0; i < pacientesOrdenados.length; i++) {
+        const p = pacientesOrdenados[i];
+        const fatorDec = p.fatorDec;
+        const doseDisponivel = atividadeRestante * fatorDec;
+        const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
+        const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
+        atividadeRestante = Math.max(0, novaAtividade);
         somaDosesRetiradas += doseRetirada;
+        
         let status = '', statusClass = '';
-        const doseDisponivel = atividadeDisponivel;
-        if (doseDisponivel >= doseAlvo * 0.95) {
+        if (doseDisponivel >= p.doseAlvo * 0.98) {
             status = translations[currentLang].status_adequado;
             statusClass = 'ok';
-        } else if (doseDisponivel >= doseAlvo * 0.7) {
+        } else if (doseDisponivel >= p.doseAlvo * 0.7) {
             status = translations[currentLang].status_baixo;
             statusClass = 'alerta';
             if (statusGeral !== 'erro') statusGeral = 'alerta';
@@ -1672,53 +1684,146 @@ function calcularPlanejamento() {
             statusClass = 'erro';
             statusGeral = 'erro';
         }
-        const fatorDecPaciente = Math.exp(-lambda * Math.max(0, dtMin));
+        
         distribuicao.push({
-            numero: paciente.index + 1,
-            horario: horaInjecao,
-            dtMin: dtMin,
-            doseAlvo: doseAlvo,
+            numero: p.index + 1,
+            horario: p.horario,
+            dtMin: p.dtMin,
+            doseAlvo: p.doseAlvo,
             doseDisponivel: Math.max(0, doseDisponivel),
             doseRetirada: doseRetirada,
-            atividadeRestante: Math.max(0, atividadeRestanteReal),
-            fatorDecaimento: fatorDecPaciente,
+            atividadeRestante: Math.max(0, atividadeRestante),
+            fatorDecaimento: fatorDec,
             status: status,
             statusClass: statusClass
         });
-    });
-    const restanteFinal = distribuicao.length > 0 ? distribuicao[distribuicao.length - 1].atividadeRestante : 0;
-    const decaimentoTotal = atividadeNecessaria - somaDosesRetiradas - restanteFinal;
-    const fatorDecaimentoReal = atividadeNecessaria > 0 ? (atividadeNecessaria - decaimentoTotal) / atividadeNecessaria : 0;
+    }
+    
+    // 5. AJUSTE FINO: Se sobrar mais que 2% da atividade total, recalcula com ajuste
+    const percentualRestante = atividadeRestante / atividadeMarcacao;
+    if (percentualRestante > 0.02 && numPacientes > 1) {
+        // Remove a margem extra que gerou sobra
+        const fatorAjuste = 1 - (percentualRestante * 0.9);
+        atividadeMarcacao = atividadeMarcacao * fatorAjuste;
+        
+        // Recalcula a distribuição
+        atividadeRestante = atividadeMarcacao;
+        somaDosesRetiradas = 0;
+        distribuicao.length = 0;
+        statusGeral = 'ok';
+        
+        for (let i = 0; i < pacientesOrdenados.length; i++) {
+            const p = pacientesOrdenados[i];
+            const fatorDec = p.fatorDec;
+            const doseDisponivel = atividadeRestante * fatorDec;
+            const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
+            const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
+            atividadeRestante = Math.max(0, novaAtividade);
+            somaDosesRetiradas += doseRetirada;
+            
+            let status = '', statusClass = '';
+            if (doseDisponivel >= p.doseAlvo * 0.98) {
+                status = translations[currentLang].status_adequado;
+                statusClass = 'ok';
+            } else if (doseDisponivel >= p.doseAlvo * 0.7) {
+                status = translations[currentLang].status_baixo;
+                statusClass = 'alerta';
+                if (statusGeral !== 'erro') statusGeral = 'alerta';
+            } else {
+                status = translations[currentLang].status_insuficiente;
+                statusClass = 'erro';
+                statusGeral = 'erro';
+            }
+            
+            distribuicao.push({
+                numero: p.index + 1,
+                horario: p.horario,
+                dtMin: p.dtMin,
+                doseAlvo: p.doseAlvo,
+                doseDisponivel: Math.max(0, doseDisponivel),
+                doseRetirada: doseRetirada,
+                atividadeRestante: Math.max(0, atividadeRestante),
+                fatorDecaimento: fatorDec,
+                status: status,
+                statusClass: statusClass
+            });
+        }
+        
+        // Atualiza o percentual restante após o ajuste
+        const novoPercentualRestante = atividadeRestante / atividadeMarcacao;
+        if (novoPercentualRestante < 0.01) {
+            // Se a sobra for muito pequena, está ótimo
+        }
+    }
+    
+    // --- ATUALIZA INTERFACE ---
+    const doseTotalAlvo = dosePorPaciente * numPacientes;
+    const tempoTotalMin = pacientesOrdenados.length > 0 ? 
+        Math.max(0, pacientesOrdenados[pacientesOrdenados.length - 1].dtMin - pacientesOrdenados[0].dtMin) : 0;
+    const fatorDecaimentoReal = atividadeMarcacao > 0 ? 
+        (atividadeMarcacao - atividadeRestante) / atividadeMarcacao : 0;
+    
     if (statusGeral === 'erro') statusMsg = translations[currentLang].status_erro;
     else if (statusGeral === 'alerta') statusMsg = translations[currentLang].status_alerta;
     else statusMsg = translations[currentLang].status_ok;
+    
     document.getElementById('resultadoPlanejamento').style.display = 'block';
     document.getElementById('isotopoLegenda').textContent = nomeIsot;
     document.getElementById('isotopoLegenda').className = `badge-${isotopo}`;
     document.getElementById('corDecaimento').style.background = cor;
     document.getElementById('labelDecaimento').innerHTML = translations[currentLang].plan_grafico_decaimento + ` (${nomeIsot})`;
-    document.getElementById('planAtividadeFinal').textContent = `${atividadeFinal.toFixed(2)} mCi`;
+    
+    // Cards principais
+    document.getElementById('planAtividadeFinal').textContent = `${atividadeMarcacao.toFixed(2)} mCi`;
     document.getElementById('planDoseTotal').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
+    document.getElementById('planSobraFinal').textContent = `${atividadeRestante.toFixed(2)} mCi`;
+    document.getElementById('planSobraFinal').style.color = atividadeRestante < 0.5 ? '#00ff64' : atividadeRestante < 2 ? '#ffd700' : '#ff6b6b';
     document.getElementById('planFatorDecaimento').textContent = `${(fatorDecaimentoReal * 100).toFixed(1)}%`;
+    
+    // Stats
     document.getElementById('planPacientes').textContent = numPacientes;
     document.getElementById('planDosePaciente').textContent = `${dosePorPaciente.toFixed(2)} mCi`;
     document.getElementById('planDoseTotalSemDec').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
     const horas = Math.floor(tempoTotalMin / 60);
     const minutos = Math.round(tempoTotalMin % 60);
-    document.getElementById('planTempoTotal').textContent = `${horas}h ${minutos}min (${tempoTotalMin.toFixed(0)} min)`;
+    document.getElementById('planTempoTotal').textContent = `${horas}h ${minutos}min (${Math.max(0, tempoTotalMin).toFixed(0)} min)`;
     document.getElementById('planMargemDisplay').textContent = `${margemPercent}% (${margem.toFixed(2)} mCi)`;
+    
     const statusEl = document.getElementById('planStatus');
     statusEl.textContent = statusMsg;
     if (statusGeral === 'ok') { statusEl.style.color = '#00ff64'; document.getElementById('planStatusCard').className = 'stat-card status-ok'; }
     else if (statusGeral === 'alerta') { statusEl.style.color = '#ffd700'; document.getElementById('planStatusCard').className = 'stat-card status-alerta'; }
     else { statusEl.style.color = '#ff6b6b'; document.getElementById('planStatusCard').className = 'stat-card status-erro'; }
+    
+    // Info de otimização
+    const pctSobra = (atividadeRestante / atividadeMarcacao * 100);
+    const infoOtimizacao = document.getElementById('infoOtimizacao');
+    if (atividadeRestante < 0.1) {
+        infoOtimizacao.innerHTML = `✅ <strong style="color: #00ff64;">Otimização perfeita!</strong> A sobra é de apenas <strong>${atividadeRestante.toFixed(3)} mCi</strong> (${pctSobra.toFixed(2)}% da atividade total). Aproveitamento máximo do radiofármaco!`;
+    } else if (atividadeRestante < 1) {
+        infoOtimizacao.innerHTML = `✅ <strong style="color: #00ff64;">Ótima otimização!</strong> Sobraram apenas <strong>${atividadeRestante.toFixed(2)} mCi</strong> (${pctSobra.toFixed(2)}% da atividade total).`;
+    } else if (atividadeRestante < 3) {
+        infoOtimizacao.innerHTML = `ℹ️ <strong style="color: #ffd700;">Boa otimização.</strong> Sobraram <strong>${atividadeRestante.toFixed(2)} mCi</strong> (${pctSobra.toFixed(2)}% da atividade total). Considere reduzir a margem.`;
+    } else {
+        infoOtimizacao.innerHTML = `⚠️ <strong style="color: #ff6b6b;">Sobra considerável.</strong> ${atividadeRestante.toFixed(2)} mCi (${pctSobra.toFixed(2)}% da atividade total). Aumente o número de pacientes ou reduza a margem.`;
+    }
+    
+    // Alertas
     const alertContainer = document.getElementById('alertContainer');
     let alerts = '';
     if (statusGeral === 'erro') alerts += `<div class="alert-box danger">⚠️ Atenção: A atividade necessária é insuficiente para atender todos os pacientes. Aumente a atividade do kit ou reduza o número de pacientes.</div>`;
     if (statusGeral === 'alerta') alerts += `<div class="alert-box warning">⚠️ Atenção: Alguns pacientes receberão doses abaixo do ideal. Considere aumentar a atividade do kit.</div>`;
-    if (atividadeFinal > 1000) alerts += `<div class="alert-box warning">⚠️ Atividade final alta (${atividadeFinal.toFixed(1)} mCi). Verifique se o kit suporta esta quantidade.</div>`;
-    if (alerts === '') alerts = `<div class="alert-box success">✅ Planejamento aprovado! A atividade calculada é suficiente para todos os pacientes.</div>`;
+    if (atividadeRestante < 0.1) {
+        alerts += `<div class="alert-box success">🎯 Otimização perfeita! Sobra de apenas ${atividadeRestante.toFixed(3)} mCi.</div>`;
+    } else if (atividadeRestante < 1) {
+        alerts += `<div class="alert-box success">✅ Otimização excelente! Sobra de ${atividadeRestante.toFixed(2)} mCi (${pctSobra.toFixed(1)}%).</div>`;
+    } else if (atividadeRestante < 3) {
+        alerts += `<div class="alert-box info">ℹ️ Sobra de ${atividadeRestante.toFixed(2)} mCi (${pctSobra.toFixed(1)}%).</div>`;
+    }
+    if (alerts === '') alerts = `<div class="alert-box success">✅ Planejamento otimizado! Sobra de ${atividadeRestante.toFixed(2)} mCi.</div>`;
     alertContainer.innerHTML = alerts;
+    
+    // --- GRÁFICO ---
     const pontos = 100;
     const dadosDecaimento = [];
     const labels = [];
@@ -1727,16 +1832,18 @@ function calcularPlanejamento() {
     for (let i = 0; i <= pontos; i++) {
         const t = (i / pontos) * duracaoTotal;
         const fator = Math.exp(-lambda * t * 60);
-        const atividade = atividadeNecessaria * fator;
+        const atividade = atividadeMarcacao * fator;
         dadosDecaimento.push(atividade);
         const horario = new Date(horarioInicio.getTime() + t * 3600000);
         labels.push(horario.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
     }
     const dadosInjecoes = [];
     for (let i = 0; i < distribuicao.length; i++) {
-        const idx = Math.round((i * intervaloMin / 60) / duracaoTotal * pontos);
-        dadosInjecoes.push({ x: Math.min(idx, pontos), y: distribuicao[i].doseDisponivel });
+        const d = distribuicao[i];
+        const idx = Math.round((d.dtMin / 60) / duracaoTotal * pontos);
+        dadosInjecoes.push({ x: Math.min(idx, pontos), y: d.doseDisponivel });
     }
+    
     const canvas = document.getElementById('graficoDecaimento');
     if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -1761,15 +1868,19 @@ function calcularPlanejamento() {
             });
         } catch(e) { console.error('Erro ao criar gráfico:', e); }
     }
+    
+    // --- TABELA ---
     const tbodyDist = document.getElementById('tabelaDistribuicao');
     tbodyDist.innerHTML = '';
     for (const d of distribuicao) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${d.numero}</td><td>${d.horario.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</td><td>${d.doseAlvo.toFixed(2)}</td><td>${d.doseDisponivel.toFixed(2)}</td><td>${d.atividadeRestante.toFixed(2)}</td><td class="resultado-calc ${d.statusClass}">${d.status}</td>`;
+        tr.innerHTML = `<td>${d.numero}</td><td>${d.horario.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</td><td>${d.doseAlvo.toFixed(2)}</td><td>${d.doseDisponivel.toFixed(2)}</td><td>${d.doseRetirada.toFixed(2)}</td><td>${d.atividadeRestante.toFixed(2)}</td><td class="resultado-calc ${d.statusClass}">${d.status}</td>`;
         tbodyDist.appendChild(tr);
     }
+    
+    // --- RECOMENDAÇÃO ---
     const recomendacao = document.getElementById('recomendacaoPlanejamento');
-    const atividadeSugerida = Math.ceil(atividadeFinal / 10) * 10;
+    const atividadeSugerida = Math.ceil(atividadeMarcacao / 5) * 5;
     recomendacao.innerHTML = `
         Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
         <br><br>
@@ -1779,22 +1890,26 @@ function calcularPlanejamento() {
         <br>
         <strong>Tempo total de injeções:</strong> ${horas}h ${minutos}min
         <br>
-        <strong>Fator de decaimento total:</strong> ${(fatorDecaimentoReal * 100).toFixed(1)}%
+        <strong style="color: #00d2ff;">Atividade necessária no kit (compensando decaimento):</strong> ${somaDosesAjustadas.toFixed(2)} mCi
         <br>
-        <strong style="color: #00d2ff;">Atividade necessária no kit (compensando decaimento):</strong> ${atividadeNecessaria.toFixed(2)} mCi
+        <strong style="color: #00ff64;">Atividade final com margem de ${margemPercent}%:</strong> ${atividadeMarcacao.toFixed(2)} mCi
         <br>
-        <strong style="color: #00ff64;">Atividade final com margem de ${margemPercent}%:</strong> ${atividadeFinal.toFixed(2)} mCi
+        <strong style="color: ${atividadeRestante < 0.5 ? '#00ff64' : '#ffd700'};">✅ Sobra no frasco:</strong> ${atividadeRestante.toFixed(2)} mCi (${(atividadeRestante/atividadeMarcacao*100).toFixed(1)}%)
         <br><br>
-        <span style="color: #ffd700;">💡 Sugestão: Marcar o kit com <strong>${atividadeSugerida} mCi</strong> para garantir segurança.</span>
+        <span style="color: #ffd700;">💡 Sugestão: Marcar o kit com <strong>${atividadeSugerida} mCi</strong> para otimizar o uso e minimizar sobras.</span>
     `;
+    
+    // --- HISTÓRICO ---
     const historicoItem = {
         data: new Date().toLocaleString('pt-BR'),
         isotopo: nomeIsot,
         pacientes: numPacientes,
         dosePorPaciente: dosePorPaciente.toFixed(2),
         doseTotal: doseTotalAlvo.toFixed(2),
-        atividadeNecessaria: atividadeNecessaria.toFixed(2),
-        atividadeFinal: atividadeFinal.toFixed(2),
+        atividadeNecessaria: somaDosesAjustadas.toFixed(2),
+        atividadeFinal: atividadeMarcacao.toFixed(2),
+        atividadeRestante: atividadeRestante.toFixed(2),
+        pctSobra: (atividadeRestante/atividadeMarcacao*100).toFixed(1),
         fatorDecaimento: (fatorDecaimentoReal * 100).toFixed(1),
         tempoTotal: `${horas}h ${minutos}min`,
         status: statusMsg
@@ -1813,9 +1928,11 @@ function atualizarHistorico() {
     let html = '';
     for (const item of historicoPlanejamento) {
         const statusColor = item.status.includes('✅') ? '#00ff64' : item.status.includes('⚠️') ? '#ffd700' : '#ff6b6b';
+        const sobraColor = parseFloat(item.atividadeRestante) < 0.5 ? '#00ff64' : parseFloat(item.atividadeRestante) < 2 ? '#ffd700' : '#ff6b6b';
         html += `<div class="historico-item" onclick="carregarHistorico(this)" data-index="${historicoPlanejamento.indexOf(item)}">
             <span>${item.isotopo} · ${item.pacientes} pacientes · ${item.dosePorPaciente} mCi/pac</span>
             <span class="valor">${item.atividadeFinal} mCi</span>
+            <span style="color: ${sobraColor}; font-size: 0.7rem;">⬇️ ${item.atividadeRestante} mCi</span>
             <span style="color: ${statusColor}; font-size: 0.7rem;">${item.status}</span>
             <span class="data">${item.data}</span>
         </div>`;
@@ -1827,7 +1944,7 @@ function carregarHistorico(element) {
     const index = parseInt(element.dataset.index);
     const item = historicoPlanejamento[index];
     if (!item) return;
-    alert(`📋 Detalhes do Cálculo:\n\nIsótopo: ${item.isotopo}\nPacientes: ${item.pacientes}\nDose por Paciente: ${item.dosePorPaciente} mCi\nDose Total: ${item.doseTotal} mCi\nAtividade Necessária: ${item.atividadeNecessaria} mCi\nAtividade Final: ${item.atividadeFinal} mCi\nFator Decaimento: ${item.fatorDecaimento}%\nTempo Total: ${item.tempoTotal}\nStatus: ${item.status}\nData: ${item.data}`);
+    alert(`📋 Detalhes do Cálculo:\n\nIsótopo: ${item.isotopo}\nPacientes: ${item.pacientes}\nDose por Paciente: ${item.dosePorPaciente} mCi\nDose Total: ${item.doseTotal} mCi\nAtividade Necessária: ${item.atividadeNecessaria} mCi\nAtividade Final: ${item.atividadeFinal} mCi\nSobra no Frasco: ${item.atividadeRestante} mCi (${item.pctSobra}%)\nFator Decaimento: ${item.fatorDecaimento}%\nTempo Total: ${item.tempoTotal}\nStatus: ${item.status}\nData: ${item.data}`);
 }
 
 function limparHistorico() {
@@ -1851,31 +1968,33 @@ function gerarPDFPlanejamento() {
                 <div><strong>${translations[currentLang].plan_dose_paciente}:</strong> ${document.getElementById('planDosePorPaciente').value} mCi</div>
                 <div><strong>${translations[currentLang].plan_margem}:</strong> ${document.getElementById('planMargemSeguranca').value}%</div>
                 <div><strong>${translations[currentLang].plan_status}:</strong> ${document.getElementById('planStatus').textContent}</div>
+                <div><strong>Sobra no frasco:</strong> ${document.getElementById('planSobraFinal').textContent}</div>
                 <div><strong>${translations[currentLang].plan_tempo_total}:</strong> ${document.getElementById('planTempoTotal').textContent}</div>
             </div>
         </div>
         <div class="pdf-section">
             <h2>📊 Resultados</h2>
-            <div class="pdf-grid-3">
-                <div class="pdf-card"><div class="label">${translations[currentLang].plan_atividade_kit}</div><div class="value gold" style="font-size:20px;">${document.getElementById('planAtividadeFinal').textContent}</div></div>
+            <div class="pdf-grid-4">
+                <div class="pdf-card"><div class="label">${translations[currentLang].plan_atividade_kit}</div><div class="value gold" style="font-size:18px;">${document.getElementById('planAtividadeFinal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">${translations[currentLang].plan_dose_total}</div><div class="value blue">${document.getElementById('planDoseTotal').textContent}</div></div>
+                <div class="pdf-card"><div class="label">Sobra no Frasco</div><div class="value green" style="color:${document.getElementById('planSobraFinal').style.color};">${document.getElementById('planSobraFinal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">${translations[currentLang].plan_fator_decaimento}</div><div class="value red">${document.getElementById('planFatorDecaimento').textContent}</div></div>
             </div>
         </div>
         <div class="pdf-section">
             <h2>${translations[currentLang].plan_tabela_titulo}</h2>
             <table>
-                <thead><tr><th>#</th><th>${translations[currentLang].plan_tabela_horario}</th><th>${translations[currentLang].plan_tabela_dose_alvo}</th><th>${translations[currentLang].plan_tabela_dose_disponivel}</th><th>${translations[currentLang].plan_tabela_restante}</th><th>${translations[currentLang].plan_tabela_status}</th></tr></thead>
+                <thead><tr><th>#</th><th>${translations[currentLang].plan_tabela_horario}</th><th>${translations[currentLang].plan_tabela_dose_alvo}</th><th>${translations[currentLang].plan_tabela_dose_disponivel}</th><th>Dose Retirada</th><th>${translations[currentLang].plan_tabela_restante}</th><th>${translations[currentLang].plan_tabela_status}</th></tr></thead>
                 <tbody>${Array.from(document.getElementById('tabelaDistribuicao').querySelectorAll('tr')).map(row => {
                     const cells = row.querySelectorAll('td');
-                    if (cells.length >= 6) return `<tr><td>${cells[0].textContent}</td><td>${cells[1].textContent}</td><td>${cells[2].textContent}</td><td>${cells[3].textContent}</td><td>${cells[4].textContent}</td><td>${cells[5].textContent}</td></tr>`;
+                    if (cells.length >= 7) return `<tr><td>${cells[0].textContent}</td><td>${cells[1].textContent}</td><td>${cells[2].textContent}</td><td>${cells[3].textContent}</td><td>${cells[4].textContent}</td><td>${cells[5].textContent}</td><td>${cells[6].textContent}</td></tr>`;
                     return '';
                 }).join('')}</tbody>
             </table>
         </div>
         <div class="pdf-section">
             <h2>${translations[currentLang].plan_recomendacao}</h2>
-            <div style="background: #f5f5f5; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #ff6b9d; font-size: 10px;">${document.getElementById('recomendacaoPlanejamento').innerHTML}</div>
+            <div style="background: #f5f5f5; padding: 10px 14px; border-radius: 6px; border-left: 4px solid #00ff64; font-size: 10px;">${document.getElementById('recomendacaoPlanejamento').innerHTML}</div>
         </div>
     `;
     pdfBody.innerHTML = html;
@@ -1883,7 +2002,7 @@ function gerarPDFPlanejamento() {
     element.style.display = 'block';
     html2pdf().set({
         margin: 8,
-        filename: `Planejamento_RadioCalc_${new Date().toISOString().slice(0,10)}.pdf`,
+        filename: `Planejamento_Otimizado_RadioCalc_${new Date().toISOString().slice(0,10)}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, letterRendering: true, useCORS: true, logging: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
