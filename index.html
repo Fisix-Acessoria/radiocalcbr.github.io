@@ -864,7 +864,6 @@
                             <th style="min-width: 80px;" data-translate="pac_col_rejeito">Rejeito (mCi)</th>
                             <th style="min-width: 75px;" data-translate="pac_col_dt">Δt (min)</th>
                             <th style="min-width: 85px;" data-translate="pac_col_restante">Ativ. Restante (mCi)</th>
-                            <th style="min-width: 75px;" data-translate="pac_col_teorica">Ativ. Teórica (mCi)</th>
                             <th style="min-width: 65px;" data-translate="pac_col_status">Status</th>
                             <th style="width: 25px;" data-translate="pac_col_acao">Ação</th>
                         </tr>
@@ -1384,7 +1383,6 @@ const translations = {
         pac_col_rejeito: "Rejeito (mCi)",
         pac_col_dt: "Δt (min)",
         pac_col_restante: "Ativ. Restante (mCi)",
-        pac_col_teorica: "Ativ. Teórica (mCi)",
         pac_col_status: "Status",
         pac_col_acao: "Ação",
         pac_info_box: "📌 Fórmulas (Planilha v2.3):",
@@ -1524,7 +1522,6 @@ const translations = {
         pac_col_rejeito: "Waste (mCi)",
         pac_col_dt: "Δt (min)",
         pac_col_restante: "Remaining Act. (mCi)",
-        pac_col_teorica: "Theoretical Act. (mCi)",
         pac_col_status: "Status",
         pac_col_acao: "Action",
         pac_info_box: "📌 Formulas (Spreadsheet v2.3):",
@@ -2752,32 +2749,28 @@ function adicionarPaciente() {
     const index = contadorPacientes;
     contadorPacientes++;
     const tbody = document.getElementById('corpoPacientes');
-    const horarioMarcacao = new Date(document.getElementById('horarioMarcacaoMestre').value);
-    const now = new Date(horarioMarcacao);
-    now.setMinutes(horarioMarcacao.getMinutes() + (contadorPacientes * 15));
-    const horaInjecaoStr = now.toISOString().slice(0, 16);
-    const peso = (55 + Math.random() * 45).toFixed(0);
-    const doseKg = isotopoAtual === 'f18' ? '0.14' : isotopoAtual === 'i123' ? '0.01' : '0.15';
-    const doseCalculada = parseFloat(peso) * parseFloat(doseKg);
-    const doseMedida = Math.max(doseCalculada + 0.5, doseCalculada * 1.05);
-    const rejeito = doseMedida * 0.05;
-    const doseAdministrada = doseMedida - rejeito;
+    const horaInjecaoStr = '';  // vazio
+    const peso = '';
+    const doseKg = '';
+    const doseCalculada = 0;        // ← CORRIGIDO
+    const doseMedida = '';
+    const rejeito = '';
+    const doseAdministrada = 0;     // ← CORRIGIDO
     const tr = document.createElement('tr');
     tr.dataset.index = index;
     tr.innerHTML = `
         <td class="num-paciente">${index + 1}</td>
         <td><input type="text" id="nomePaciente_${index}" placeholder="${translations[currentLang].pac_col_nome}" value="Paciente ${index + 1}"></td>
         <td><input type="text" id="idPaciente_${index}" placeholder="${translations[currentLang].pac_col_id}" value="P-${String(10000 + index).padStart(5, '0')}"></td>
-        <td><input type="number" id="pesoPaciente_${index}" value="${peso}" step="0.1" min="1"></td>
-        <td><input type="number" id="doseKgPaciente_${index}" value="${doseKg}" step="0.01" min="0.01"></td>
-        <td class="dose-calculada" id="doseCalculada_${index}">${doseCalculada.toFixed(2)}</td>
-        <td><input type="datetime-local" id="horaInjecao_${index}" value="${horaInjecaoStr}"></td>
-        <td><input type="number" id="doseMedida_${index}" value="${doseMedida.toFixed(2)}" step="0.1" min="0" class="dose-medida-input"></td>
-        <td class="dose-administrada" id="doseAdministrada_${index}">${doseAdministrada.toFixed(2)}</td>
-        <td><input type="number" id="rejeito_${index}" value="${rejeito.toFixed(2)}" step="0.1" min="0" class="rejeito-input"></td>
+        <td><input type="number" id="pesoPaciente_${index}" value="" placeholder="kg" step="0.1" min="1"></td>
+        <td><input type="number" id="doseKgPaciente_${index}" value="" placeholder="mCi/kg" step="0.01" min="0.01"></td>
+        <td class="dose-calculada" id="doseCalculada_${index}">--</td>   <!-- ← CORRIGIDO -->
+        <td><input type="datetime-local" id="horaInjecao_${index}" value="${horaInjecaoStr}" placeholder="HH:MM"></td>
+        <td><input type="number" id="doseMedida_${index}" value="" placeholder="mCi" step="0.1" min="0" class="dose-medida-input"></td>
+        <td class="dose-administrada" id="doseAdministrada_${index}">--</td>   <!-- ← CORRIGIDO -->
+        <td><input type="number" id="rejeito_${index}" value="" placeholder="mCi" step="0.1" min="0" class="rejeito-input"></td>
         <td class="resultado-calc" id="intervaloInjecao_${index}">--</td>
         <td class="resultado-calc" id="atividadeRestante_${index}">--</td>
-        <td class="resultado-calc" id="atividadeTeorica_${index}">--</td>
         <td id="statusPaciente_${index}">--</td>
         <td><button class="btn-danger" onclick="removerPaciente(${index})">✕</button></td>
     `;
@@ -2831,24 +2824,66 @@ function removerPaciente(index) {
 function reordenarPacientes() {
     const tbody = document.getElementById('corpoPacientes');
     const rows = tbody.querySelectorAll('tr');
-    rows.forEach((row, idx) => {
-        row.dataset.index = idx;
-        const numCell = row.querySelector('.num-paciente');
-        if (numCell) numCell.textContent = idx + 1;
-        const inputs = row.querySelectorAll('input');
-        inputs.forEach(input => {
-            const oldId = input.id;
-            if (oldId) { const parts = oldId.split('_'); if (parts.length === 2) input.id = `${parts[0]}_${idx}`; }
-        });
-        const cells = ['doseCalculada', 'doseAdministrada', 'intervaloInjecao', 'atividadeRestante', 'atividadeTeorica', 'statusPaciente'];
-        cells.forEach(cellId => {
-            const cell = row.querySelector(`#${cellId}_${idx}`);
-            if (!cell) { const oldCell = row.querySelector(`#${cellId}`); if (oldCell) oldCell.id = `${cellId}_${idx}`; }
-        });
-        const btn = row.querySelector('.btn-danger');
-        if (btn) btn.setAttribute('onclick', `removerPaciente(${idx})`);
+    
+    // Coleta todos os dados atuais
+    const dadosPacientes = [];
+    rows.forEach((row) => {
+        const idx = parseInt(row.dataset.index);
+        const nome = document.getElementById(`nomePaciente_${idx}`)?.value || '';
+        const id = document.getElementById(`idPaciente_${idx}`)?.value || '';
+        const peso = document.getElementById(`pesoPaciente_${idx}`)?.value || '';
+        const doseKg = document.getElementById(`doseKgPaciente_${idx}`)?.value || '';
+        const hora = document.getElementById(`horaInjecao_${idx}`)?.value || '';
+        const doseMedida = document.getElementById(`doseMedida_${idx}`)?.value || '';
+        const rejeito = document.getElementById(`rejeito_${idx}`)?.value || '';
+        const doseCalculada = document.getElementById(`doseCalculada_${idx}`)?.textContent || '';
+        const doseAdministrada = document.getElementById(`doseAdministrada_${idx}`)?.textContent || '';
+        dadosPacientes.push({ idx, nome, id, peso, doseKg, hora, doseMedida, rejeito, doseCalculada, doseAdministrada });
     });
-    contadorPacientes = rows.length;
+    
+    // Ordena por horário de injeção
+    dadosPacientes.sort((a, b) => {
+        if (!a.hora || !b.hora) return 0;
+        return new Date(a.hora) - new Date(b.hora);
+    });
+    
+    // Recria as linhas na ordem correta
+    tbody.innerHTML = '';
+    dadosPacientes.forEach((dado, novoIndex) => {
+        const tr = document.createElement('tr');
+        tr.dataset.index = novoIndex;
+        tr.innerHTML = `
+            <td class="num-paciente">${novoIndex + 1}</td>
+            <td><input type="text" id="nomePaciente_${novoIndex}" placeholder="${translations[currentLang].pac_col_nome}" value="${dado.nome}"></td>
+            <td><input type="text" id="idPaciente_${novoIndex}" placeholder="${translations[currentLang].pac_col_id}" value="${dado.id}"></td>
+            <td><input type="number" id="pesoPaciente_${novoIndex}" value="${dado.peso}" step="0.1" min="1"></td>
+            <td><input type="number" id="doseKgPaciente_${novoIndex}" value="${dado.doseKg}" step="0.01" min="0.01"></td>
+            <td class="dose-calculada" id="doseCalculada_${novoIndex}">${dado.doseCalculada || '--'}</td>
+            <td><input type="datetime-local" id="horaInjecao_${novoIndex}" value="${dado.hora}"></td>
+            <td><input type="number" id="doseMedida_${novoIndex}" value="${dado.doseMedida}" step="0.1" min="0" class="dose-medida-input"></td>
+            <td class="dose-administrada" id="doseAdministrada_${novoIndex}">${dado.doseAdministrada || '--'}</td>
+            <td><input type="number" id="rejeito_${novoIndex}" value="${dado.rejeito}" step="0.1" min="0" class="rejeito-input"></td>
+            <td class="resultado-calc" id="intervaloInjecao_${novoIndex}">--</td>
+            <td class="resultado-calc" id="atividadeRestante_${novoIndex}">--</td>
+            <td id="statusPaciente_${novoIndex}">--</td>
+            <td><button class="btn-danger" onclick="removerPaciente(${novoIndex})">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+        
+        const inputs = tr.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => { 
+                recalcularDosePaciente(novoIndex); 
+                calcularPacientes(); 
+            });
+            input.addEventListener('input', () => { 
+                recalcularDosePaciente(novoIndex); 
+                calcularPacientes(); 
+            });
+        });
+    });
+    
+    contadorPacientes = dadosPacientes.length;
 }
 
 function atualizarContadorPacientes() {
@@ -2919,7 +2954,6 @@ function calcularPacientes() {
         if (!dados) return;
         const intervaloCell = document.getElementById(`intervaloInjecao_${index}`);
         const restanteCell = document.getElementById(`atividadeRestante_${index}`);
-        const teoricaCell = document.getElementById(`atividadeTeorica_${index}`);
         const statusCell = document.getElementById(`statusPaciente_${index}`);
         if (intervaloCell) {
             const idxAtual = horasInjecoes.findIndex(item => item.index === index);
@@ -2934,7 +2968,6 @@ function calcularPacientes() {
             else statusClass = 'erro';
             restanteCell.className = `resultado-calc ${statusClass}`;
         }
-        if (teoricaCell) { teoricaCell.textContent = `${dados.atividadeTeorica.toFixed(2)} mCi`; teoricaCell.className = 'resultado-calc'; teoricaCell.style.color = '#00d2ff'; }
         if (statusCell) {
             let status = '', statusClass = '';
             if (dados.dtMin >= 0 && ativMarcacao > 0) {
