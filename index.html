@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head>calcularPlanejamentoSimplificado()
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioCalc - Planejamento de Radiofármacos</title>
@@ -1843,7 +1843,8 @@ function atualizarInfoIsotopo() {
     setTimeout(() => { calcularPlanejamento(); calcularPacientes(); }, 100);
 }
 
-// ====== PLANEJAMENTO - MODO SIMPLIFICADO ======
+// ====== PLANEJAMENTO - MODO SIMPLIFICADO (CORRIGIDO) ======
+// ====== PLANEJAMENTO - MODO SIMPLIFICADO (OTIMIZADO PARA SOBRA MÍNIMA) ======
 function calcularPlanejamentoSimplificado() {
     const isotopo = document.getElementById('planIsotopo').value;
     const numPacientes = parseInt(document.getElementById('planNumPacientes').value) || 1;
@@ -1852,43 +1853,138 @@ function calcularPlanejamentoSimplificado() {
     const intervaloMin = parseFloat(document.getElementById('planIntervaloInjecoes').value) || 30;
     const horarioMarcacao = new Date(document.getElementById('planHorarioMarcacao').value);
     const horarioPrimeira = new Date(document.getElementById('planHorarioPrimeira').value);
-    const horarioUltimo = new Date(document.getElementById('planHorarioUltimo').value);
     const meiaVida = MEIA_VIDA_MIN[isotopo];
     const lambda = getLambda(isotopo);
     const nomeIsot = NOME_ISOTOPO[isotopo];
     const cor = COR_ISOTOPO[isotopo];
-    
-    // Cálculo otimizado
+
+    // Gera horários dos pacientes
     const pacientesOrdenados = [];
     for (let i = 0; i < numPacientes; i++) {
         const horario = new Date(horarioPrimeira.getTime() + i * intervaloMin * 60000);
         const dtMin = (horario - horarioMarcacao) / (1000 * 60);
-        const fatorDec = Math.exp(-lambda * Math.max(0, dtMin));
-        pacientesOrdenados.push({ index: i, horario, dtMin, fatorDec, doseAlvo: dosePorPaciente });
+        pacientesOrdenados.push({ index: i, horario, dtMin: Math.max(0, dtMin), doseAlvo: dosePorPaciente });
     }
-    
+
+    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) ======
+    // Simula com 1 mCi para encontrar o fator de correção
+    let atividadeSimulada = 1;
     let somaDosesAjustadas = 0;
-    for (const p of pacientesOrdenados) {
-        const doseAjustada = p.doseAlvo / p.fatorDec;
-        somaDosesAjustadas += doseAjustada;
-    }
-    
-    const margem = somaDosesAjustadas * (margemPercent / 100);
-    let atividadeMarcacao = somaDosesAjustadas + margem;
-    
-    let atividadeRestante = atividadeMarcacao;
-    let somaDosesRetiradas = 0;
-    const distribuicao = [];
-    let statusGeral = 'ok';
-    let statusMsg = translations[currentLang].status_ok;
     
     for (let i = 0; i < pacientesOrdenados.length; i++) {
         const p = pacientesOrdenados[i];
-        const fatorDec = p.fatorDec;
-        const doseDisponivel = atividadeRestante * fatorDec;
+        if (i === 0) {
+            // Primeira injeção: decai desde a marcação
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeSimulada = atividadeSimulada * fatorDec;
+        } else {
+            // Injeções seguintes: decai APENAS desde a injeção anterior
+            const anterior = pacientesOrdenados[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeSimulada = atividadeSimulada * fatorDecEntre;
+            }
+        }
+        // Retira a dose (simulada)
+        atividadeSimulada = Math.max(0, atividadeSimulada - 1);
+        somaDosesAjustadas += 1;
+    }
+
+    // Atividade exata necessária (sem margem)
+    const fatorCorrecao = somaDosesAjustadas / numPacientes;
+    const atividadeExata = (dosePorPaciente * numPacientes) * fatorCorrecao;
+
+    // ====== APLICA A MARGEM DE SEGURANÇA ======
+    const margem = atividadeExata * (margemPercent / 100);
+    let atividadeMarcacao = atividadeExata + margem;
+
+    // ====== OTIMIZAÇÃO PARA SOBRA MÍNIMA ======
+    // Arredonda para cima em múltiplos de 0.5 ou 1.0 para facilitar a marcação
+    let atividadeSugerida = Math.ceil(atividadeMarcacao / 0.5) * 0.5; // Arredonda para 0.5 mCi
+
+    // Verifica se com este valor todos os pacientes são atendidos
+    let atividadeTeste = atividadeSugerida;
+    let atividadeRestante = atividadeTeste;
+    let todosAtendidos = true;
+
+    for (let i = 0; i < pacientesOrdenados.length; i++) {
+        const p = pacientesOrdenados[i];
+        if (i === 0) {
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeRestante = atividadeRestante * fatorDec;
+        } else {
+            const anterior = pacientesOrdenados[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeRestante = atividadeRestante * fatorDecEntre;
+            }
+        }
+        const doseDisponivel = atividadeRestante;
+        if (doseDisponivel < p.doseAlvo * 0.98) {
+            todosAtendidos = false;
+            break;
+        }
+        atividadeRestante = Math.max(0, atividadeRestante - p.doseAlvo);
+    }
+
+    // Se não atendeu todos, aumenta em 0.5 mCi até atender
+    while (!todosAtendidos) {
+        atividadeSugerida += 0.5;
+        atividadeRestante = atividadeSugerida;
+        todosAtendidos = true;
+        
+        for (let i = 0; i < pacientesOrdenados.length; i++) {
+            const p = pacientesOrdenados[i];
+            if (i === 0) {
+                const fatorDec = Math.exp(-lambda * p.dtMin);
+                atividadeRestante = atividadeRestante * fatorDec;
+            } else {
+                const anterior = pacientesOrdenados[i - 1];
+                const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+                if (dtDiferenca > 0) {
+                    const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                    atividadeRestante = atividadeRestante * fatorDecEntre;
+                }
+            }
+            const doseDisponivel = atividadeRestante;
+            if (doseDisponivel < p.doseAlvo * 0.98) {
+                todosAtendidos = false;
+                break;
+            }
+            atividadeRestante = Math.max(0, atividadeRestante - p.doseAlvo);
+        }
+    }
+
+    // Usa o valor otimizado
+    atividadeMarcacao = atividadeSugerida;
+
+    // ====== SIMULAÇÃO REAL COM O VALOR OTIMIZADO ======
+    atividadeRestante = atividadeMarcacao;
+    const distribuicao = [];
+    let statusGeral = 'ok';
+    let statusMsg = translations[currentLang].status_ok;
+    let somaDosesRetiradas = 0;
+
+    for (let i = 0; i < pacientesOrdenados.length; i++) {
+        const p = pacientesOrdenados[i];
+        
+        if (i === 0) {
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeRestante = atividadeRestante * fatorDec;
+        } else {
+            const anterior = pacientesOrdenados[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeRestante = atividadeRestante * fatorDecEntre;
+            }
+        }
+        
+        const doseDisponivel = atividadeRestante;
         const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
-        const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
-        atividadeRestante = Math.max(0, novaAtividade);
+        atividadeRestante = Math.max(0, atividadeRestante - doseRetirada);
         somaDosesRetiradas += doseRetirada;
         
         let status = '', statusClass = '';
@@ -1905,87 +2001,74 @@ function calcularPlanejamentoSimplificado() {
             statusGeral = 'erro';
         }
         
+        const dtAcumulado = (p.horario - horarioMarcacao) / (1000 * 60);
         distribuicao.push({
-            numero: p.index + 1,
+            numero: i + 1,
             horario: p.horario,
-            dtMin: p.dtMin,
+            dtMin: dtAcumulado,
             doseAlvo: p.doseAlvo,
             doseDisponivel: Math.max(0, doseDisponivel),
             doseRetirada: doseRetirada,
             atividadeRestante: Math.max(0, atividadeRestante),
-            fatorDecaimento: fatorDec,
+            fatorDecaimento: Math.exp(-lambda * Math.max(0, dtAcumulado)),
             status: status,
             statusClass: statusClass
         });
     }
-    
-    // Ajuste fino para minimizar sobra
-    const percentualRestante = atividadeRestante / atividadeMarcacao;
-    if (percentualRestante > 0.02 && numPacientes > 1) {
-        const fatorAjuste = 1 - (percentualRestante * 0.9);
-        atividadeMarcacao = atividadeMarcacao * fatorAjuste;
-        atividadeRestante = atividadeMarcacao;
-        somaDosesRetiradas = 0;
-        distribuicao.length = 0;
-        statusGeral = 'ok';
-        
-        for (let i = 0; i < pacientesOrdenados.length; i++) {
-            const p = pacientesOrdenados[i];
-            const fatorDec = p.fatorDec;
-            const doseDisponivel = atividadeRestante * fatorDec;
-            const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
-            const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
-            atividadeRestante = Math.max(0, novaAtividade);
-            somaDosesRetiradas += doseRetirada;
-            
-            let status = '', statusClass = '';
-            if (doseDisponivel >= p.doseAlvo * 0.98) {
-                status = translations[currentLang].status_adequado;
-                statusClass = 'ok';
-            } else if (doseDisponivel >= p.doseAlvo * 0.7) {
-                status = translations[currentLang].status_baixo;
-                statusClass = 'alerta';
-                if (statusGeral !== 'erro') statusGeral = 'alerta';
-            } else {
-                status = translations[currentLang].status_insuficiente;
-                statusClass = 'erro';
-                statusGeral = 'erro';
-            }
-            
-            distribuicao.push({
-                numero: p.index + 1,
-                horario: p.horario,
-                dtMin: p.dtMin,
-                doseAlvo: p.doseAlvo,
-                doseDisponivel: Math.max(0, doseDisponivel),
-                doseRetirada: doseRetirada,
-                atividadeRestante: Math.max(0, atividadeRestante),
-                fatorDecaimento: fatorDec,
-                status: status,
-                statusClass: statusClass
-            });
-        }
-    }
-    
-    // Atualiza interface com os resultados
-    atualizarResultadosPlanejamento(
-        isotopo, nomeIsot, cor, meiaVida, lambda,
-        numPacientes, dosePorPaciente, margemPercent, margem,
-        atividadeMarcacao, atividadeRestante, somaDosesAjustadas,
-        pacientesOrdenados, distribuicao, statusGeral, statusMsg
-    );
-    
-    // Atualiza gráfico e tabela
-    atualizarGraficoPlanejamento(isotopo, nomeIsot, cor, lambda, atividadeMarcacao, distribuicao, horarioMarcacao, dosePorPaciente);
-    atualizarTabelaDistribuicao(distribuicao);
+
+    // ====== ATUALIZA INTERFACE ======
     const tempoTotalMin = pacientesOrdenados.length > 0 ? 
         Math.max(0, pacientesOrdenados[pacientesOrdenados.length - 1].dtMin - pacientesOrdenados[0].dtMin) : 0;
     const horas = Math.floor(tempoTotalMin / 60);
     const minutos = Math.round(tempoTotalMin % 60);
-    atualizarRecomendacao(numPacientes, nomeIsot, meiaVida, dosePorPaciente, somaDosesAjustadas, atividadeMarcacao, margemPercent, atividadeRestante, horas, minutos);
+
+    // Calcula a sobra REAL
+    const sobraReal = atividadeRestante;
+    const sobraPercentual = (sobraReal / atividadeMarcacao) * 100;
+
+    // Atualiza os cards de resultado
+    atualizarResultadosPlanejamento(
+        isotopo, nomeIsot, cor, meiaVida, lambda,
+        numPacientes, dosePorPaciente, margemPercent, margem,
+        atividadeMarcacao, sobraReal, somaDosesRetiradas,
+        pacientesOrdenados, distribuicao, statusGeral,
+        statusGeral === 'ok' ? translations[currentLang].status_ok : 
+        statusGeral === 'alerta' ? translations[currentLang].status_alerta : 
+        translations[currentLang].status_erro,
+        horas, minutos
+    );
+    
+    atualizarGraficoPlanejamento(isotopo, nomeIsot, cor, lambda, atividadeMarcacao, distribuicao, horarioMarcacao, dosePorPaciente);
+    atualizarTabelaDistribuicao(distribuicao);
+    
+    // Recomendação com valor otimizado
+    const recomendacao = document.getElementById('recomendacaoPlanejamento');
+    recomendacao.innerHTML = `
+        <strong style="color: #00ff64;">✅ Planejamento Otimizado!</strong>
+        <br><br>
+        Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
+        <br><br>
+        <strong>Dose por paciente:</strong> ${dosePorPaciente.toFixed(2)} mCi
+        <br>
+        <strong>Tempo total de injeções:</strong> ${horas}h ${minutos}min
+        <br><br>
+        <strong style="color: #ffd700; font-size: 1.1rem;">🎯 ATIVIDADE IDEAL PARA MARCAR O KIT:</strong>
+        <br>
+        <strong style="color: #00ff64; font-size: 1.4rem;">${atividadeMarcacao.toFixed(2)} mCi</strong>
+        <br><br>
+        <strong style="color: ${sobraReal < 0.1 ? '#00ff64' : sobraReal < 0.5 ? '#ffd700' : '#ff6b6b'};">✅ Sobra no frasco:</strong> 
+        ${sobraReal.toFixed(3)} mCi (${sobraPercentual.toFixed(2)}% da atividade total)
+        <br>
+        <span style="color: ${sobraReal < 0.1 ? '#00ff64' : '#ffd700'};">
+            ${sobraReal < 0.1 ? '🎯 Otimização perfeita! Aproveitamento máximo do radiofármaco!' : 
+              sobraReal < 0.5 ? '✅ Ótima otimização! Sobra mínima.' : 
+              '⚠️ Sobra considerável. Considere ajustar a margem.'}
+        </span>
+    `;
 }
 
-// ====== PLANEJAMENTO - MODO AGENDA ======
+// ====== PLANEJAMENTO - MODO AGENDA (CORRIGIDO) ======
+// ====== PLANEJAMENTO - MODO AGENDA (OTIMIZADO PARA SOBRA MÍNIMA) ======
 function calcularPlanejamentoAgenda() {
     const isotopo = document.getElementById('planIsotopoAgenda').value;
     const dosePorPaciente = parseFloat(document.getElementById('planDosePorPacienteAgenda').value) || 0;
@@ -1995,62 +2078,148 @@ function calcularPlanejamentoAgenda() {
     const lambda = getLambda(isotopo);
     const nomeIsot = NOME_ISOTOPO[isotopo];
     const cor = COR_ISOTOPO[isotopo];
-    
+
     // Coleta os pacientes da tabela agenda
     const tbody = document.getElementById('corpoAgenda');
     const rows = tbody.querySelectorAll('tr');
     const pacientesAgenda = [];
-    
+
     rows.forEach((row, index) => {
         const horaInput = document.getElementById(`agendaHora_${index}`);
         if (horaInput) {
             const horario = new Date(horaInput.value);
             if (!isNaN(horario.getTime())) {
-                const dtMin = (horario - horarioMarcacao) / (1000 * 60);
-                const fatorDec = Math.exp(-lambda * Math.max(0, dtMin));
                 pacientesAgenda.push({
                     index: index,
                     horario: horario,
-                    dtMin: dtMin,
-                    fatorDec: fatorDec,
+                    dtMin: Math.max(0, (horario - horarioMarcacao) / (1000 * 60)),
                     doseAlvo: dosePorPaciente
                 });
             }
         }
     });
-    
+
     const numPacientes = pacientesAgenda.length;
-    if (numPacientes === 0) {
+    if (numPacientes === 0) { 
         alert('⚠️ Adicione pelo menos um paciente com horário válido na agenda.');
-        return;
+        return; 
     }
-    
-    // Ordena por horário
     pacientesAgenda.sort((a, b) => a.horario - b.horario);
-    
-    // Cálculo otimizado
+
+    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) ======
+    let atividadeSimulada = 1;
     let somaDosesAjustadas = 0;
-    for (const p of pacientesAgenda) {
-        const doseAjustada = p.doseAlvo / p.fatorDec;
-        somaDosesAjustadas += doseAjustada;
-    }
-    
-    const margem = somaDosesAjustadas * (margemPercent / 100);
-    let atividadeMarcacao = somaDosesAjustadas + margem;
-    
-    let atividadeRestante = atividadeMarcacao;
-    let somaDosesRetiradas = 0;
-    const distribuicao = [];
-    let statusGeral = 'ok';
-    let statusMsg = translations[currentLang].status_ok;
     
     for (let i = 0; i < pacientesAgenda.length; i++) {
         const p = pacientesAgenda[i];
-        const fatorDec = p.fatorDec;
-        const doseDisponivel = atividadeRestante * fatorDec;
+        if (i === 0) {
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeSimulada = atividadeSimulada * fatorDec;
+        } else {
+            const anterior = pacientesAgenda[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeSimulada = atividadeSimulada * fatorDecEntre;
+            }
+        }
+        atividadeSimulada = Math.max(0, atividadeSimulada - 1);
+        somaDosesAjustadas += 1;
+    }
+
+    const fatorCorrecao = somaDosesAjustadas / numPacientes;
+    const atividadeExata = (dosePorPaciente * numPacientes) * fatorCorrecao;
+
+    // ====== APLICA A MARGEM DE SEGURANÇA ======
+    const margem = atividadeExata * (margemPercent / 100);
+    let atividadeMarcacao = atividadeExata + margem;
+
+    // ====== OTIMIZAÇÃO PARA SOBRA MÍNIMA ======
+    // Arredonda para cima em múltiplos de 0.5 para facilitar a marcação
+    let atividadeSugerida = Math.ceil(atividadeMarcacao / 0.5) * 0.5;
+
+    // Verifica se com este valor todos os pacientes são atendidos
+    let atividadeTeste = atividadeSugerida;
+    let atividadeRestante = atividadeTeste;
+    let todosAtendidos = true;
+
+    for (let i = 0; i < pacientesAgenda.length; i++) {
+        const p = pacientesAgenda[i];
+        if (i === 0) {
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeRestante = atividadeRestante * fatorDec;
+        } else {
+            const anterior = pacientesAgenda[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeRestante = atividadeRestante * fatorDecEntre;
+            }
+        }
+        const doseDisponivel = atividadeRestante;
+        if (doseDisponivel < p.doseAlvo * 0.98) {
+            todosAtendidos = false;
+            break;
+        }
+        atividadeRestante = Math.max(0, atividadeRestante - p.doseAlvo);
+    }
+
+    // Se não atendeu todos, aumenta em 0.5 mCi até atender
+    while (!todosAtendidos) {
+        atividadeSugerida += 0.5;
+        atividadeRestante = atividadeSugerida;
+        todosAtendidos = true;
+        
+        for (let i = 0; i < pacientesAgenda.length; i++) {
+            const p = pacientesAgenda[i];
+            if (i === 0) {
+                const fatorDec = Math.exp(-lambda * p.dtMin);
+                atividadeRestante = atividadeRestante * fatorDec;
+            } else {
+                const anterior = pacientesAgenda[i - 1];
+                const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+                if (dtDiferenca > 0) {
+                    const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                    atividadeRestante = atividadeRestante * fatorDecEntre;
+                }
+            }
+            const doseDisponivel = atividadeRestante;
+            if (doseDisponivel < p.doseAlvo * 0.98) {
+                todosAtendidos = false;
+                break;
+            }
+            atividadeRestante = Math.max(0, atividadeRestante - p.doseAlvo);
+        }
+    }
+
+    // Usa o valor otimizado
+    atividadeMarcacao = atividadeSugerida;
+
+    // ====== SIMULAÇÃO REAL COM O VALOR OTIMIZADO ======
+    atividadeRestante = atividadeMarcacao;
+    const distribuicao = [];
+    let statusGeral = 'ok';
+    let statusMsg = translations[currentLang].status_ok;
+    let somaDosesRetiradas = 0;
+
+    for (let i = 0; i < pacientesAgenda.length; i++) {
+        const p = pacientesAgenda[i];
+        
+        if (i === 0) {
+            const fatorDec = Math.exp(-lambda * p.dtMin);
+            atividadeRestante = atividadeRestante * fatorDec;
+        } else {
+            const anterior = pacientesAgenda[i - 1];
+            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
+            if (dtDiferenca > 0) {
+                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
+                atividadeRestante = atividadeRestante * fatorDecEntre;
+            }
+        }
+        
+        const doseDisponivel = atividadeRestante;
         const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
-        const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
-        atividadeRestante = Math.max(0, novaAtividade);
+        atividadeRestante = Math.max(0, atividadeRestante - doseRetirada);
         somaDosesRetiradas += doseRetirada;
         
         let status = '', statusClass = '';
@@ -2067,86 +2236,68 @@ function calcularPlanejamentoAgenda() {
             statusGeral = 'erro';
         }
         
+        const dtAcumulado = (p.horario - horarioMarcacao) / (1000 * 60);
         distribuicao.push({
             numero: p.index + 1,
             horario: p.horario,
-            dtMin: p.dtMin,
+            dtMin: dtAcumulado,
             doseAlvo: p.doseAlvo,
             doseDisponivel: Math.max(0, doseDisponivel),
             doseRetirada: doseRetirada,
             atividadeRestante: Math.max(0, atividadeRestante),
-            fatorDecaimento: fatorDec,
+            fatorDecaimento: Math.exp(-lambda * Math.max(0, dtAcumulado)),
             status: status,
             statusClass: statusClass
         });
     }
-    
-    // Ajuste fino para minimizar sobra
-    const percentualRestante = atividadeRestante / atividadeMarcacao;
-    if (percentualRestante > 0.02 && numPacientes > 1) {
-        const fatorAjuste = 1 - (percentualRestante * 0.9);
-        atividadeMarcacao = atividadeMarcacao * fatorAjuste;
-        atividadeRestante = atividadeMarcacao;
-        somaDosesRetiradas = 0;
-        distribuicao.length = 0;
-        statusGeral = 'ok';
-        
-        for (let i = 0; i < pacientesAgenda.length; i++) {
-            const p = pacientesAgenda[i];
-            const fatorDec = p.fatorDec;
-            const doseDisponivel = atividadeRestante * fatorDec;
-            const doseRetirada = Math.min(p.doseAlvo, doseDisponivel);
-            const novaAtividade = atividadeRestante - (doseRetirada / fatorDec);
-            atividadeRestante = Math.max(0, novaAtividade);
-            somaDosesRetiradas += doseRetirada;
-            
-            let status = '', statusClass = '';
-            if (doseDisponivel >= p.doseAlvo * 0.98) {
-                status = translations[currentLang].status_adequado;
-                statusClass = 'ok';
-            } else if (doseDisponivel >= p.doseAlvo * 0.7) {
-                status = translations[currentLang].status_baixo;
-                statusClass = 'alerta';
-                if (statusGeral !== 'erro') statusGeral = 'alerta';
-            } else {
-                status = translations[currentLang].status_insuficiente;
-                statusClass = 'erro';
-                statusGeral = 'erro';
-            }
-            
-            distribuicao.push({
-                numero: p.index + 1,
-                horario: p.horario,
-                dtMin: p.dtMin,
-                doseAlvo: p.doseAlvo,
-                doseDisponivel: Math.max(0, doseDisponivel),
-                doseRetirada: doseRetirada,
-                atividadeRestante: Math.max(0, atividadeRestante),
-                fatorDecaimento: fatorDec,
-                status: status,
-                statusClass: statusClass
-            });
-        }
-    }
-    
-    // Atualiza interface com os resultados
+
+    // ====== ATUALIZA INTERFACE ======
     const tempoTotalMin = pacientesAgenda.length > 0 ? 
         Math.max(0, pacientesAgenda[pacientesAgenda.length - 1].dtMin - pacientesAgenda[0].dtMin) : 0;
     const horas = Math.floor(tempoTotalMin / 60);
     const minutos = Math.round(tempoTotalMin % 60);
-    
+
+    const sobraReal = atividadeRestante;
+    const sobraPercentual = (sobraReal / atividadeMarcacao) * 100;
+
     atualizarResultadosPlanejamento(
         isotopo, nomeIsot, cor, meiaVida, lambda,
         numPacientes, dosePorPaciente, margemPercent, margem,
-        atividadeMarcacao, atividadeRestante, somaDosesAjustadas,
-        pacientesAgenda, distribuicao, statusGeral, statusMsg,
+        atividadeMarcacao, sobraReal, somaDosesRetiradas,
+        pacientesAgenda, distribuicao, statusGeral,
+        statusGeral === 'ok' ? translations[currentLang].status_ok : 
+        statusGeral === 'alerta' ? translations[currentLang].status_alerta : 
+        translations[currentLang].status_erro,
         horas, minutos
     );
     
-    // Atualiza gráfico e tabela
     atualizarGraficoPlanejamento(isotopo, nomeIsot, cor, lambda, atividadeMarcacao, distribuicao, horarioMarcacao, dosePorPaciente);
     atualizarTabelaDistribuicao(distribuicao);
-    atualizarRecomendacao(numPacientes, nomeIsot, meiaVida, dosePorPaciente, somaDosesAjustadas, atividadeMarcacao, margemPercent, atividadeRestante, horas, minutos);
+    
+    // Recomendação com valor otimizado
+    const recomendacao = document.getElementById('recomendacaoPlanejamento');
+    recomendacao.innerHTML = `
+        <strong style="color: #00ff64;">✅ Planejamento Otimizado (Agenda)!</strong>
+        <br><br>
+        Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
+        <br><br>
+        <strong>Dose por paciente:</strong> ${dosePorPaciente.toFixed(2)} mCi
+        <br>
+        <strong>Tempo total de injeções:</strong> ${horas}h ${minutos}min
+        <br><br>
+        <strong style="color: #ffd700; font-size: 1.1rem;">🎯 ATIVIDADE IDEAL PARA MARCAR O KIT:</strong>
+        <br>
+        <strong style="color: #00ff64; font-size: 1.4rem;">${atividadeMarcacao.toFixed(2)} mCi</strong>
+        <br><br>
+        <strong style="color: ${sobraReal < 0.1 ? '#00ff64' : sobraReal < 0.5 ? '#ffd700' : '#ff6b6b'};">✅ Sobra no frasco:</strong> 
+        ${sobraReal.toFixed(3)} mCi (${sobraPercentual.toFixed(2)}% da atividade total)
+        <br>
+        <span style="color: ${sobraReal < 0.1 ? '#00ff64' : '#ffd700'};">
+            ${sobraReal < 0.1 ? '🎯 Otimização perfeita! Aproveitamento máximo do radiofármaco!' : 
+              sobraReal < 0.5 ? '✅ Ótima otimização! Sobra mínima.' : 
+              '⚠️ Sobra considerável. Considere ajustar a margem.'}
+        </span>
+    `;
     
     // Atualiza a tabela da agenda com os resultados
     atualizarTabelaAgendaResultados(pacientesAgenda, distribuicao);
