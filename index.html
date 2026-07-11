@@ -2508,8 +2508,32 @@ function atualizarTabelaAgendaResultados(pacientes, distribuicao) {
     });
 }
 
-// ====== FUNÇÃO PRINCIPAL DE PLANEJAMENTO ======
+// ====== FUNÇÃO PRINCIPAL DE PLANEJAMENTO (CORRIGIDA) ======
 function calcularPlanejamento() {
+    // Verifica se todas as datas são válidas ANTES de calcular
+    const datasParaVerificar = [
+        document.getElementById('planHorarioMarcacao')?.value,
+        document.getElementById('planHorarioPrimeira')?.value,
+        document.getElementById('planHorarioUltimo')?.value,
+        document.getElementById('planHorarioMarcacaoAgenda')?.value
+    ];
+    
+    // Se alguma data estiver incompleta, NÃO calcula
+    for (const data of datasParaVerificar) {
+        if (data && data.length > 0 && data.length < 16) {
+            console.log('⏳ Data incompleta:', data);
+            return; // Sai da função, não trava
+        }
+        if (data) {
+            const testeData = new Date(data);
+            if (isNaN(testeData.getTime())) {
+                console.log('⏳ Data inválida:', data);
+                return; // Sai da função, não trava
+            }
+        }
+    }
+    
+    // Se chegou aqui, todas as datas são válidas
     const modo = document.querySelector('input[name="modoPlanejamento"]:checked').value;
     if (modo === 'simplificado') {
         calcularPlanejamentoSimplificado();
@@ -2518,7 +2542,6 @@ function calcularPlanejamento() {
     }
     trackEvent('calcular_planejamento', 'planejamento', modo);
 }
-
 // ====== TOGGLE ENTRE MODOS ======
 function toggleModoPlanejamento() {
     const modo = document.querySelector('input[name="modoPlanejamento"]:checked').value;
