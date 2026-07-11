@@ -552,17 +552,17 @@
                 <div class="grid-3">
                     <div class="input-group">
                         <label data-translate="plan_horario_marcacao">Horário da Marcação</label>
-                        <input type="datetime-local" id="planHorarioMarcacao" onchange="calcularPlanejamento()">
+                        <input type="datetime-local" id="planHorarioMarcacao">
                         <small data-translate="plan_horario_marcacao_small">Momento em que o kit será marcado</small>
                     </div>
                     <div class="input-group">
                         <label data-translate="plan_horario_primeira">Horário da 1ª Injeção</label>
-                        <input type="datetime-local" id="planHorarioPrimeira" onchange="calcularPlanejamento()">
+                        <input type="datetime-local" id="planHorarioPrimeira">
                         <small data-translate="plan_horario_primeira_small">Momento da primeira administração</small>
                     </div>
                     <div class="input-group">
                         <label data-translate="plan_horario_ultimo">Horário da Última Injeção</label>
-                        <input type="datetime-local" id="planHorarioUltimo" onchange="calcularPlanejamento()">
+                        <input type="datetime-local" id="planHorarioUltimo">
                         <small data-translate="plan_horario_ultimo_small">Momento da última administração</small>
                     </div>
                 </div>
@@ -594,7 +594,7 @@
                     </div>
                     <div class="input-group">
                         <label data-translate="plan_horario_marcacao">Horário da Marcação</label>
-                        <input type="datetime-local" id="planHorarioMarcacaoAgenda" onchange="calcularPlanejamento()">
+                        <input type="datetime-local" id="planHorarioMarcacaoAgenda">
                         <small data-translate="plan_horario_marcacao_small">Momento em que o kit será marcado</small>
                     </div>
                     <div class="input-group">
@@ -792,7 +792,7 @@
                 <div>
                     <div class="input-group">
                         <label data-translate="marc_horario">Horário da Marcação</label>
-                        <input type="datetime-local" id="horarioMarcacaoMestre" onchange="calcularPacientes()">
+                        <input type="datetime-local" id="horarioMarcacaoMestre">
                     </div>
                 </div>
             </div>
@@ -2606,7 +2606,7 @@ function adicionarLinhaAgenda(index, horario) {
     
     tr.innerHTML = `
         <td class="num-paciente">${index + 1}</td>
-        <td><input type="datetime-local" id="agendaHora_${index}" value="${horarioStr}" onchange="calcularPlanejamento()"></td>
+        <td><input type="datetime-local" id="agendaHora_${index}" value="${horarioStr}"></td>
         <td id="agendaDoseAlvo_${index}">--</td>
         <td id="agendaDoseDisponivel_${index}">--</td>
         <td id="agendaDoseRetirada_${index}">--</td>
