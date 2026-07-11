@@ -3248,5 +3248,26 @@ window.onload = function() {
     }, 300);
 };
 </script>
+    <!-- ====== ALERTA DE PERDA DE DADOS ====== -->
+    <script>
+    function temDadosParaPerder() {
+        const tbody = document.getElementById('corpoPacientes');
+        const temPacientes = tbody ? tbody.querySelectorAll('tr').length > 0 : false;
+        const temHistorico = typeof historicoPlanejamento !== 'undefined' && historicoPlanejamento.length > 0;
+        const resultadoPlanejamento = document.getElementById('resultadoPlanejamento');
+        const temCalculos = resultadoPlanejamento ? resultadoPlanejamento.style.display !== 'none' : false;
+        return temPacientes || temHistorico || temCalculos;
+    }
+
+    window.addEventListener('beforeunload', function(e) {
+        if (temDadosParaPerder()) {
+            e.preventDefault();
+            e.returnValue = '';
+            return '⚠️ ATENÇÃO: Todos os dados da sessão atual serão perdidos ao recarregar a página. Deseja continuar?';
+        }
+    });
+
+    console.log('✅ Alerta de perda de dados ativado!');
+    </script>
 </body>
 </html>
