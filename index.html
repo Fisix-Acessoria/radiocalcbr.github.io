@@ -431,7 +431,7 @@
                     RadioCalc
                     <span class="br">BR</span>
                 </span>
-                <span class="logo-badge">v1.0 β</span>
+                <span class="logo-badge">v1.2 beta</span>
             </div>
         </h1>
         <p class="subtitle" data-translate="subtitulo">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
@@ -678,8 +678,8 @@
                         <div class="valor" id="planSobraFinal" style="font-size: 1.8rem; color: #00ff64;">--</div>
                     </div>
                     <div class="stat-card" style="border-color: rgba(255,107,107,0.3);">
-                        <div class="rotulo">📉 Fator de Decaimento</div>
-                        <div class="valor" id="planFatorDecaimento" style="font-size: 1.5rem; color: #ff6b6b;">--</div>
+                        <div class="rotulo">📉 Aproveitamento do Kit</div>
+                        <div class="valor" id="planAproveitamento" style="font-size: 1.5rem; color: #ff6b6b;">--</div>
                     </div>
                 </div>
 
@@ -1022,7 +1022,7 @@
             <span class="icon" style="font-size: 2.8rem;">☢️🩺</span>
             <div>
                 <h2>RadioCalc BR</h2>
-                <span class="versao">v1.0 beta</span>
+                <span class="versao">v1.2 beta</span>
             </div>
         </div>
 
@@ -1073,7 +1073,7 @@
         <div class="rodape-sobre">
             <span class="info">🔬 Baseado em SNMMI 2024 · Planilha v2.3</span>
             <a href="mailto:fisixassessoria@gmail.com" class="contato">📧 fisixassessoria@gmail.com</a>
-            <span class="versao-rodape">v1.0 beta</span>
+            <span class="versao-rodape">v1.2 beta</span>
         </div>
     </div>
 </div>
@@ -1327,7 +1327,7 @@ const translations = {
         plan_btn_limpar: "🗑️",
         plan_atividade_kit: "🎯 Atividade de Marcação",
         plan_dose_total: "📊 Dose Total Alvo",
-        plan_fator_decaimento: "📉 Fator de Decaimento",
+        plan_fator_decaimento: "📉 Aproveitamento do Kit",
         plan_pacientes: "Pacientes",
         plan_dose_paciente_label: "Dose por Paciente",
         plan_dose_total_sem_dec: "Dose Total sem Decaimento",
@@ -1667,7 +1667,7 @@ ${descricao}
 📧 Email do remetente: ${email || 'Não informado'}
 
 ---
-Enviado via RadioCalc v1.0 beta
+Enviado via RadioCalc v1.2 beta
     `.trim();
     
     const subject = encodeURIComponent(`[RadioCalc] Feedback: ${tipos[tipo] || tipo}`);
@@ -2332,7 +2332,7 @@ function atualizarResultadosPlanejamento(isotopo, nomeIsot, cor, meiaVida, lambd
     document.getElementById('planDoseTotal').textContent = `${doseTotalAlvo.toFixed(2)} mCi`;
     document.getElementById('planSobraFinal').textContent = `${atividadeRestante.toFixed(2)} mCi`;
     document.getElementById('planSobraFinal').style.color = atividadeRestante < 0.5 ? '#00ff64' : atividadeRestante < 2 ? '#ffd700' : '#ff6b6b';
-    document.getElementById('planFatorDecaimento').textContent = `${(fatorDecaimentoReal * 100).toFixed(1)}%`;
+    document.getElementById('planAproveitamento').textContent = `${(fatorDecaimentoReal * 100).toFixed(1)}%`;
     
     // Stats
     document.getElementById('planPacientes').textContent = numPacientes;
@@ -2755,7 +2755,7 @@ function gerarPDFPlanejamento() {
                 <div class="pdf-card"><div class="label">${translations[currentLang].plan_atividade_kit}</div><div class="value gold" style="font-size:18px;">${document.getElementById('planAtividadeFinal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">${translations[currentLang].plan_dose_total}</div><div class="value blue">${document.getElementById('planDoseTotal').textContent}</div></div>
                 <div class="pdf-card"><div class="label">Sobra no Frasco</div><div class="value green" style="color:${document.getElementById('planSobraFinal').style.color};">${document.getElementById('planSobraFinal').textContent}</div></div>
-                <div class="pdf-card"><div class="label">${translations[currentLang].plan_fator_decaimento}</div><div class="value red">${document.getElementById('planFatorDecaimento').textContent}</div></div>
+                <div class="pdf-card"><div class="label">${translations[currentLang].plan_fator_decaimento}</div><div class="value red">${document.getElementById('planAproveitamento').textContent}</div></div>
             </div>
         </div>
         <div class="pdf-section">
@@ -3219,7 +3219,7 @@ function calcularDosePediatrica() {
 
 // ====== INICIALIZAÇÃO ======
 window.onload = function() {
-    trackEvent('pagina_carregada', 'sistema', 'radiocalc_v1.0_beta');
+    trackEvent('pagina_carregada', 'sistema', 'radiocalc_v1.2_beta');
     const agora = new Date();
     const hoje = new Date(agora);
     hoje.setHours(8, 0, 0, 0);
