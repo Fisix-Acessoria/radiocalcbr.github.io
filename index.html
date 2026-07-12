@@ -903,9 +903,10 @@
                 👶 Dose Pediátrica 
                 <span class="snmmi-badge" data-translate="ped_badge">SNMMI 2024</span>
             </h3>
-            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;" data-translate="ped_desc">
-                Cálculo baseado nas <strong>Diretrizes de Consenso Norte-Americanas para Atividades de Radiofármacos em Pediatria</strong> (SNMMI 2024).
-            </p>
+          <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;" data-translate="ped_desc">
+    Cálculo baseado em diretrizes internacionais para atividades de radiofármacos em pediatria:
+    <strong>SNMMI 2024</strong> (Norte-Americana) e <strong>EANM 2005</strong> (Europeia).
+</p>
 
             <div class="grid-2">
                 <div>
@@ -913,29 +914,30 @@
                         <label data-translate="ped_radiofarmaco">Radiofármaco / Exame</label>
                         <select id="radiofarmacoPediatrico" onchange="calcularDosePediatrica()">
                             <optgroup label="🔵 Tc-99m">
-                                <option value="MDP" data-dose="0.25" data-min="1.0" data-max="20.0">MDP (Ósseo) - 0.25 mCi/kg (1-20 mCi)</option>
-                                <option value="DMSA" data-dose="0.05" data-min="0.5" data-max="2.7">DMSA (Renal) - 0.05 mCi/kg (0.5-2.7 mCi)</option>
-                                <option value="DTPA" data-dose="0.15" data-min="1.0" data-max="4.0">DTPA (Renal) - 0.15 mCi/kg (1-4 mCi)</option>
-                                <option value="IDA" data-dose="0.05" data-min="0.5" data-max="3.0">IDA (Hepatobiliar) - 0.05 mCi/kg (0.5-3 mCi)</option>
-                                <option value="pertec_tireoide" data-dose="0.03" data-min="0.19" data-max="2.5">Pertecnetato (Tireoide) - 0.03 mCi/kg (0.19-2.5 mCi)</option>
-                                <option value="sestamibi" data-dose="0.15" data-min="5.0" data-max="10.0">Sestamibi (Miocárdio) - 0.15 mCi/kg (5-10 mCi)</option>
+                                <option value="MDP" data-dose="0.25" data-min="1.0" data-max="20.0">MDP (Ósseo)</option>
+                                <option value="DMSA" data-dose="0.05" data-min="0.5" data-max="2.7">DMSA (Renal)</option>
+                                <option value="DTPA" data-dose="0.15" data-min="1.0" data-max="4.0">DTPA (Renal)</option>
+                                <option value="IDA" data-dose="0.05" data-min="0.5" data-max="3.0">IDA (Hepatobiliar)</option>
+                                <option value="pertec_tireoide" data-dose="0.03" data-min="0.19" data-max="2.5">Pertecnetato (Tireoide)</option>
+                                <option value="sestamibi" data-dose="0.15" data-min="5.0" data-max="10.0">Sestamibi (Miocárdio)</option>
                             </optgroup>
                             <optgroup label="🟢 F-18">
-                                <option value="FDG_corpo" data-dose="0.10" data-min="0.7" data-max="10.0">FDG (Corpo) - 0.10 mCi/kg (0.7-10 mCi)</option>
-                                <option value="NaF" data-dose="0.05" data-min="0.5" data-max="4.0">NaF (Ósseo PET) - 0.05 mCi/kg (0.5-4 mCi)</option>
+                                <option value="FDG_corpo" data-dose="0.10" data-min="0.7" data-max="10.0">FDG (Corpo)</option>
+                                <option value="NaF" data-dose="0.05" data-min="0.5" data-max="4.0">NaF (Ósseo PET)</option>
                             </optgroup>
                             <optgroup label="🟡 I-123">
-                                <option value="MIBG" data-dose="0.14" data-min="1.0" data-max="10.0">MIBG - 0.14 mCi/kg (1-10 mCi)</option>
+                                <option value="MIBG" data-dose="0.14" data-min="1.0" data-max="10.0">MIBG</option>
                             </optgroup>
                         </select>
                         <small data-translate="ped_radio_small">Baseado nas diretrizes SNMMI 2024</small>
                     </div>
                     <div class="input-group">
                         <label data-translate="ped_metodo">Método de Cálculo</label>
-                        <select id="metodoPediatrico" onchange="calcularDosePediatrica()">
-                            <option value="snmmi" data-translate="ped_metodo_snmmi">SNMMI (peso + limites mín/máx)</option>
-                            <option value="peso_simples" data-translate="ped_metodo_peso">Peso Simples (sem limites)</option>
-                        </select>
+                      <select id="metodoPediatrico" onchange="calcularDosePediatrica()">
+    <option value="snmmi" data-translate="ped_metodo_snmmi">SNMMI 2024 (peso + limites mín/máx)</option>
+    <option value="eanm" data-translate="ped_metodo_eanm">EANM 2005 (multiplicador por peso + mínimo)</option>
+    <option value="peso_simples" data-translate="ped_metodo_peso">Peso Simples (sem limites)</option>
+</select>
                     </div>
                 </div>
                 <div>
@@ -1284,6 +1286,71 @@ let contadorPacientes = 0;
 let isotopoAtual = 'tc';
 let graficoDecaimento = null;
 let historicoPlanejamento = [];
+// ====== DADOS EANM (extraídos do cartão de dosimetria) ======
+const EANM_MULTIPLICADORES = [
+    { pesoMin: 3, pesoMax: 3, mult: 1.00 },
+    { pesoMin: 4, pesoMax: 4, mult: 1.12 },
+    { pesoMin: 5, pesoMax: 5, mult: 1.14 },
+    { pesoMin: 6, pesoMax: 6, mult: 1.47 },
+    { pesoMin: 7, pesoMax: 7, mult: 1.71 },
+    { pesoMin: 8, pesoMax: 8, mult: 1.71 },
+    { pesoMin: 9, pesoMax: 9, mult: 2.14 },
+    { pesoMin: 10, pesoMax: 10, mult: 2.71 },
+    { pesoMin: 11, pesoMax: 11, mult: 2.71 },
+    { pesoMin: 12, pesoMax: 12, mult: 3.14 },
+    { pesoMin: 13, pesoMax: 13, mult: 3.57 },
+    { pesoMin: 14, pesoMax: 14, mult: 3.57 },
+    { pesoMin: 15, pesoMax: 15, mult: 3.77 },
+    { pesoMin: 16, pesoMax: 16, mult: 4.00 },
+    { pesoMin: 17, pesoMax: 17, mult: 4.43 },
+    { pesoMin: 18, pesoMax: 18, mult: 4.86 },
+    { pesoMin: 19, pesoMax: 19, mult: 5.29 },
+    { pesoMin: 20, pesoMax: 20, mult: 5.71 },
+    { pesoMin: 21, pesoMax: 21, mult: 6.14 },
+    { pesoMin: 22, pesoMax: 22, mult: 6.43 },
+    { pesoMin: 23, pesoMax: 23, mult: 6.86 },
+    { pesoMin: 24, pesoMax: 24, mult: 7.29 },
+    { pesoMin: 25, pesoMax: 25, mult: 7.72 },
+    { pesoMin: 26, pesoMax: 26, mult: 8.00 },
+    { pesoMin: 27, pesoMax: 27, mult: 8.43 },
+    { pesoMin: 28, pesoMax: 28, mult: 8.86 },
+    { pesoMin: 29, pesoMax: 29, mult: 9.14 },
+    { pesoMin: 30, pesoMax: 30, mult: 9.57 },
+    { pesoMin: 31, pesoMax: 31, mult: 10.00 },
+    { pesoMin: 32, pesoMax: 32, mult: 10.29 },
+    { pesoMin: 33, pesoMax: 33, mult: 10.71 },
+    { pesoMin: 34, pesoMax: 34, mult: 11.29 },
+    { pesoMin: 35, pesoMax: 35, mult: 12.00 },
+    { pesoMin: 36, pesoMax: 36, mult: 12.71 },
+    { pesoMin: 37, pesoMax: 37, mult: 13.43 },
+    { pesoMin: 38, pesoMax: 38, mult: 14.00 },
+    { pesoMin: 39, pesoMax: 39, mult: 14.00 },
+    { pesoMin: 40, pesoMax: 42, mult: 15.00 },
+    { pesoMin: 43, pesoMax: 45, mult: 16.00 },
+    { pesoMax: 47, pesoMin: 46, mult: 17.00 },
+    { pesoMin: 48, pesoMax: 50, mult: 18.00 },
+    { pesoMin: 51, pesoMax: 54, mult: 19.00 },
+    { pesoMin: 55, pesoMax: 58, mult: 20.00 },
+    { pesoMin: 59, pesoMax: 62, mult: 21.00 },
+    { pesoMin: 63, pesoMax: 66, mult: 22.00 },
+    { pesoMin: 67, pesoMax: 70, mult: 23.00 }
+];
+
+const EANM_RADIOFARMACOS = {
+    // Tc-99m
+    'MDP': { basal: 35.0, minima: 40.0, nome: 'MDP' },
+    'DMSA': { basal: 6.8, minima: 18.5, nome: 'DMSA' },
+    'DTPA': { basal: 34.0, minima: 20.0, nome: 'DTPA (Normal)' },
+    'IDA': { basal: 10.5, minima: 20.0, nome: 'IDA (Biliar)' },
+    'pertec_tireoide': { basal: 5.6, minima: 10.0, nome: 'Pertecnetato (Tireoide)' },
+    'sestamibi': { basal: 63.0, minima: 80.0, nome: 'Sestamibi (Miocárdio)' },
+    // F-18
+    'FDG_corpo': { basal: 25.9, minima: 26.0, nome: 'FDG (Corpo)' },
+    'NaF': { basal: 10.5, minima: 14.0, nome: 'NaF (Ósseo PET)' },
+    // I-123
+    'MIBG': { basal: 28.0, minima: 37.0, nome: 'MIBG' },
+    // Adicionar mais conforme necessário
+};
 
 // ====== SISTEMA DE IDIOMAS ======
 let currentLang = 'pt';
@@ -1395,6 +1462,7 @@ const translations = {
         ped_radio_small: "Baseado nas diretrizes SNMMI 2024",
         ped_metodo: "Método de Cálculo",
         ped_metodo_snmmi: "SNMMI (peso + limites mín/máx)",
+        ped_metodo_eanm: "EANM 2005 (multiplicador por peso + mínimo)",
         ped_metodo_peso: "Peso Simples (sem limites)",
         ped_peso: "Peso da Criança (kg)",
         ped_idade: "Idade (anos) - referência",
@@ -1534,6 +1602,7 @@ const translations = {
         ped_radio_small: "Based on SNMMI 2024 guidelines",
         ped_metodo: "Calculation Method",
         ped_metodo_snmmi: "SNMMI (weight + min/max limits)",
+        ped_metodo_eanm: "EANM 2005 (weight multiplier + minimum)",
         ped_metodo_peso: "Simple Weight (no limits)",
         ped_peso: "Child's Weight (kg)",
         ped_idade: "Age (years) - reference",
@@ -3189,25 +3258,88 @@ function calcularPacientes() {
 function calcularDosePediatrica() {
     const selectRadio = document.getElementById('radiofarmacoPediatrico');
     const selectedOption = selectRadio.options[selectRadio.selectedIndex];
-    const doseKg = parseFloat(selectedOption.getAttribute('data-dose')) || 0.1;
-    const doseMin = parseFloat(selectedOption.getAttribute('data-min')) || 0;
-    const doseMax = parseFloat(selectedOption.getAttribute('data-max')) || 0;
-    const nomeRadio = selectedOption.text.split(' - ')[0];
     const metodo = document.getElementById('metodoPediatrico').value;
     const peso = parseFloat(document.getElementById('pesoPediatrico').value) || 1;
     const idade = parseFloat(document.getElementById('idadePediatrica').value) || 0;
     const fatorCorrecao = parseFloat(document.getElementById('fatorCorrecaoPediatrica').value) || 1;
-    trackEvent('calcular_dose_pediatrica', 'pediatrica', `${nomeRadio}_${peso}kg`);
+    
+    // --- MÉTODO EANM ---
+    if (metodo === 'eanm') {
+        const radiofarmacoKey = selectedOption.value;
+        const dadosEANM = EANM_RADIOFARMACOS[radiofarmacoKey];
+        if (!dadosEANM) {
+            alert('⚠️ Este radiofármaco não está disponível no método EANM. Selecione outro.');
+            return;
+        }
+        
+        // Encontra o multiplicador para o peso
+        let multiplicadorObj = EANM_MULTIPLICADORES.find(m => 
+            peso >= m.pesoMin && peso <= m.pesoMax
+        );
+        // Se o peso for maior que 68kg, usa o último multiplicador
+        if (!multiplicadorObj && peso > 68) {
+            multiplicadorObj = EANM_MULTIPLICADORES[EANM_MULTIPLICADORES.length - 1];
+        }
+        const multiplicador = multiplicadorObj ? multiplicadorObj.mult : 1.0;
+        
+        // Calcula a dose em MBq
+        let doseMBq = dadosEANM.basal * multiplicador;
+        // Aplica a atividade mínima
+        doseMBq = Math.max(doseMBq, dadosEANM.minima);
+        // Aplica o fator de correção (opcional)
+        doseMBq = doseMBq * fatorCorrecao;
+        
+        // Converte para mCi (1 mCi = 37 MBq)
+        const doseMCi = doseMBq / 37;
+        
+        // Exibe os resultados
+        document.getElementById('resultadoPediatrico').style.display = 'block';
+        document.getElementById('doseRecomendadaPediatrica').textContent = `${doseMCi.toFixed(3)} mCi (${doseMBq.toFixed(1)} MBq)`;
+        document.getElementById('dosePorPesoPediatrica').textContent = `${(doseMBq / peso / 37).toFixed(4)} mCi/kg`;
+        document.getElementById('doseMinPediatrica').textContent = `${(dadosEANM.minima / 37).toFixed(2)} mCi (${dadosEANM.minima} MBq)`;
+        document.getElementById('doseMaxPediatrica').textContent = 'N/A (uso do multiplicador)';
+        document.getElementById('faixaEtariaPediatrica').textContent = `Multiplicador: ${multiplicador.toFixed(2)} (${peso} kg)`;
+        document.getElementById('statusDosePediatrica').textContent = '✅ Cálculo EANM 2005';
+        document.getElementById('statusDosePediatrica').style.color = '#00d2ff';
+        document.getElementById('percentualAdultoPediatrico').textContent = `${((peso/70)*100).toFixed(1)}%`;
+        const volume = doseMCi / 0.1;
+        document.getElementById('volumePediatrico').textContent = `${volume.toFixed(1)} μL (${(volume/1000).toFixed(2)} mL)`;
+        
+        // Atualiza a info box
+        document.getElementById('infoTextoPediatrica').innerHTML = `
+            <strong>Método:</strong> EANM 2005 (Jacobs F, et al. Eur J Nucl Med Mol Imaging. 2005) &bull;
+            <strong>Radiofármaco:</strong> ${dadosEANM.nome}<br>
+            <strong>Atividade basal:</strong> ${dadosEANM.basal} MBq &bull;
+            <strong>Multiplicador (${peso} kg):</strong> ${multiplicador.toFixed(2)} &bull;
+            <strong>Mínimo:</strong> ${dadosEANM.minima} MBq<br>
+            <strong>Dose calculada:</strong> ${doseMBq.toFixed(1)} MBq ≈ ${doseMCi.toFixed(3)} mCi
+            <br><br>
+            <span style="color: #888; font-size: 0.8rem;">
+                📌 Baseado no cartão de dosimetria da EANM (European Association of Nuclear Medicine)
+            </span>
+        `;
+        return;
+    }
+    
+    // --- MÉTODO SNMMI (código existente) ---
+    const doseKg = parseFloat(selectedOption.getAttribute('data-dose')) || 0.1;
+    const doseMin = parseFloat(selectedOption.getAttribute('data-min')) || 0;
+    const doseMax = parseFloat(selectedOption.getAttribute('data-max')) || 0;
+    const nomeRadio = selectedOption.text.split(' - ')[0];
+    
     let doseCalculada = peso * doseKg;
     let doseFinal = doseCalculada * fatorCorrecao;
     let doseComLimites = doseFinal;
     let status = '✅ Dentro dos limites';
     let statusCor = '#00ff64';
+    
     if (metodo === 'snmmi') {
         if (doseMin > 0 && doseFinal < doseMin) { doseComLimites = doseMin; status = '⬆️ Ajustado para mínimo'; statusCor = '#ffd700'; }
         else if (doseMax > 0 && doseFinal > doseMax) { doseComLimites = doseMax; status = '⬇️ Ajustado para máximo'; statusCor = '#ff6b6b'; }
     } else { status = '📊 Peso simples (sem limites)'; statusCor = '#00d2ff'; }
+    
     if (peso > 70) { const doseMaxPeso = peso * doseKg; if (doseComLimites > doseMaxPeso) { doseComLimites = doseMaxPeso; status = '⬇️ Ajustado para peso > 70kg'; statusCor = '#ffd700'; } }
+    
     let faixaEtaria = '';
     if (idade < 0.1) faixaEtaria = 'Recém-nascido';
     else if (idade < 1) faixaEtaria = 'Lactente (1-12 meses)';
@@ -3216,8 +3348,10 @@ function calcularDosePediatrica() {
     else if (idade < 11) faixaEtaria = 'Escolar (7-10 anos)';
     else if (idade < 15) faixaEtaria = 'Adolescente (11-14 anos)';
     else faixaEtaria = 'Adolescente (15-18 anos)';
+    
     const percentualAdulto = Math.min(100, (peso / 70) * 100);
     const volume = doseComLimites / 0.1;
+    
     document.getElementById('resultadoPediatrico').style.display = 'block';
     document.getElementById('doseRecomendadaPediatrica').textContent = `${doseComLimites.toFixed(2)} mCi`;
     document.getElementById('dosePorPesoPediatrica').textContent = `${doseKg.toFixed(3)} mCi/kg`;
@@ -3228,8 +3362,8 @@ function calcularDosePediatrica() {
     document.getElementById('statusDosePediatrica').style.color = statusCor;
     document.getElementById('percentualAdultoPediatrico').textContent = `${percentualAdulto.toFixed(1)}%`;
     document.getElementById('volumePediatrico').textContent = `${volume.toFixed(1)} μL (${(volume/1000).toFixed(2)} mL)`;
-    const infoTexto = document.getElementById('infoTextoPediatrica');
-    infoTexto.innerHTML = `
+    
+    document.getElementById('infoTextoPediatrica').innerHTML = `
         <strong>Radiofármaco:</strong> ${nomeRadio} &bull;
         <strong>Método:</strong> ${metodo === 'snmmi' ? 'SNMMI 2024 (com limites)' : 'Peso Simples'} &bull;
         <strong>Fator de Correção:</strong> ${fatorCorrecao.toFixed(2)}<br>
@@ -3239,7 +3373,6 @@ function calcularDosePediatrica() {
         ${metodo === 'snmmi' ? `<br><strong>Limites SNMMI:</strong> Min ${doseMin > 0 ? doseMin.toFixed(2) : 'N/A'} mCi | Máx ${doseMax > 0 ? doseMax.toFixed(2) : 'N/A'} mCi` : ''}
     `;
 }
-
 // ====== INICIALIZAÇÃO ======
 window.onload = function() {
     trackEvent('pagina_carregada', 'sistema', 'radiocalc_v1.2_beta');
