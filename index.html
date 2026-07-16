@@ -431,7 +431,7 @@
                     RadioCalc
                     <span class="br">BR</span>
                 </span>
-                <span class="logo-badge">v1.2 beta</span>
+                <span class="logo-badge">v1.3 beta</span>
             </div>
         </h1>
         <p class="subtitle" data-translate="subtitulo">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
@@ -862,6 +862,7 @@
                             <th style="min-width: 70px;" data-translate="pac_col_dose_medida">Dose Medida (mCi)</th>
                             <th style="min-width: 75px;" data-translate="pac_col_dose_admin">Dose Admin. (mCi)</th>
                             <th style="min-width: 80px;" data-translate="pac_col_rejeito">Rejeito (mCi)</th>
+                          <th style="min-width: 110px;" data-translate="pac_col_hora_rejeito" title="Informe o horário em que o rejeito foi medido. O sistema corrigirá automaticamente o valor do rejeito considerando o decaimento radioativo entre a injeção e a medição.">📅 Hora Medição Rejeito</th>
                             <th style="min-width: 75px;" data-translate="pac_col_dt">Δt (min)</th>
                             <th style="min-width: 85px;" data-translate="pac_col_restante">Ativ. Restante (mCi)</th>
                             <th style="min-width: 65px;" data-translate="pac_col_status">Status</th>
@@ -1024,7 +1025,7 @@
             <span class="icon" style="font-size: 2.8rem;">☢️🩺</span>
             <div>
                 <h2>RadioCalc BR</h2>
-                <span class="versao">v1.2 beta</span>
+                <span class="versao">v1.3 beta</span>
             </div>
         </div>
 
@@ -1075,7 +1076,7 @@
         <div class="rodape-sobre">
             <span class="info">🔬 Baseado em SNMMI 2024 · Planilha v2.3</span>
             <a href="mailto:fisixassessoria@gmail.com" class="contato">📧 fisixassessoria@gmail.com</a>
-            <span class="versao-rodape">v1.2 beta</span>
+            <span class="versao-rodape">v1.3 beta</span>
         </div>
     </div>
 </div>
@@ -1736,7 +1737,7 @@ ${descricao}
 📧 Email do remetente: ${email || 'Não informado'}
 
 ---
-Enviado via RadioCalc v1.2 beta
+Enviado via RadioCalc v1.3 beta
     `.trim();
     
     const subject = encodeURIComponent(`[RadioCalc] Feedback: ${tipos[tipo] || tipo}`);
@@ -3003,28 +3004,47 @@ function adicionarPaciente() {
     tr.dataset.index = index;
     tr.innerHTML = `
         <td class="num-paciente">${index + 1}</td>
-        <td><input type="text" id="nomePaciente_${index}" placeholder="${translations[currentLang].pac_col_nome}" value="Paciente ${index + 1}"></td>
-        <td><input type="text" id="idPaciente_${index}" placeholder="${translations[currentLang].pac_col_id}" value="P-${String(10000 + index).padStart(5, '0')}"></td>
-        <td><input type="number" id="pesoPaciente_${index}" value="" placeholder="kg" step="0.1" min="1"></td>
-        <td><input type="number" id="doseKgPaciente_${index}" value="" placeholder="mCi/kg" step="0.01" min="0.01"></td>
-        <td class="dose-calculada" id="doseCalculada_${index}">--</td>   <!-- ← CORRIGIDO -->
-        <td><input type="datetime-local" id="horaInjecao_${index}" value="${horaInjecaoStr}" placeholder="HH:MM"></td>
-        <td><input type="number" id="doseMedida_${index}" value="" placeholder="mCi" step="0.1" min="0" class="dose-medida-input"></td>
-        <td class="dose-administrada" id="doseAdministrada_${index}">--</td>   <!-- ← CORRIGIDO -->
-        <td><input type="number" id="rejeito_${index}" value="" placeholder="mCi" step="0.1" min="0" class="rejeito-input"></td>
-        <td class="resultado-calc" id="intervaloInjecao_${index}">--</td>
-        <td class="resultado-calc" id="atividadeRestante_${index}">--</td>
-        <td id="statusPaciente_${index}">--</td>
-        <td><button class="btn-danger" onclick="removerPaciente(${index})">✕</button></td>
+<td><input type="text" id="nomePaciente_${index}" placeholder="${translations[currentLang].pac_col_nome}" value="Paciente ${index + 1}"></td>
+<td><input type="text" id="idPaciente_${index}" placeholder="${translations[currentLang].pac_col_id}" value="P-${String(10000 + index).padStart(5, '0')}"></td>
+<td><input type="number" id="pesoPaciente_${index}" value="" placeholder="kg" step="0.1" min="1"></td>
+<td><input type="number" id="doseKgPaciente_${index}" value="" placeholder="mCi/kg" step="0.01" min="0.01"></td>
+<td class="dose-calculada" id="doseCalculada_${index}">--</td>
+<td><input type="datetime-local" id="horaInjecao_${index}" value="${horaInjecaoStr}" placeholder="HH:MM"></td>
+<td><input type="number" id="doseMedida_${index}" value="" placeholder="mCi" step="0.1" min="0" class="dose-medida-input"></td>
+<td class="dose-administrada" id="doseAdministrada_${index}">--</td>
+<td><input type="number" id="rejeito_${index}" value="" placeholder="mCi" step="0.1" min="0" class="rejeito-input" onchange="calcularDoseComRejeitoCorrigido(${index})"></td>
+<td><input type="datetime-local" id="horaRejeito_${index}" value="" onchange="calcularDoseComRejeitoCorrigido(${index})"></td>
+<td class="resultado-calc" id="intervaloInjecao_${index}">--</td>
+<td class="resultado-calc" id="atividadeRestante_${index}">--</td>
+<td id="statusPaciente_${index}">--</td>
+<td><button class="btn-danger" onclick="removerPaciente(${index})">✕</button></td>
     `;
     tbody.appendChild(tr);
     atualizarContadorPacientes();
     trackEvent('adicionar_paciente', 'pacientes', `total_${contadorPacientes}`);
-    const inputs = tr.querySelectorAll('input');
-    inputs.forEach(input => {
-        input.addEventListener('change', () => { recalcularDosePaciente(index); calcularPacientes(); });
-        input.addEventListener('input', () => { recalcularDosePaciente(index); calcularPacientes(); });
+ const inputs = tr.querySelectorAll('input');
+inputs.forEach(input => {
+    input.addEventListener('change', () => { 
+        recalcularDosePaciente(index); 
+        
+        // Se for o campo rejeito ou horaRejeito, corrige a dose
+        if (input.id && (input.id.startsWith('rejeito_') || input.id.startsWith('horaRejeito_'))) {
+            calcularDoseComRejeitoCorrigido(index);
+        }
+        
+        calcularPacientes(); 
     });
+    input.addEventListener('input', () => { 
+        recalcularDosePaciente(index); 
+        
+        // Se for o campo rejeito ou horaRejeito, corrige a dose
+        if (input.id && (input.id.startsWith('rejeito_') || input.id.startsWith('horaRejeito_'))) {
+            calcularDoseComRejeitoCorrigido(index);
+        }
+        
+        calcularPacientes(); 
+    });
+});
     setTimeout(() => calcularPacientes(), 50);
 }
 
@@ -3048,7 +3068,61 @@ function recalcularDosePaciente(index) {
         doseAdministradaEl.style.color = doseAdmin < 0 ? '#ff6b6b' : '#00ff88';
     }
 }
-
+// ====== CALCULA DOSE ADMINISTRADA COM REJEITO CORRIGIDO ======
+function calcularDoseComRejeitoCorrigido(index) {
+    const horaInjecaoInput = document.getElementById(`horaInjecao_${index}`);
+    const horaRejeitoInput = document.getElementById(`horaRejeito_${index}`);
+    const rejeitoInput = document.getElementById(`rejeito_${index}`);
+    const doseMedidaInput = document.getElementById(`doseMedida_${index}`);
+    const doseAdministradaEl = document.getElementById(`doseAdministrada_${index}`);
+    
+    if (!horaInjecaoInput || !horaRejeitoInput || !rejeitoInput || !doseAdministradaEl) return;
+    
+    const horaInjecao = new Date(horaInjecaoInput.value);
+    const horaRejeito = new Date(horaRejeitoInput.value);
+    const rejeitoMedido = parseFloat(rejeitoInput.value) || 0;
+    const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
+    const lambda = getLambda(isotopoAtual);
+    
+    // Se não tiver horário de medição ou for inválido, usa o rejeito sem correção
+    if (isNaN(horaInjecao.getTime()) || isNaN(horaRejeito.getTime()) || horaRejeito <= horaInjecao) {
+        const doseAdmin = doseMedida - rejeitoMedido;
+        doseAdministradaEl.textContent = doseAdmin.toFixed(2);
+        doseAdministradaEl.style.color = doseAdmin < 0 ? '#ff6b6b' : '#00ff88';
+        return;
+    }
+    
+    // Calcula o tempo entre a injeção e a medição do rejeito
+    const dtMedicaoMin = (horaRejeito - horaInjecao) / (1000 * 60);
+    
+    // CORRIGE o rejeito para o momento da injeção (desfaz o decaimento)
+    const fatorCorrecao = Math.exp(lambda * dtMedicaoMin); // inverso do decaimento
+    const rejeitoCorrigido = rejeitoMedido * fatorCorrecao;
+    
+    // Calcula a dose administrada com o rejeito corrigido
+    const doseAdmin = doseMedida - rejeitoCorrigido;
+    
+    // Atualiza a célula da Dose Administrada
+    doseAdministradaEl.textContent = doseAdmin.toFixed(2);
+    doseAdministradaEl.style.color = doseAdmin < 0 ? '#ff6b6b' : '#00ff88';
+    
+    // Adiciona um indicador visual de que o rejeito foi corrigido
+    const rejeitoCell = rejeitoInput.closest('td');
+    if (rejeitoCell) {
+        // Remove indicador antigo se existir
+        const indicadorAntigo = rejeitoCell.querySelector('.indicador-correcao');
+        if (indicadorAntigo) indicadorAntigo.remove();
+        
+        // Cria novo indicador apenas se houve correção significativa
+        if (dtMedicaoMin > 5) {
+            const indicador = document.createElement('span');
+            indicador.className = 'indicador-correcao';
+            indicador.style.cssText = 'display:block;font-size:0.55rem;color:#00d2ff;margin-top:2px;';
+            indicador.textContent = `↻ corrigido (Δt: ${dtMedicaoMin.toFixed(0)} min, fator: ${fatorCorrecao.toFixed(3)})`;
+            rejeitoCell.appendChild(indicador);
+        }
+    }
+}
 function adicionarPacientesLote() {
     let count = 0;
     for (let i = 0; i < 5; i++) { if (contadorPacientes >= MAX_PACIENTES) break; adicionarPaciente(); count++; }
@@ -3063,7 +3137,6 @@ function removerPaciente(index) {
     const row = tbody.querySelector(`tr[data-index="${index}"]`);
     if (row) { row.remove(); reordenarPacientes(); atualizarContadorPacientes(); calcularPacientes(); trackEvent('remover_paciente', 'pacientes', `id_${index}`); }
 }
-
 function reordenarPacientes() {
     const tbody = document.getElementById('corpoPacientes');
     const rows = tbody.querySelectorAll('tr');
@@ -3079,9 +3152,10 @@ function reordenarPacientes() {
         const hora = document.getElementById(`horaInjecao_${idx}`)?.value || '';
         const doseMedida = document.getElementById(`doseMedida_${idx}`)?.value || '';
         const rejeito = document.getElementById(`rejeito_${idx}`)?.value || '';
+        const horaRejeito = document.getElementById(`horaRejeito_${idx}`)?.value || '';
         const doseCalculada = document.getElementById(`doseCalculada_${idx}`)?.textContent || '';
         const doseAdministrada = document.getElementById(`doseAdministrada_${idx}`)?.textContent || '';
-        dadosPacientes.push({ idx, nome, id, peso, doseKg, hora, doseMedida, rejeito, doseCalculada, doseAdministrada });
+        dadosPacientes.push({ idx, nome, id, peso, doseKg, hora, doseMedida, rejeito, horaRejeito, doseCalculada, doseAdministrada });
     });
     
     // Ordena por horário de injeção
@@ -3105,7 +3179,8 @@ function reordenarPacientes() {
             <td><input type="datetime-local" id="horaInjecao_${novoIndex}" value="${dado.hora}"></td>
             <td><input type="number" id="doseMedida_${novoIndex}" value="${dado.doseMedida}" step="0.1" min="0" class="dose-medida-input"></td>
             <td class="dose-administrada" id="doseAdministrada_${novoIndex}">${dado.doseAdministrada || '--'}</td>
-            <td><input type="number" id="rejeito_${novoIndex}" value="${dado.rejeito}" step="0.1" min="0" class="rejeito-input"></td>
+            <td><input type="number" id="rejeito_${novoIndex}" value="${dado.rejeito}" step="0.1" min="0" class="rejeito-input" onchange="calcularDoseComRejeitoCorrigido(${novoIndex})"></td>
+            <td><input type="datetime-local" id="horaRejeito_${novoIndex}" value="${dado.horaRejeito || ''}" onchange="calcularDoseComRejeitoCorrigido(${novoIndex})"></td>
             <td class="resultado-calc" id="intervaloInjecao_${novoIndex}">--</td>
             <td class="resultado-calc" id="atividadeRestante_${novoIndex}">--</td>
             <td id="statusPaciente_${novoIndex}">--</td>
@@ -3159,10 +3234,18 @@ function calcularPacientes() {
             const horaInjecao = new Date(horaInjecaoInput.value);
             const peso = parseFloat(pesoInput?.value) || 0;
             const doseKg = parseFloat(doseKgInput?.value) || 0;
-            const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
-            const rejeito = parseFloat(rejeitoInput?.value) || 0;
-            const doseCalculada = peso * doseKg;
-            const doseAdministrada = doseMedida - rejeito;
+          const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
+const rejeito = parseFloat(rejeitoInput?.value) || 0;
+const doseCalculada = peso * doseKg;
+
+// Usa o valor já corrigido da célula, se disponível
+const doseAdminEl = document.getElementById(`doseAdministrada_${index}`);
+let doseAdministrada = 0;
+if (doseAdminEl && doseAdminEl.textContent !== '--') {
+    doseAdministrada = parseFloat(doseAdminEl.textContent) || 0;
+} else {
+    doseAdministrada = doseMedida - rejeito;
+}
             if (doseCalcEl) doseCalcEl.textContent = doseCalculada.toFixed(2);
             if (doseAdminEl) { doseAdminEl.textContent = doseAdministrada.toFixed(2); doseAdminEl.style.color = doseAdministrada < 0 ? '#ff6b6b' : '#00ff88'; }
             if (!isNaN(horaInjecao.getTime()) && horarioMarcacao) {
