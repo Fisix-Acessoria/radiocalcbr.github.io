@@ -3992,8 +3992,8 @@ function debounce(func, wait) {
 
 // ====== INICIAR AUTO-SAVE ======
 function iniciarAutoSave() {
-    // ===== SALVAMENTO AUTOMÁTICO A CADA 1 MINUTO =====
-    setInterval(autoSalvar, 60000);
+    // ===== SALVAMENTO AUTOMÁTICO A CADA 2 HORAS =====
+    setInterval(autoSalvar, 7200000);  // 2 horas em milissegundos
 
     // ===== SALVA AO TROCAR DE ABA =====
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -4005,7 +4005,7 @@ function iniciarAutoSave() {
     // ===== SALVA ANTES DE FECHAR A PÁGINA =====
     window.addEventListener('beforeunload', autoSalvar);
 
-    console.log('🔄 Auto-save ativado (apenas a cada 1 minuto)!');
+    console.log('🔄 Auto-save ativado (apenas a cada 2 horas)!');
 }
 
 // Adiciona o CSS para a animação
