@@ -435,41 +435,78 @@
             </div>
         </h1>
         <p class="subtitle" data-translate="subtitulo">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
-            <button onclick="abrirSobre()" style="
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.1);
-                color: #aaa;
-                padding: 4px 14px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-size: 0.75rem;
-                transition: 0.3s;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,215,0,0.3)'" onmouseout="this.style.color='#aaa';this.style.borderColor='rgba(255,255,255,0.1)'">
-                ℹ️ Sobre
-            </button>
-            <button onclick="toggleLanguage()" style="
-                background: rgba(255,255,255,0.08);
-                border: 1px solid rgba(255,215,0,0.3);
-                color: #ffd700;
-                padding: 4px 16px;
-                border-radius: 20px;
-                cursor: pointer;
-                font-size: 0.8rem;
-                font-weight: 600;
-                transition: 0.3s;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            " onmouseover="this.style.background='rgba(255,215,0,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-                🌐 <span id="langLabel">PT</span> <span style="font-size: 0.6rem; opacity: 0.6;">▼</span>
-            </button>
-        </div>
-    </div>
-</header>
+ <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+    <!-- BOTÃO SALVAR DADOS -->
+    <button onclick="salvarTodosOsDados()" style="
+        background: rgba(0,210,255,0.15);
+        border: 1px solid rgba(0,210,255,0.3);
+        color: #00d2ff;
+        padding: 6px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    " onmouseover="this.style.background='rgba(0,210,255,0.25)'" onmouseout="this.style.background='rgba(0,210,255,0.15)'">
+        💾 Salvar Dados
+    </button>
+    
+    <!-- NOVO BOTÃO LIMPAR DADOS -->
+    <button onclick="limparDadosSalvos()" style="
+        background: rgba(255,107,107,0.15);
+        border: 1px solid rgba(255,107,107,0.3);
+        color: #ff6b6b;
+        padding: 6px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        font-weight: 600;
+        transition: 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    " onmouseover="this.style.background='rgba(255,107,107,0.25)'" onmouseout="this.style.background='rgba(255,107,107,0.15)'">
+        🗑️ Limpar Dados
+    </button>
+    
+    <!-- BOTÃO SOBRE -->
+    <button onclick="abrirSobre()" style="
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #aaa;
+        padding: 4px 14px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,215,0,0.3)'" onmouseout="this.style.color='#aaa';this.style.borderColor='rgba(255,255,255,0.1)'">
+        ℹ️ Sobre
+    </button>
+    
+    <!-- BOTÃO IDIOMA -->
+    <button onclick="toggleLanguage()" style="
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,215,0,0.3);
+        color: #ffd700;
+        padding: 4px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        font-weight: 600;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    " onmouseover="this.style.background='rgba(255,215,0,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+        🌐 <span id="langLabel">PT</span> <span style="font-size: 0.6rem; opacity: 0.6;">▼</span>
+    </button>
+</div>
 
 <div class="container">
 
@@ -477,7 +514,7 @@
     <div class="disclaimer-box" id="disclaimerBox">
         <div class="disclaimer-flex">
             <span class="disclaimer-icon">⚠️</span>
-            <div>
+            <div style="text-align: left;">
                 <span class="disclaimer-title" data-translate="disclaimer_title">Aviso de Responsabilidade</span><br>
                 <span data-translate="disclaimer_text">Esta calculadora destina-se ao <span class="disclaimer-highlight">auxílio de profissionais habilitados</span> em medicina nuclear e <span class="disclaimer-highlight">não substitui</span>:</span>
                 <ul>
@@ -746,14 +783,14 @@
                 </div>
             </div>
 
-            <div class="info-box planejamento" style="margin-top: 15px;">
-                <strong style="color: #ff6b9d;" data-translate="plan_exemplo">📌 Exemplo Prático:</strong><br>
-                <span style="color: #aaa; font-size: 0.85rem;" data-translate="plan_exemplo_texto">
-                    <strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>
-                    Tc-99m (meia-vida: 362 min) · Margem: 10%<br>
-                    → Atividade de marcação otimizada: <strong style="color: #ffd700;">~550 mCi</strong> (sobra mínima!)
-                </span>
-            </div>
+           <div class="info-box planejamento" style="margin-top: 15px; text-align: left !important;">
+    <strong style="color: #ff6b9d; display: block;" data-translate="plan_exemplo">📌 Exemplo Prático:</strong>
+    <span style="color: #aaa; font-size: 0.85rem; display: block;" data-translate="plan_exemplo_texto">
+        <strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>
+        Tc-99m (meia-vida: 362 min) · Margem: 10%<br>
+        → Atividade de marcação otimizada: <strong style="color: #ffd700;">~550 mCi</strong> (sobra mínima!)
+    </span>
+</div>
         </div>
     </div>
 
@@ -877,34 +914,35 @@
                 <div class="stats-grid" id="statsPacientes"></div>
             </div>
 
-            <div class="info-box" id="infoBoxPacientes">
-                <strong data-translate="pac_info_box">📌 Fórmulas (Planilha v2.3):</strong><br>
-                <span id="infoTextoPacientes" data-translate="pac_info_texto">
-                    <strong>Dose Calculada</strong> = Peso × Dose/kg<br>
-                    <strong>Dose Administrada</strong> = Dose Medida - Rejeito<br>
-                    <strong>Rejeito</strong> = Dose Medida - (Dose Medida - Dose Pós-Admin)<br>
-                    <strong>Δt</strong> = Horário Injeção - Horário Marcação (minutos)<br>
-                    <strong>Fator Decaimento</strong> = exp(-0.693/meia-vida × Δt)<br>
-                    <strong>Atividade Teórica</strong> = Dose Medida / Fator Decaimento<br>
-                    <strong>Atividade Restante Real</strong> = Atividade Inicial - Σ(Dose Medida) - Decaimento
-                </span>
-                <br><br>
-                <span style="color: #aaa; font-size: 0.85rem;" data-translate="pac_meia_vida">
-                    ⏱️ Meia-vida: <strong id="meiaVidaDisplay">362 min</strong> (Tc-99m) · 
-                    λ = <strong id="lambdaDisplay">0.001914</strong> min⁻¹
-                </span>
+          <div class="info-box" id="infoBoxPacientes" style="text-align: left !important;">
+    <strong style="display: block;" data-translate="pac_info_box">📌 Fórmulas (Planilha v2.3):</strong>
+    <span id="infoTextoPacientes" style="display: block;" data-translate="pac_info_texto">
+        <strong>Dose Calculada</strong> = Peso × Dose/kg<br>
+        <strong>Dose Administrada</strong> = Dose Medida - Rejeito<br>
+        <strong>Rejeito</strong> = Dose Medida - (Dose Medida - Dose Pós-Admin)<br>
+        <strong>Δt</strong> = Horário Injeção - Horário Marcação (minutos)<br>
+        <strong>Fator Decaimento</strong> = exp(-0.693/meia-vida × Δt)<br>
+        <strong>Atividade Teórica</strong> = Dose Medida / Fator Decaimento<br>
+        <strong>Atividade Restante Real</strong> = Atividade Inicial - Σ(Dose Medida) - Decaimento
+    </span>
+    <br>
+    <span style="color: #aaa; font-size: 0.85rem; display: block;" data-translate="pac_meia_vida">
+        ⏱️ Meia-vida: <strong id="meiaVidaDisplay">362 min</strong> (Tc-99m) · 
+        λ = <strong id="lambdaDisplay">0.001914</strong> min⁻¹
+    </span>
+</div>
             </div>
         </div>
     </div>
 
     <!-- ===== ABA 4: DOSE PEDIÁTRICA ===== -->
-    <div id="aba-pediatrica" class="tab-content">
-        <div class="card">
+    <div id="aba-pediatrica" class="tab-content" style="text-align: left;">
+    <div class="card">
             <h3 class="card-title" style="color: #ff6b9d;" data-translate="ped_title">
                 👶 Dose Pediátrica 
                 <span class="snmmi-badge" data-translate="ped_badge">SNMMI 2024</span>
             </h3>
-          <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px;" data-translate="ped_desc">
+ <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 15px; text-align: left;" data-translate="ped_desc">
     Cálculo baseado em diretrizes internacionais para atividades de radiofármacos em pediatria:
     <strong>SNMMI 2024</strong> (Norte-Americana) e <strong>EANM 2005</strong> (Europeia).
 </p>
@@ -977,10 +1015,10 @@
                     </div>
                 </div>
 
-                <div class="info-box snmmi" id="infoBoxPediatrica" style="margin-top: 15px;">
-                    <strong style="color: #00d4ff;" data-translate="ped_info_titulo">📋 Diretriz SNMMI 2024:</strong>
-                    <span id="infoTextoPediatrica" style="color: #aaa;" data-translate="ped_info_texto">Selecione um radiofármaco e insira o peso da criança para calcular a dose recomendada.</span>
-                </div>
+              <div class="info-box snmmi" id="infoBoxPediatrica" style="margin-top: 15px; text-align: left !important;">
+    <strong style="color: #00d4ff; display: block;" data-translate="ped_info_titulo">📋 Diretriz SNMMI 2024:</strong>
+    <span id="infoTextoPediatrica" style="color: #aaa; display: block;" data-translate="ped_info_texto">Selecione um radiofármaco e insira o peso da criança para calcular a dose recomendada.</span>
+</div>
 
                 <div class="info-box snmmi" style="margin-top: 15px; border-left-color: #00d4ff; background: rgba(0, 212, 255, 0.05);">
                     <strong style="color: #00d4ff;" data-translate="ped_notas">📌 Notas Importantes (SNMMI 2024):</strong><br>
@@ -1018,7 +1056,7 @@
 
 <!-- ===== MODAL SOBRE ===== -->
 <div class="modal-sobre-overlay" id="modalSobre" onclick="fecharSobreExterno(event)">
-    <div class="modal-sobre">
+    <div class="modal-sobre" style="text-align: left;">
         <button class="fechar" onclick="fecharSobre()">✕</button>
 
         <div class="header-sobre">
@@ -1029,7 +1067,7 @@
             </div>
         </div>
 
-        <div class="descricao">
+        <div class="descricao" style="text-align: left;">
             O <strong>RadioCalc BR</strong> é uma ferramenta computacional em desenvolvimento, idealizada para auxiliar profissionais e estudantes da Medicina Nuclear na realização de cálculos relacionados ao preparo, controle de qualidade e administração de radiofármacos.
             <br><br>
             O projeto tem como objetivo contribuir para a <strong>padronização dos cálculos</strong>, reduzir a possibilidade de erros operacionais e otimizar a rotina dos serviços de Medicina Nuclear, por meio de uma interface simples, acessível e de fácil utilização, disponível diretamente em navegador web.
@@ -1038,29 +1076,29 @@
         </div>
 
         <div class="grid-sobre">
-            <div class="item">
+            <div class="item" style="text-align: left;">
                 <div class="emoji">🎯</div>
                 <h4>Objetivo</h4>
                 <p>Auxiliar no planejamento, marcação e administração segura de radiofármacos, com suporte para Tc-99m, F-18 e I-123.</p>
             </div>
-            <div class="item">
+            <div class="item" style="text-align: left;">
                 <div class="emoji">📋</div>
                 <h4>Funcionalidades</h4>
                 <p>Planejamento de atividade, marcação, gestão de pacientes e dose pediátrica baseada nas diretrizes SNMMI 2024.</p>
             </div>
-            <div class="item">
+            <div class="item" style="text-align: left;">
                 <div class="emoji">👶</div>
                 <h4>Dose Pediátrica</h4>
                 <p>Diretriz SNMMI 2024 com limites mínimos e máximos por faixa etária e peso, com fator de correção ajustável.</p>
             </div>
-            <div class="item">
+            <div class="item" style="text-align: left;">
                 <div class="emoji">📊</div>
                 <h4>Relatórios</h4>
                 <p>Geração de PDFs detalhados do planejamento e da lista de pacientes para documentação e arquivamento.</p>
             </div>
         </div>
 
-        <div class="aviso">
+        <div class="aviso" style="text-align: left;">
             <span class="icone">⚠️</span>
             <div>
                 <strong>Importante</strong>
@@ -1075,7 +1113,7 @@
 
         <div class="rodape-sobre">
             <span class="info">🔬 Baseado em SNMMI 2024 · Planilha v2.3</span>
-            <a href="mailto:fisixassessoria@gmail.com" class="contato">📧 fisixassessoria@gmail.com</a>
+           <a href="#" class="contato" onclick="enviarEmailContato(event)">📧 fisixassessoria@gmail.com</a>
             <span class="versao-rodape">v1.3 beta</span>
         </div>
     </div>
@@ -1449,6 +1487,7 @@ const translations = {
         pac_col_dose_medida: "Dose Medida (mCi)",
         pac_col_dose_admin: "Dose Admin. (mCi)",
         pac_col_rejeito: "Rejeito (mCi)",
+        pac_col_hora_rejeito: "📅 Hora Medição Rejeito",
         pac_col_dt: "Δt (min)",
         pac_col_restante: "Ativ. Restante (mCi)",
         pac_col_status: "Status",
@@ -1589,6 +1628,7 @@ const translations = {
         pac_col_dose_medida: "Measured Dose (mCi)",
         pac_col_dose_admin: "Admin. Dose (mCi)",
         pac_col_rejeito: "Waste (mCi)",
+        pac_col_hora_rejeito: "📅 Waste Measurement Time",
         pac_col_dt: "Δt (min)",
         pac_col_restante: "Remaining Act. (mCi)",
         pac_col_status: "Status",
@@ -1913,7 +1953,6 @@ function atualizarInfoIsotopo() {
     setTimeout(() => { calcularPlanejamento(); calcularPacientes(); }, 100);
 }
 
-// ====== PLANEJAMENTO - MODO SIMPLIFICADO (CORRIGIDO) ======
 // ====== PLANEJAMENTO - MODO SIMPLIFICADO (OTIMIZADO PARA SOBRA MÍNIMA) ======
 function calcularPlanejamentoSimplificado() {
     const isotopo = document.getElementById('planIsotopo').value;
@@ -2111,30 +2150,37 @@ function calcularPlanejamentoSimplificado() {
     atualizarGraficoPlanejamento(isotopo, nomeIsot, cor, lambda, atividadeMarcacao, distribuicao, horarioMarcacao, dosePorPaciente);
     atualizarTabelaDistribuicao(distribuicao);
     
-    // Recomendação com valor otimizado
-    const recomendacao = document.getElementById('recomendacaoPlanejamento');
-    recomendacao.innerHTML = `
-        <strong style="color: #00ff64;">✅ Planejamento Otimizado!</strong>
-        <br><br>
-        Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
-        <br><br>
-        <strong>Dose por paciente:</strong> ${dosePorPaciente.toFixed(2)} mCi
-        <br>
-        <strong>Tempo total de injeções:</strong> ${horas}h ${minutos}min
-        <br><br>
-        <strong style="color: #ffd700; font-size: 1.1rem;">🎯 ATIVIDADE IDEAL PARA MARCAR O KIT:</strong>
-        <br>
-        <strong style="color: #00ff64; font-size: 1.4rem;">${atividadeMarcacao.toFixed(2)} mCi</strong>
-        <br><br>
-        <strong style="color: ${sobraReal < 0.1 ? '#00ff64' : sobraReal < 0.5 ? '#ffd700' : '#ff6b6b'};">✅ Sobra no frasco:</strong> 
-        ${sobraReal.toFixed(3)} mCi (${sobraPercentual.toFixed(2)}% da atividade total)
-        <br>
-        <span style="color: ${sobraReal < 0.1 ? '#00ff64' : '#ffd700'};">
-            ${sobraReal < 0.1 ? '🎯 Otimização perfeita! Aproveitamento máximo do radiofármaco!' : 
-              sobraReal < 0.5 ? '✅ Ótima otimização! Sobra mínima.' : 
-              '⚠️ Sobra considerável. Considere ajustar a margem.'}
-        </span>
-    `;
+   // Recomendação com valor otimizado
+const recomendacao = document.getElementById('recomendacaoPlanejamento');
+recomendacao.style.cssText = `
+    text-align: left !important;
+    display: block;
+    width: 100%;
+    padding-left: 0;
+    margin-left: 0;
+`;
+recomendacao.innerHTML = `
+    <strong style="color: #00ff64;">✅ Planejamento Otimizado!</strong>
+    <br><br>
+    Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
+    <br><br>
+    <strong>Dose por paciente:</strong> ${dosePorPaciente.toFixed(2)} mCi
+    <br>
+    <strong>Tempo total de injeções:</strong> ${horas}h ${minutos}min
+    <br><br>
+    <strong style="color: #ffd700; font-size: 1.1rem;">🎯 ATIVIDADE IDEAL PARA MARCAR O KIT:</strong>
+    <br>
+    <strong style="color: #00ff64; font-size: 1.4rem;">${atividadeMarcacao.toFixed(2)} mCi</strong>
+    <br><br>
+    <strong style="color: ${sobraReal < 0.1 ? '#00ff64' : sobraReal < 0.5 ? '#ffd700' : '#ff6b6b'};">✅ Sobra no frasco:</strong> 
+    ${sobraReal.toFixed(3)} mCi (${sobraPercentual.toFixed(2)}% da atividade total)
+    <br>
+    <span style="color: ${sobraReal < 0.1 ? '#00ff64' : '#ffd700'};">
+        ${sobraReal < 0.1 ? '🎯 Otimização perfeita! Aproveitamento máximo do radiofármaco!' : 
+          sobraReal < 0.5 ? '✅ Ótima otimização! Sobra mínima.' : 
+          '⚠️ Sobra considerável. Considere ajustar a margem.'}
+    </span>
+`;
 }
 
 // ====== PLANEJAMENTO - MODO AGENDA (CORRIGIDO) ======
@@ -2346,6 +2392,7 @@ function calcularPlanejamentoAgenda() {
     
     // Recomendação com valor otimizado
     const recomendacao = document.getElementById('recomendacaoPlanejamento');
+    recomendacao.style.textAlign = 'left';
     recomendacao.innerHTML = `
         <strong style="color: #00ff64;">✅ Planejamento Otimizado (Agenda)!</strong>
         <br><br>
@@ -2527,6 +2574,7 @@ function atualizarTabelaDistribuicao(distribuicao) {
 
 function atualizarRecomendacao(numPacientes, nomeIsot, meiaVida, dosePorPaciente, somaDosesAjustadas, atividadeMarcacao, margemPercent, atividadeRestante, horas, minutos) {
     const recomendacao = document.getElementById('recomendacaoPlanejamento');
+    recomendacao.style.textAlign = 'left';
     const atividadeSugerida = Math.ceil(atividadeMarcacao / 5) * 5;
     recomendacao.innerHTML = `
         Para atender <strong>${numPacientes} pacientes</strong> com ${nomeIsot} (meia-vida: ${meiaVida} min):
@@ -3456,39 +3504,661 @@ function calcularDosePediatrica() {
         ${metodo === 'snmmi' ? `<br><strong>Limites SNMMI:</strong> Min ${doseMin > 0 ? doseMin.toFixed(2) : 'N/A'} mCi | Máx ${doseMax > 0 ? doseMax.toFixed(2) : 'N/A'} mCi` : ''}
     `;
 }
+// ====== NOVAS FUNÇÕES DE SALVAMENTO ======
+
+// ====== SALVAR TODOS OS DADOS ======
+function salvarTodosOsDados() {
+    try {
+        const dados = {
+            // Pacientes
+            pacientes: [],
+            // Planejamento - Simplificado
+            planSimplificado: {
+                isotopo: document.getElementById('planIsotopo')?.value || '',
+                numPacientes: document.getElementById('planNumPacientes')?.value || '',
+                dosePorPaciente: document.getElementById('planDosePorPaciente')?.value || '',
+                margem: document.getElementById('planMargemSeguranca')?.value || '',
+                intervalo: document.getElementById('planIntervaloInjecoes')?.value || '',
+                horarioMarcacao: document.getElementById('planHorarioMarcacao')?.value || '',
+                horarioPrimeira: document.getElementById('planHorarioPrimeira')?.value || '',
+                horarioUltimo: document.getElementById('planHorarioUltimo')?.value || ''
+            },
+            // Planejamento - Agenda
+            planAgenda: {
+                isotopo: document.getElementById('planIsotopoAgenda')?.value || '',
+                dosePorPaciente: document.getElementById('planDosePorPacienteAgenda')?.value || '',
+                margem: document.getElementById('planMargemSegurancaAgenda')?.value || '',
+                horarioMarcacao: document.getElementById('planHorarioMarcacaoAgenda')?.value || '',
+                pacientes: []
+            },
+            // Marcação
+            marcacao: {
+                radiofarmaco: document.getElementById('radiofarmacoMestre')?.value || '',
+                horario: document.getElementById('horarioMarcacaoMestre')?.value || '',
+                atividadeTotal: document.getElementById('atividadeMarcacaoMestre')?.value || '',
+                atividadeDisponivel: document.getElementById('atividadeDisponivelMestre')?.value || ''
+            },
+            // Dose Pediátrica
+            pediatrica: {
+                radiofarmaco: document.getElementById('radiofarmacoPediatrico')?.value || '',
+                metodo: document.getElementById('metodoPediatrico')?.value || '',
+                peso: document.getElementById('pesoPediatrico')?.value || '',
+                idade: document.getElementById('idadePediatrica')?.value || '',
+                fator: document.getElementById('fatorCorrecaoPediatrica')?.value || ''
+            },
+            // Histórico
+            historico: typeof historicoPlanejamento !== 'undefined' ? historicoPlanejamento : [],
+            // Aba ativa
+            abaAtiva: document.querySelector('.tab-content.active')?.id || 'aba-planejamento',
+            // Data do salvamento
+            dataSalvamento: new Date().toISOString()
+        };
+
+        // Coleta os dados dos pacientes
+        const tbody = document.getElementById('corpoPacientes');
+        if (tbody) {
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((row) => {
+                const idx = parseInt(row.dataset.index);
+                if (!isNaN(idx)) {
+                    dados.pacientes.push({
+                        nome: document.getElementById(`nomePaciente_${idx}`)?.value || '',
+                        id: document.getElementById(`idPaciente_${idx}`)?.value || '',
+                        peso: document.getElementById(`pesoPaciente_${idx}`)?.value || '',
+                        doseKg: document.getElementById(`doseKgPaciente_${idx}`)?.value || '',
+                        horaInjecao: document.getElementById(`horaInjecao_${idx}`)?.value || '',
+                        doseMedida: document.getElementById(`doseMedida_${idx}`)?.value || '',
+                        rejeito: document.getElementById(`rejeito_${idx}`)?.value || '',
+                        horaRejeito: document.getElementById(`horaRejeito_${idx}`)?.value || '',
+                        doseCalculada: document.getElementById(`doseCalculada_${idx}`)?.textContent || '',
+                        doseAdministrada: document.getElementById(`doseAdministrada_${idx}`)?.textContent || ''
+                    });
+                }
+            });
+        }
+
+        // Coleta os pacientes da agenda
+        const agendaTbody = document.getElementById('corpoAgenda');
+        if (agendaTbody) {
+            const agendaRows = agendaTbody.querySelectorAll('tr');
+            agendaRows.forEach((row) => {
+                const idx = parseInt(row.dataset.index);
+                if (!isNaN(idx)) {
+                    const horaInput = document.getElementById(`agendaHora_${idx}`);
+                    if (horaInput) {
+                        dados.planAgenda.pacientes.push({
+                            horario: horaInput.value || ''
+                        });
+                    }
+                }
+            });
+        }
+
+        // Salva no localStorage
+        localStorage.setItem('radiocalc_dados', JSON.stringify(dados));
+        
+        // Mostra feedback visual
+        mostrarFeedbackSalvamento('✅ Dados salvos com sucesso!', 'success');
+        
+        return true;
+    } catch (e) {
+        console.error('Erro ao salvar dados:', e);
+        mostrarFeedbackSalvamento('⚠️ Erro ao salvar dados.', 'error');
+        return false;
+    }
+}
+
+// ====== LIMPAR TODOS OS DADOS SALVOS ======
+// ====== LIMPAR TODOS OS DADOS SALVOS ======
+function limparDadosSalvos() {
+    // Confirmação antes de limpar
+    if (!confirm('⚠️ ATENÇÃO: Isso irá apagar TODOS os dados salvos e restaurar os valores padrão. Deseja continuar?')) {
+        return;
+    }
+
+    try {
+        // Remove os dados do localStorage
+        localStorage.removeItem('radiocalc_dados');
+        
+        // Limpa também os dados da interface manualmente
+        // 1. Limpa os pacientes
+        const tbody = document.getElementById('corpoPacientes');
+        if (tbody) {
+            tbody.innerHTML = '';
+            // Adiciona 5 pacientes padrão
+            if (typeof adicionarPaciente === 'function') {
+                for (let i = 0; i < 5; i++) {
+                    adicionarPaciente();
+                }
+            }
+        }
+        
+        // 2. Limpa o histórico
+        if (typeof historicoPlanejamento !== 'undefined') {
+            historicoPlanejamento = [];
+            if (typeof atualizarHistorico === 'function') {
+                atualizarHistorico();
+            }
+        }
+        
+        // 3. Reseta os campos de planejamento para valores padrão
+        const agora = new Date();
+        const planMarc = new Date(agora);
+        planMarc.setHours(8, 0, 0, 0);
+        
+        const planMarcElement = document.getElementById('planHorarioMarcacao');
+        if (planMarcElement) planMarcElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const planMarcAgendaElement = document.getElementById('planHorarioMarcacaoAgenda');
+        if (planMarcAgendaElement) planMarcAgendaElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const horarioMarcacaoElement = document.getElementById('horarioMarcacaoMestre');
+        if (horarioMarcacaoElement) horarioMarcacaoElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const planPrimeira = new Date(agora);
+        planPrimeira.setHours(8, 30, 0, 0);
+        const planPrimeiraElement = document.getElementById('planHorarioPrimeira');
+        if (planPrimeiraElement) planPrimeiraElement.value = planPrimeira.toISOString().slice(0, 16);
+        
+        const planUltimo = new Date(agora);
+        planUltimo.setHours(14, 30, 0, 0);
+        const planUltimoElement = document.getElementById('planHorarioUltimo');
+        if (planUltimoElement) planUltimoElement.value = planUltimo.toISOString().slice(0, 16);
+        
+        // 4. Reseta os selects para valores padrão
+        const planIsotopo = document.getElementById('planIsotopo');
+        if (planIsotopo) planIsotopo.value = 'tc';
+        
+        const planIsotopoAgenda = document.getElementById('planIsotopoAgenda');
+        if (planIsotopoAgenda) planIsotopoAgenda.value = 'tc';
+        
+        // 5. Reseta campos numéricos
+        const planNumPacientes = document.getElementById('planNumPacientes');
+        if (planNumPacientes) planNumPacientes.value = 1;
+        
+        const planDosePorPaciente = document.getElementById('planDosePorPaciente');
+        if (planDosePorPaciente) planDosePorPaciente.value = 15;
+        
+        const planDosePorPacienteAgenda = document.getElementById('planDosePorPacienteAgenda');
+        if (planDosePorPacienteAgenda) planDosePorPacienteAgenda.value = 15;
+        
+        const planMargemSeguranca = document.getElementById('planMargemSeguranca');
+        if (planMargemSeguranca) planMargemSeguranca.value = 5;
+        
+        const planMargemSegurancaAgenda = document.getElementById('planMargemSegurancaAgenda');
+        if (planMargemSegurancaAgenda) planMargemSegurancaAgenda.value = 5;
+        
+        const planIntervaloInjecoes = document.getElementById('planIntervaloInjecoes');
+        if (planIntervaloInjecoes) planIntervaloInjecoes.value = 30;
+        
+        // 6. Reseta a marcação
+        const atividadeMarcacaoMestre = document.getElementById('atividadeMarcacaoMestre');
+        if (atividadeMarcacaoMestre) atividadeMarcacaoMestre.value = 360;
+        
+        const atividadeDisponivelMestre = document.getElementById('atividadeDisponivelMestre');
+        if (atividadeDisponivelMestre) atividadeDisponivelMestre.value = 360;
+        
+        const radiofarmacoMestre = document.getElementById('radiofarmacoMestre');
+        if (radiofarmacoMestre) radiofarmacoMestre.value = 'MDP';
+        
+        // 7. Reseta a dose pediátrica
+        const pesoPediatrico = document.getElementById('pesoPediatrico');
+        if (pesoPediatrico) pesoPediatrico.value = 18;
+        
+        const idadePediatrica = document.getElementById('idadePediatrica');
+        if (idadePediatrica) idadePediatrica.value = 5;
+        
+        const fatorCorrecaoPediatrica = document.getElementById('fatorCorrecaoPediatrica');
+        if (fatorCorrecaoPediatrica) fatorCorrecaoPediatrica.value = 1.0;
+        
+        const radiofarmacoPediatrico = document.getElementById('radiofarmacoPediatrico');
+        if (radiofarmacoPediatrico) radiofarmacoPediatrico.value = 'MDP';
+        
+        const metodoPediatrico = document.getElementById('metodoPediatrico');
+        if (metodoPediatrico) metodoPediatrico.value = 'snmmi';
+        
+        // 8. Reseta a agenda
+        const agendaTbody = document.getElementById('corpoAgenda');
+        if (agendaTbody) {
+            agendaTbody.innerHTML = '';
+            if (typeof inicializarAgendaPadrao === 'function') {
+                inicializarAgendaPadrao();
+            }
+        }
+        
+        // 9. Reseta a aba ativa para planejamento
+        if (typeof trocarAba === 'function') {
+            trocarAba('planejamento');
+        }
+        
+        // 10. Esconde resultados
+        const resultadoPlanejamento = document.getElementById('resultadoPlanejamento');
+        if (resultadoPlanejamento) resultadoPlanejamento.style.display = 'none';
+        
+        const resultadoMarcacao = document.getElementById('resultadoMarcacaoContainer');
+        if (resultadoMarcacao) resultadoMarcacao.classList.remove('ativo');
+        
+        const resultadoPediatrico = document.getElementById('resultadoPediatrico');
+        if (resultadoPediatrico) resultadoPediatrico.style.display = 'none';
+        
+        // 11. Recalcula tudo para atualizar a interface
+        setTimeout(function() {
+            if (typeof calcularPlanejamento === 'function') calcularPlanejamento();
+            if (typeof calcularMarcacao === 'function') calcularMarcacao();
+            if (typeof calcularPacientes === 'function') calcularPacientes();
+            if (typeof calcularDosePediatrica === 'function') calcularDosePediatrica();
+        }, 100);
+        
+        // Mostra feedback de sucesso
+        setTimeout(function() {
+            mostrarFeedbackSalvamento('✅ Dados resetados com sucesso! Valores padrão restaurados.', 'success');
+        }, 200);
+        
+    } catch (e) {
+        console.error('Erro ao limpar dados:', e);
+        mostrarFeedbackSalvamento('⚠️ Erro ao limpar dados.', 'error');
+    }
+}
+
+// ====== CARREGAR TODOS OS DADOS ======
+function carregarTodosOsDados() {
+    try {
+        const dadosSalvos = localStorage.getItem('radiocalc_dados');
+        if (!dadosSalvos) {
+            console.log('ℹ️ Nenhum dado salvo encontrado.');
+            return false;
+        }
+
+        const dados = JSON.parse(dadosSalvos);
+
+        // ==== 1. CARREGAR PLANEJAMENTO SIMPLIFICADO ====
+        if (dados.planSimplificado) {
+            const p = dados.planSimplificado;
+            const el = document.getElementById('planIsotopo');
+            if (el && p.isotopo) el.value = p.isotopo;
+            const el2 = document.getElementById('planNumPacientes');
+            if (el2 && p.numPacientes) el2.value = p.numPacientes;
+            const el3 = document.getElementById('planDosePorPaciente');
+            if (el3 && p.dosePorPaciente) el3.value = p.dosePorPaciente;
+            const el4 = document.getElementById('planMargemSeguranca');
+            if (el4 && p.margem) el4.value = p.margem;
+            const el5 = document.getElementById('planIntervaloInjecoes');
+            if (el5 && p.intervalo) el5.value = p.intervalo;
+            const el6 = document.getElementById('planHorarioMarcacao');
+            if (el6 && p.horarioMarcacao) el6.value = p.horarioMarcacao;
+            const el7 = document.getElementById('planHorarioPrimeira');
+            if (el7 && p.horarioPrimeira) el7.value = p.horarioPrimeira;
+            const el8 = document.getElementById('planHorarioUltimo');
+            if (el8 && p.horarioUltimo) el8.value = p.horarioUltimo;
+        }
+
+        // ==== 2. CARREGAR PLANEJAMENTO AGENDA ====
+        if (dados.planAgenda) {
+            const p = dados.planAgenda;
+            const el = document.getElementById('planIsotopoAgenda');
+            if (el && p.isotopo) el.value = p.isotopo;
+            const el2 = document.getElementById('planDosePorPacienteAgenda');
+            if (el2 && p.dosePorPaciente) el2.value = p.dosePorPaciente;
+            const el3 = document.getElementById('planMargemSegurancaAgenda');
+            if (el3 && p.margem) el3.value = p.margem;
+            const el4 = document.getElementById('planHorarioMarcacaoAgenda');
+            if (el4 && p.horarioMarcacao) el4.value = p.horarioMarcacao;
+            
+            // Carrega os pacientes da agenda
+            if (p.pacientes && p.pacientes.length > 0) {
+                const agendaTbody = document.getElementById('corpoAgenda');
+                if (agendaTbody) {
+                    agendaTbody.innerHTML = '';
+                    p.pacientes.forEach((paciente, index) => {
+                        const tr = document.createElement('tr');
+                        tr.dataset.index = index;
+                        tr.innerHTML = `
+                            <td class="num-paciente">${index + 1}</td>
+                            <td><input type="datetime-local" id="agendaHora_${index}" value="${paciente.horario || ''}"></td>
+                            <td id="agendaDoseAlvo_${index}">--</td>
+                            <td id="agendaDoseDisponivel_${index}">--</td>
+                            <td id="agendaDoseRetirada_${index}">--</td>
+                            <td id="agendaAtivRestante_${index}">--</td>
+                            <td id="agendaDtMin_${index}">--</td>
+                            <td id="agendaStatus_${index}">--</td>
+                            <td><button class="btn-danger btn-sm" onclick="removerLinhaAgenda(${index})">✕</button></td>
+                        `;
+                        agendaTbody.appendChild(tr);
+                    });
+                    if (typeof reordenarAgenda === 'function') reordenarAgenda();
+                    if (typeof atualizarContadorAgenda === 'function') atualizarContadorAgenda();
+                }
+            }
+        }
+
+        // ==== 3. CARREGAR MARCAÇÃO ====
+        if (dados.marcacao) {
+            const m = dados.marcacao;
+            const el = document.getElementById('radiofarmacoMestre');
+            if (el && m.radiofarmaco) el.value = m.radiofarmaco;
+            const el2 = document.getElementById('horarioMarcacaoMestre');
+            if (el2 && m.horario) el2.value = m.horario;
+            const el3 = document.getElementById('atividadeMarcacaoMestre');
+            if (el3 && m.atividadeTotal) el3.value = m.atividadeTotal;
+            const el4 = document.getElementById('atividadeDisponivelMestre');
+            if (el4 && m.atividadeDisponivel) el4.value = m.atividadeDisponivel;
+            if (typeof atualizarInfoIsotopo === 'function') atualizarInfoIsotopo();
+        }
+
+        // ==== 4. CARREGAR DOSE PEDIÁTRICA ====
+        if (dados.pediatrica) {
+            const p = dados.pediatrica;
+            const el = document.getElementById('radiofarmacoPediatrico');
+            if (el && p.radiofarmaco) el.value = p.radiofarmaco;
+            const el2 = document.getElementById('metodoPediatrico');
+            if (el2 && p.metodo) el2.value = p.metodo;
+            const el3 = document.getElementById('pesoPediatrico');
+            if (el3 && p.peso) el3.value = p.peso;
+            const el4 = document.getElementById('idadePediatrica');
+            if (el4 && p.idade) el4.value = p.idade;
+            const el5 = document.getElementById('fatorCorrecaoPediatrica');
+            if (el5 && p.fator) el5.value = p.fator;
+        }
+
+        // ==== 5. CARREGAR HISTÓRICO ====
+        if (dados.historico && typeof historicoPlanejamento !== 'undefined') {
+            historicoPlanejamento = dados.historico;
+            if (typeof atualizarHistorico === 'function') atualizarHistorico();
+        }
+
+        // ==== 6. CARREGAR PACIENTES ====
+        if (dados.pacientes && dados.pacientes.length > 0) {
+            const tbody = document.getElementById('corpoPacientes');
+            if (tbody) {
+                tbody.innerHTML = '';
+                dados.pacientes.forEach((paciente, index) => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.index = index;
+                    tr.innerHTML = `
+                        <td class="num-paciente">${index + 1}</td>
+                        <td><input type="text" id="nomePaciente_${index}" placeholder="Nome" value="${paciente.nome || `Paciente ${index + 1}`}"></td>
+                        <td><input type="text" id="idPaciente_${index}" placeholder="ID" value="${paciente.id || `P-${String(10000 + index).padStart(5, '0')}`}"></td>
+                        <td><input type="number" id="pesoPaciente_${index}" value="${paciente.peso || ''}" placeholder="kg" step="0.1" min="1"></td>
+                        <td><input type="number" id="doseKgPaciente_${index}" value="${paciente.doseKg || ''}" placeholder="mCi/kg" step="0.01" min="0.01"></td>
+                        <td class="dose-calculada" id="doseCalculada_${index}">${paciente.doseCalculada || '--'}</td>
+                        <td><input type="datetime-local" id="horaInjecao_${index}" value="${paciente.horaInjecao || ''}"></td>
+                        <td><input type="number" id="doseMedida_${index}" value="${paciente.doseMedida || ''}" placeholder="mCi" step="0.1" min="0" class="dose-medida-input"></td>
+                        <td class="dose-administrada" id="doseAdministrada_${index}">${paciente.doseAdministrada || '--'}</td>
+                        <td><input type="number" id="rejeito_${index}" value="${paciente.rejeito || ''}" placeholder="mCi" step="0.1" min="0" class="rejeito-input" onchange="calcularDoseComRejeitoCorrigido(${index})"></td>
+                        <td><input type="datetime-local" id="horaRejeito_${index}" value="${paciente.horaRejeito || ''}" onchange="calcularDoseComRejeitoCorrigido(${index})"></td>
+                        <td class="resultado-calc" id="intervaloInjecao_${index}">--</td>
+                        <td class="resultado-calc" id="atividadeRestante_${index}">--</td>
+                        <td id="statusPaciente_${index}">--</td>
+                        <td><button class="btn-danger" onclick="removerPaciente(${index})">✕</button></td>
+                    `;
+                    tbody.appendChild(tr);
+
+                    // Adiciona eventos aos inputs
+                    const inputs = tr.querySelectorAll('input');
+                    inputs.forEach(input => {
+                        input.addEventListener('change', () => { 
+                            if (typeof recalcularDosePaciente === 'function') recalcularDosePaciente(index); 
+                            if (typeof calcularPacientes === 'function') calcularPacientes(); 
+                        });
+                        input.addEventListener('input', () => { 
+                            if (typeof recalcularDosePaciente === 'function') recalcularDosePaciente(index); 
+                            if (typeof calcularPacientes === 'function') calcularPacientes(); 
+                        });
+                    });
+                });
+                if (typeof contadorPacientes !== 'undefined') {
+                    contadorPacientes = dados.pacientes.length;
+                }
+                if (typeof atualizarContadorPacientes === 'function') atualizarContadorPacientes();
+            }
+        }
+
+        // ==== 7. RESTAURAR ABA ATIVA ====
+        if (dados.abaAtiva) {
+            const abaId = dados.abaAtiva.replace('aba-', '');
+            if (typeof trocarAba === 'function') trocarAba(abaId);
+        }
+
+        // ==== 8. RECALCULAR TUDO ====
+        setTimeout(() => {
+            if (typeof calcularMarcacao === 'function') calcularMarcacao();
+            if (typeof calcularPacientes === 'function') calcularPacientes();
+            if (typeof calcularPlanejamento === 'function') calcularPlanejamento();
+            if (typeof calcularDosePediatrica === 'function') calcularDosePediatrica();
+        }, 300);
+
+        mostrarFeedbackSalvamento('✅ Dados carregados com sucesso!', 'success');
+        console.log('✅ Dados carregados do localStorage:', dados.dataSalvamento);
+        return true;
+
+    } catch (e) {
+        console.error('Erro ao carregar dados:', e);
+        mostrarFeedbackSalvamento('⚠️ Erro ao carregar dados salvos.', 'error');
+        return false;
+    }
+}
+
+// ====== SALVAMENTO AUTOMÁTICO ======
+function autoSalvar() {
+    salvarTodosOsDados();
+}
+
+// ====== FEEDBACK VISUAL DE SALVAMENTO ======
+function mostrarFeedbackSalvamento(mensagem, tipo = 'success') {
+    const existing = document.getElementById('feedbackSalvamento');
+    if (existing) existing.remove();
+
+    const div = document.createElement('div');
+    div.id = 'feedbackSalvamento';
+    
+    let bgColor, borderColor, textColor;
+    if (tipo === 'success') {
+        bgColor = 'rgba(0,255,100,0.15)';
+        borderColor = 'rgba(0,255,100,0.3)';
+        textColor = '#00ff64';
+    } else if (tipo === 'warning') {
+        bgColor = 'rgba(255,107,107,0.15)';
+        borderColor = 'rgba(255,107,107,0.3)';
+        textColor = '#ff6b6b';
+    } else {
+        bgColor = 'rgba(255,215,0,0.15)';
+        borderColor = 'rgba(255,215,0,0.3)';
+        textColor = '#ffd700';
+    }
+    
+    div.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        right: 30px;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        z-index: 10002;
+        animation: slideUp 0.3s ease;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        max-width: 350px;
+        background: ${bgColor};
+        border: 1px solid ${borderColor};
+        color: ${textColor};
+    `;
+    div.textContent = mensagem;
+    document.body.appendChild(div);
+
+    setTimeout(() => {
+        div.style.opacity = '0';
+        div.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => div.remove(), 500);
+    }, 3000);
+}
+
+// ====== FUNÇÃO DEBOUNCE ======
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// ====== INICIAR AUTO-SAVE ======
+function iniciarAutoSave() {
+    // ===== SALVAMENTO AUTOMÁTICO A CADA 2 HORAS =====
+    setInterval(autoSalvar, 7200000);  // 2 horas em milissegundos
+
+    // ===== SALVA AO TROCAR DE ABA =====
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            setTimeout(autoSalvar, 100);
+        });
+    });
+
+    // ===== SALVA ANTES DE FECHAR A PÁGINA =====
+    window.addEventListener('beforeunload', autoSalvar);
+
+    console.log('🔄 Auto-save ativado (apenas a cada 2 horas)!');
+}
+
+// Adiciona o CSS para a animação
+const styleAnim = document.createElement('style');
+styleAnim.textContent = `
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+`;
+document.head.appendChild(styleAnim);
+
 // ====== INICIALIZAÇÃO ======
 window.onload = function() {
-    trackEvent('pagina_carregada', 'sistema', 'radiocalc_v1.2_beta');
-    const agora = new Date();
-    const hoje = new Date(agora);
-    hoje.setHours(8, 0, 0, 0);
-    const marc = new Date(hoje);
-    marc.setHours(8, 0, 0, 0);
-    document.getElementById('horarioMarcacaoMestre').value = marc.toISOString().slice(0, 16);
-    const planMarc = new Date(agora);
-    planMarc.setHours(8, 0, 0, 0);
-    document.getElementById('planHorarioMarcacao').value = planMarc.toISOString().slice(0, 16);
-    document.getElementById('planHorarioMarcacaoAgenda').value = planMarc.toISOString().slice(0, 16);
-    const planPrimeira = new Date(agora);
-    planPrimeira.setHours(8, 30, 0, 0);
-    document.getElementById('planHorarioPrimeira').value = planPrimeira.toISOString().slice(0, 16);
-    const planUltimo = new Date(agora);
-    planUltimo.setHours(14, 30, 0, 0);
-    document.getElementById('planHorarioUltimo').value = planUltimo.toISOString().slice(0, 16);
-    isotopoAtual = 'tc';
-    for (let i = 0; i < 5; i++) adicionarPaciente();
-    atualizarInfoIsotopo();
-    inicializarAgendaPadrao();
-    setTimeout(() => {
-        calcularMarcacao();
-        setTimeout(() => calcularPacientes(), 100);
-        setTimeout(() => calcularPlanejamento(), 200);
-        setTimeout(() => calcularDosePediatrica(), 300);
-    }, 300);
+    if (typeof trackEvent === 'function') {
+        trackEvent('pagina_carregada', 'sistema', 'radiocalc_v1.3_beta');
+    }
+    
+    // 1. Tenta carregar dados salvos
+    const dadosCarregados = carregarTodosOsDados();
+    
+    // 2. Se não houver dados salvos, inicializa com valores padrão
+    if (!dadosCarregados) {
+        const agora = new Date();
+        
+        // Horários padrão
+        const planMarc = new Date(agora);
+        planMarc.setHours(8, 0, 0, 0);
+        
+        const planMarcElement = document.getElementById('planHorarioMarcacao');
+        if (planMarcElement) planMarcElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const planMarcAgendaElement = document.getElementById('planHorarioMarcacaoAgenda');
+        if (planMarcAgendaElement) planMarcAgendaElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const horarioMarcacaoElement = document.getElementById('horarioMarcacaoMestre');
+        if (horarioMarcacaoElement) horarioMarcacaoElement.value = planMarc.toISOString().slice(0, 16);
+        
+        const planPrimeira = new Date(agora);
+        planPrimeira.setHours(8, 30, 0, 0);
+        const planPrimeiraElement = document.getElementById('planHorarioPrimeira');
+        if (planPrimeiraElement) planPrimeiraElement.value = planPrimeira.toISOString().slice(0, 16);
+        
+        const planUltimo = new Date(agora);
+        planUltimo.setHours(14, 30, 0, 0);
+        const planUltimoElement = document.getElementById('planHorarioUltimo');
+        if (planUltimoElement) planUltimoElement.value = planUltimo.toISOString().slice(0, 16);
+        
+        // Adiciona 5 pacientes padrão
+        if (typeof adicionarPaciente === 'function') {
+            // Verifica se já existem pacientes
+            const tbody = document.getElementById('corpoPacientes');
+            if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                for (let i = 0; i < 5; i++) adicionarPaciente();
+            }
+        }
+        
+        if (typeof inicializarAgendaPadrao === 'function') {
+            const agendaTbody = document.getElementById('corpoAgenda');
+            if (agendaTbody && agendaTbody.querySelectorAll('tr').length === 0) {
+                inicializarAgendaPadrao();
+            }
+        }
+        
+        if (typeof atualizarInfoIsotopo === 'function') atualizarInfoIsotopo();
+    }
+    
+    // 3. Inicia o auto-save
+    iniciarAutoSave();
+    
+    // 4. Recalcula tudo
+    setTimeout(function() {
+        if (typeof calcularMarcacao === 'function') calcularMarcacao();
+        setTimeout(function() { 
+            if (typeof calcularPacientes === 'function') calcularPacientes(); 
+        }, 100);
+        setTimeout(function() { 
+            if (typeof calcularPlanejamento === 'function') calcularPlanejamento(); 
+        }, 200);
+        setTimeout(function() { 
+            if (typeof calcularDosePediatrica === 'function') calcularDosePediatrica(); 
+        }, 300);
+    }, 400);
+    
+    // 5. Salva automaticamente após carregar
+    setTimeout(autoSalvar, 2000);
 };
-</script>
+// ====== FUNÇÕES DE CONTATO E NOTIFICAÇÃO ======
+
+function enviarEmailContato(event) {
+    if (event) event.preventDefault();
+    const email = 'fisixassessoria@gmail.com';
+    
+    // Tenta abrir o cliente de email
+    const mailtoLink = `mailto:${email}`;
+    window.location.href = mailtoLink;
+    
+    // Fallback: copia o email
+    setTimeout(() => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(email).then(() => {
+                mostrarFeedbackSalvamento('📧 Email copiado para a área de transferência!', 'success');
+            }).catch(() => {
+                copiarEmailFallback(email);
+            });
+        } else {
+            copiarEmailFallback(email);
+        }
+    }, 500);
+}
+
+function copiarEmailContato() {
+    const email = 'fisixassessoria@gmail.com';
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(() => {
+            mostrarFeedbackSalvamento('✅ Email copiado para a área de transferência!', 'success');
+        }).catch(() => {
+            copiarEmailFallback(email);
+        });
+    } else {
+        copiarEmailFallback(email);
+    }
+}
+
+function copiarEmailFallback(email) {
+    try {
+        const textArea = document.createElement('textarea');
+        textArea.value = email;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        textArea.style.top = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        mostrarFeedbackSalvamento('✅ Email copiado para a área de transferência!', 'success');
+    } catch (e) {
+        alert('📧 Envie um email para: ' + email);
+    }
+}
     <!-- ====== ALERTA DE PERDA DE DADOS ====== -->
-    <script>
     function temDadosParaPerder() {
         const tbody = document.getElementById('corpoPacientes');
         const temPacientes = tbody ? tbody.querySelectorAll('tr').length > 0 : false;
