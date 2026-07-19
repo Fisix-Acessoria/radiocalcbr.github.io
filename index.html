@@ -891,7 +891,7 @@
         <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
             <button class="btn-primary" onclick="calcularMarcacao()" style="flex: 2; min-width: 150px;" data-translate="marc_btn_calcular">📊 Calcular Marcação</button>
             <button class="btn-etiqueta" onclick="imprimirEtiquetaZebra()" style="flex: 1; min-width: 120px; background: linear-gradient(90deg, #00d2ff, #0077ff); color: #fff; border: none; border-radius: 10px; padding: 14px; font-weight: bold; cursor: pointer; transition: 0.3s;">
-                🏷️ Etiqueta Zebra
+                🏷️ Etiqueta
             </button>
         </div>
 
@@ -3248,7 +3248,7 @@ function imprimirEtiquetaZebra() {
     win.document.write(`
         <html>
         <head>
-            <title>Etiqueta Zebra 50x30mm</title>
+            <title>Etiqueta 50x30mm</title>
             <style>
                 * { margin: 0; padding: 0; box-sizing: border-box; }
                 body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
@@ -3270,7 +3270,7 @@ function imprimirEtiquetaZebra() {
             </style>
         </head>
         <body>
-            <h2>🏷️ Etiqueta Zebra 50x30mm</h2>
+            <h2>🏷️ Etiqueta 50x30mm</h2>
             <div class="dados-resumo">
                 📋 <strong>${radiofarmacoNome}</strong> · 
                 ${atividadeTotal} mCi · 
