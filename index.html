@@ -904,7 +904,8 @@
                     <div class="stat-card vermelho"><div class="rotulo" data-translate="marc_diferenca">Diferença</div><div class="valor" id="diferencaMarcacao">--</div></div>
                 </div>
                 <div class="info-box" id="infoBoxMarcacao">
-                    <strong data-translate="marc_atencao">⚠️ Atenção:</strong> <span id="infoTextoMarcacao" data-translate="marc_info_texto">A atividade de marcação não deve exceder a atividade disponível.</span>
+                    <strong data-translate="marc_atencao">⚠️ Atenção:</strong> <span id="infoTextoMarcacao" data-translate="marc_info_texto">A atividade de marcação deve estar em conformidade com as especificações técnicas do fabricante e as boas práticas de manipulação.
+</span>
                 </div>
             </div>
         </div>
@@ -1514,7 +1515,7 @@ const translations = {
         marc_disponivel: "Disponível",
         marc_diferenca: "Diferença",
         marc_atencao: "⚠️ Atenção:",
-        marc_info_texto: "A atividade de marcação não deve exceder a atividade disponível.",
+        marc_info_texto: "A atividade de marcação deve respeitar os limites estabelecidos pelas orientações do fabricante e protocolos institucionais.",
         pac_title: "👥 Administração de Pacientes",
         pac_desc: "<strong style='color: #ffd700;'>Baseado na Planilha v2.3</strong> · λ = 0.693 / meia-vida (min) · Δt = Horário Injeção - Marcação",
         pac_total: "Total de Pacientes:",
@@ -1655,7 +1656,7 @@ const translations = {
         marc_disponivel: "Available",
         marc_diferenca: "Difference",
         marc_atencao: "⚠️ Attention:",
-        marc_info_texto: "The labeling activity must not exceed the available activity.",
+        marc_info_texto: "The labeling activity must comply with the limits established by the manufacturer's guidelines and institutional protocols.",
         pac_title: "👥 Patient Administration",
         pac_desc: "<strong style='color: #ffd700;'>Based on Spreadsheet v2.3</strong> · λ = 0.693 / half-life (min) · Δt = Injection Time - Labeling Time",
         pac_total: "Total Patients:",
@@ -2925,7 +2926,27 @@ function gerarExcelPlanejamento() {
     // Cria os dados para o Excel
     const dados = [];
     
-    // Cabeçalho
+    // ===== CABEÇALHO DO RADIOCALCBR =====
+    dados.push(['==================================================']);
+    dados.push(['         ☢️ RADIOCALCBR - PLANEJAMENTO']);
+    dados.push(['==================================================']);
+    dados.push(['']);
+    dados.push(['📋 RELATÓRIO DE PLANEJAMENTO DE RADIOFÁRMACOS']);
+    dados.push(['']);
+    dados.push(['📅 Data/Hora:', new Date().toLocaleString('pt-BR')]);
+    dados.push(['🔬 Isótopo:', document.getElementById('isotopoLegenda')?.textContent || 'Tc-99m']);
+    dados.push(['📊 Atividade de Marcação:', document.getElementById('planAtividadeFinal')?.textContent || '--']);
+    dados.push(['📈 Dose Total Alvo:', document.getElementById('planDoseTotal')?.textContent || '--']);
+    dados.push(['✅ Sobra no Frasco:', document.getElementById('planSobraFinal')?.textContent || '--']);
+    dados.push(['📉 Aproveitamento:', document.getElementById('planAproveitamento')?.textContent || '--']);
+    dados.push(['📌 Status:', document.getElementById('planStatus')?.textContent || '--']);
+    dados.push(['']);
+    dados.push(['==================================================']);
+    dados.push(['📋 DISTRIBUIÇÃO POR PACIENTE']);
+    dados.push(['==================================================']);
+    dados.push([]); // linha em branco
+    
+    // Cabeçalho da tabela
     dados.push([
         '#', 
         'Horário', 
@@ -2952,15 +2973,16 @@ function gerarExcelPlanejamento() {
         }
     });
     
-    // Adiciona informações adicionais
-    dados.push([]); // linha em branco
-    dados.push(['RESUMO DO PLANEJAMENTO']);
-    dados.push(['Atividade de Marcação', document.getElementById('planAtividadeFinal').textContent]);
-    dados.push(['Dose Total Alvo', document.getElementById('planDoseTotal').textContent]);
-    dados.push(['Sobra no Frasco', document.getElementById('planSobraFinal').textContent]);
-    dados.push(['Aproveitamento', document.getElementById('planAproveitamento').textContent]);
-    dados.push(['Status', document.getElementById('planStatus').textContent]);
-    dados.push(['Data/Hora', new Date().toLocaleString('pt-BR')]);
+    // Rodapé
+    dados.push([]);
+    dados.push(['==================================================']);
+    dados.push(['📌 GERADO POR RADIOCALCBR']);
+    dados.push(['🔗 https://github.com/yourusername/radiocalcbr']);
+    dados.push(['📧 fisixassessoria@gmail.com']);
+    dados.push(['==================================================']);
+    dados.push(['⚠️ AVISO: Resultados devem ser validados clinicamente.']);
+    dados.push(['   O usuário é o único responsável pela aplicação.']);
+    dados.push(['==================================================']);
     
     // Cria a planilha
     const wb = XLSX.utils.book_new();
@@ -2968,19 +2990,19 @@ function gerarExcelPlanejamento() {
     
     // Ajusta largura das colunas
     ws['!cols'] = [
-        { wch: 6 },   // #
-        { wch: 20 },  // Horário
-        { wch: 18 },  // Dose Alvo
-        { wch: 20 },  // Dose Disponível
-        { wch: 18 },  // Dose Retirada
-        { wch: 22 },  // Atividade Restante
-        { wch: 15 }   // Status
+        { wch: 8 },   // #
+        { wch: 22 },  // Horário
+        { wch: 20 },  // Dose Alvo
+        { wch: 22 },  // Dose Disponível
+        { wch: 20 },  // Dose Retirada
+        { wch: 24 },  // Atividade Restante
+        { wch: 18 }   // Status
     ];
     
     XLSX.utils.book_append_sheet(wb, ws, 'Planejamento');
     
     // Gera e baixa o arquivo
-    const nomeArquivo = `Planejamento_RadioCalc_${new Date().toISOString().slice(0,10)}.xlsx`;
+    const nomeArquivo = `Planejamento_RadioCalcBR_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(wb, nomeArquivo);
 }
 
@@ -2996,8 +3018,27 @@ function gerarExcelPacientes() {
     
     trackEvent('gerar_excel_pacientes', 'relatorio', `${rows.length}_pacientes`);
     
-    // Cabeçalho
-    const dados = [[
+    const dados = [];
+    
+    // ===== CABEÇALHO DO RADIOCALCBR =====
+    dados.push(['==================================================']);
+    dados.push(['         ☢️ RADIOCALCBR - PACIENTES']);
+    dados.push(['==================================================']);
+    dados.push(['']);
+    dados.push(['📋 RELATÓRIO DE ADMINISTRAÇÃO DE PACIENTES']);
+    dados.push(['']);
+    dados.push(['📅 Data/Hora:', new Date().toLocaleString('pt-BR')]);
+    dados.push(['🔬 Isótopo:', NOME_ISOTOPO[isotopoAtual] || 'Tc-99m']);
+    dados.push(['⏱️ Meia-vida:', `${MEIA_VIDA_MIN[isotopoAtual] || 362} min`]);
+    dados.push(['📊 Total de Pacientes:', rows.length]);
+    dados.push(['']);
+    dados.push(['==================================================']);
+    dados.push(['📋 LISTA DE PACIENTES']);
+    dados.push(['==================================================']);
+    dados.push([]); // linha em branco
+    
+    // Cabeçalho da tabela
+    dados.push([
         '#', 
         'Nome', 
         'ID', 
@@ -3011,7 +3052,7 @@ function gerarExcelPacientes() {
         'Δt (min)', 
         'Ativ. Restante (mCi)',
         'Status'
-    ]];
+    ]);
     
     // Dados dos pacientes
     rows.forEach((row, idx) => {
@@ -3045,6 +3086,17 @@ function gerarExcelPacientes() {
         ]);
     });
     
+    // Rodapé
+    dados.push([]);
+    dados.push(['==================================================']);
+    dados.push(['📌 GERADO POR RADIOCALCBR']);
+    dados.push(['🔗 https://github.com/yourusername/radiocalcbr']);
+    dados.push(['📧 fisixassessoria@gmail.com']);
+    dados.push(['==================================================']);
+    dados.push(['⚠️ AVISO: Resultados devem ser validados clinicamente.']);
+    dados.push(['   O usuário é o único responsável pela aplicação.']);
+    dados.push(['==================================================']);
+    
     // Cria a planilha
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(dados);
@@ -3069,7 +3121,7 @@ function gerarExcelPacientes() {
     XLSX.utils.book_append_sheet(wb, ws, 'Pacientes');
     
     // Gera e baixa o arquivo
-    const nomeArquivo = `Pacientes_RadioCalc_${new Date().toISOString().slice(0,10)}.xlsx`;
+    const nomeArquivo = `Pacientes_RadioCalcBR_${new Date().toISOString().slice(0,10)}.xlsx`;
     XLSX.writeFile(wb, nomeArquivo);
 }
 
