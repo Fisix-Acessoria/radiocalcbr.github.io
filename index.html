@@ -2018,32 +2018,41 @@ function calcularPlanejamentoSimplificado() {
         pacientesOrdenados.push({ index: i, horario, dtMin: Math.max(0, dtMin), doseAlvo: dosePorPaciente });
     }
 
-    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) ======
+    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) - CORRIGIDO ======
     // Simula com 1 mCi para encontrar o fator de correção
     let atividadeSimulada = 1;
     let somaDosesAjustadas = 0;
-    
+    let atividadeAtual = atividadeSimulada;
+
+    // A simulação agora respeita a ordem correta: decaimento → subtração da dose
     for (let i = 0; i < pacientesOrdenados.length; i++) {
         const p = pacientesOrdenados[i];
-        if (i === 0) {
-            // Primeira injeção: decai desde a marcação
-            const fatorDec = Math.exp(-lambda * p.dtMin);
-            atividadeSimulada = atividadeSimulada * fatorDec;
-        } else {
-            // Injeções seguintes: decai APENAS desde a injeção anterior
+        
+        // Calcula o intervalo desde a injeção anterior (ou desde a marcação)
+        let intervaloMin = p.dtMin;
+        if (i > 0) {
             const anterior = pacientesOrdenados[i - 1];
-            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
-            if (dtDiferenca > 0) {
-                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
-                atividadeSimulada = atividadeSimulada * fatorDecEntre;
-            }
+            intervaloMin = (p.horario - anterior.horario) / (1000 * 60);
         }
-        // Retira a dose (simulada)
-        atividadeSimulada = Math.max(0, atividadeSimulada - 1);
+
+        // Aplica o decaimento desde a última subtração
+        if (intervaloMin > 0) {
+            const fatorDec = Math.exp(-lambda * intervaloMin);
+            atividadeAtual = atividadeAtual * fatorDec;
+        }
+
+        // Verifica se a dose está disponível
+        if (atividadeAtual < 1) {
+            // Se não houver atividade suficiente para 1 mCi, a correção aumenta
+            atividadeAtual = 1; // Reseta para evitar números negativos
+        }
+
+        // Subtrai a dose simulada (1 mCi)
+        atividadeAtual = Math.max(0, atividadeAtual - 1);
         somaDosesAjustadas += 1;
     }
 
-    // Atividade exata necessária (sem margem)
+    // O fator de correção é a razão entre a soma das doses ajustadas e o número de pacientes
     const fatorCorrecao = somaDosesAjustadas / numPacientes;
     const atividadeExata = (dosePorPaciente * numPacientes) * fatorCorrecao;
 
@@ -2265,29 +2274,42 @@ function calcularPlanejamentoAgenda() {
     }
     pacientesAgenda.sort((a, b) => a.horario - b.horario);
 
-    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) ======
+    // ====== CÁLCULO DA ATIVIDADE EXATA (SEM MARGEM) - CORRIGIDO ======
     let atividadeSimulada = 1;
     let somaDosesAjustadas = 0;
-    
+    let atividadeAtual = atividadeSimulada;
+
+    // A simulação agora respeita a ordem correta: decaimento → subtração da dose
     for (let i = 0; i < pacientesAgenda.length; i++) {
         const p = pacientesAgenda[i];
-        if (i === 0) {
-            const fatorDec = Math.exp(-lambda * p.dtMin);
-            atividadeSimulada = atividadeSimulada * fatorDec;
-        } else {
+        
+        // Calcula o intervalo desde a injeção anterior (ou desde a marcação)
+        let intervaloMin = p.dtMin;
+        if (i > 0) {
             const anterior = pacientesAgenda[i - 1];
-            const dtDiferenca = (p.horario - anterior.horario) / (1000 * 60);
-            if (dtDiferenca > 0) {
-                const fatorDecEntre = Math.exp(-lambda * dtDiferenca);
-                atividadeSimulada = atividadeSimulada * fatorDecEntre;
-            }
+            intervaloMin = (p.horario - anterior.horario) / (1000 * 60);
         }
-        atividadeSimulada = Math.max(0, atividadeSimulada - 1);
+
+        // Aplica o decaimento desde a última subtração
+        if (intervaloMin > 0) {
+            const fatorDec = Math.exp(-lambda * intervaloMin);
+            atividadeAtual = atividadeAtual * fatorDec;
+        }
+
+        // Verifica se a dose está disponível
+        if (atividadeAtual < 1) {
+            // Se não houver atividade suficiente para 1 mCi, a correção aumenta
+            atividadeAtual = 1; // Reseta para evitar números negativos
+        }
+
+        // Subtrai a dose simulada (1 mCi)
+        atividadeAtual = Math.max(0, atividadeAtual - 1);
         somaDosesAjustadas += 1;
     }
 
-    const fatorCorrecao = somaDosesAjustadas / numPacientes;
-    const atividadeExata = (dosePorPaciente * numPacientes) * fatorCorrecao;
+    // O fator de correção é a razão entre a soma das doses ajustadas e o número de pacientes
+    const fatorCorrecao = somaDosesAjustadas / pacientesAgenda.length;
+    const atividadeExata = (dosePorPaciente * pacientesAgenda.length) * fatorCorrecao;
 
     // ====== APLICA A MARGEM DE SEGURANÇA ======
     const margem = atividadeExata * (margemPercent / 100);
@@ -3300,6 +3322,22 @@ function imprimirEtiquetaA4() {
 }
 
 // ====== PACIENTES ======
+function processarAtualizacaoPaciente(index, inputEl = null) {
+    if (typeof recalcularDosePaciente === 'function') {
+        recalcularDosePaciente(index);
+    }
+
+    if (inputEl && (inputEl.id?.startsWith('rejeito_') || inputEl.id?.startsWith('horaRejeito_'))) {
+        if (typeof calcularDoseComRejeitoCorrigido === 'function') {
+            calcularDoseComRejeitoCorrigido(index);
+        }
+    }
+
+    if (typeof calcularPacientes === 'function') {
+        calcularPacientes();
+    }
+}
+
 function adicionarPaciente() {
     if (contadorPacientes >= MAX_PACIENTES) { alert(`Limite máximo de ${MAX_PACIENTES} pacientes atingido!`); return; }
     const index = contadorPacientes;
@@ -3335,29 +3373,10 @@ function adicionarPaciente() {
     atualizarContadorPacientes();
     trackEvent('adicionar_paciente', 'pacientes', `total_${contadorPacientes}`);
  const inputs = tr.querySelectorAll('input');
-inputs.forEach(input => {
-    input.addEventListener('change', () => { 
-        recalcularDosePaciente(index); 
-        
-        // Se for o campo rejeito ou horaRejeito, corrige a dose
-        if (input.id && (input.id.startsWith('rejeito_') || input.id.startsWith('horaRejeito_'))) {
-            calcularDoseComRejeitoCorrigido(index);
-        }
-        
-        calcularPacientes(); 
+    inputs.forEach(input => {
+        input.addEventListener('change', () => processarAtualizacaoPaciente(index, input));
+        input.addEventListener('input', () => processarAtualizacaoPaciente(index, input));
     });
-    input.addEventListener('input', () => { 
-        recalcularDosePaciente(index); 
-        
-        // Se for o campo rejeito ou horaRejeito, corrige a dose
-        if (input.id && (input.id.startsWith('rejeito_') || input.id.startsWith('horaRejeito_'))) {
-            calcularDoseComRejeitoCorrigido(index);
-        }
-        
-        calcularPacientes(); 
-    });
-});
-    setTimeout(() => calcularPacientes(), 50);
 }
 
 function recalcularDosePaciente(index) {
@@ -3367,17 +3386,23 @@ function recalcularDosePaciente(index) {
     const doseMedidaInput = document.getElementById(`doseMedida_${index}`);
     const rejeitoInput = document.getElementById(`rejeito_${index}`);
     const doseAdministradaEl = document.getElementById(`doseAdministrada_${index}`);
+
     if (pesoInput && doseKgInput && doseCalculadaEl) {
         const peso = parseFloat(pesoInput.value) || 0;
         const doseKg = parseFloat(doseKgInput.value) || 0;
         doseCalculadaEl.textContent = (peso * doseKg).toFixed(2);
     }
-    if (doseMedidaInput && rejeitoInput && doseAdministradaEl) {
+
+    if (doseMedidaInput && doseAdministradaEl) {
         const doseMedida = parseFloat(doseMedidaInput.value) || 0;
-        const rejeito = parseFloat(rejeitoInput.value) || 0;
+        const rejeito = parseFloat(rejeitoInput?.value) || 0;
         const doseAdmin = doseMedida - rejeito;
         doseAdministradaEl.textContent = doseAdmin.toFixed(2);
         doseAdministradaEl.style.color = doseAdmin < 0 ? '#ff6b6b' : '#00ff88';
+    }
+
+    if (typeof calcularDoseComRejeitoCorrigido === 'function') {
+        calcularDoseComRejeitoCorrigido(index);
     }
 }
 // ====== CALCULA DOSE ADMINISTRADA COM REJEITO CORRIGIDO ======
@@ -3502,14 +3527,8 @@ function reordenarPacientes() {
         
         const inputs = tr.querySelectorAll('input');
         inputs.forEach(input => {
-            input.addEventListener('change', () => { 
-                recalcularDosePaciente(novoIndex); 
-                calcularPacientes(); 
-            });
-            input.addEventListener('input', () => { 
-                recalcularDosePaciente(novoIndex); 
-                calcularPacientes(); 
-            });
+            input.addEventListener('change', () => processarAtualizacaoPaciente(novoIndex, input));
+            input.addEventListener('input', () => processarAtualizacaoPaciente(novoIndex, input));
         });
     });
     
@@ -3546,18 +3565,20 @@ function calcularPacientes() {
             const horaInjecao = new Date(horaInjecaoInput.value);
             const peso = parseFloat(pesoInput?.value) || 0;
             const doseKg = parseFloat(doseKgInput?.value) || 0;
-          const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
-const rejeito = parseFloat(rejeitoInput?.value) || 0;
-const doseCalculada = peso * doseKg;
+            const doseMedida = parseFloat(doseMedidaInput?.value) || 0;
+            const rejeito = parseFloat(rejeitoInput?.value) || 0;
+            const doseCalculada = peso * doseKg;
 
-// Usa o valor já corrigido da célula, se disponível
-const doseAdminEl = document.getElementById(`doseAdministrada_${index}`);
-let doseAdministrada = 0;
-if (doseAdminEl && doseAdminEl.textContent !== '--') {
-    doseAdministrada = parseFloat(doseAdminEl.textContent) || 0;
-} else {
-    doseAdministrada = doseMedida - rejeito;
-}
+            if (typeof calcularDoseComRejeitoCorrigido === 'function') {
+                calcularDoseComRejeitoCorrigido(index);
+            }
+
+            let doseAdministrada = 0;
+            if (doseAdminEl && doseAdminEl.textContent !== '--') {
+                doseAdministrada = parseFloat(doseAdminEl.textContent) || 0;
+            } else {
+                doseAdministrada = doseMedida - rejeito;
+            }
             if (doseCalcEl) doseCalcEl.textContent = doseCalculada.toFixed(2);
             if (doseAdminEl) { doseAdminEl.textContent = doseAdministrada.toFixed(2); doseAdminEl.style.color = doseAdministrada < 0 ? '#ff6b6b' : '#00ff88'; }
             if (!isNaN(horaInjecao.getTime()) && horarioMarcacao) {
@@ -3667,15 +3688,23 @@ function calcularDosePediatrica() {
             return;
         }
         
-        // Encontra o multiplicador para o peso
-        let multiplicadorObj = EANM_MULTIPLICADORES.find(m => 
-            peso >= m.pesoMin && peso <= m.pesoMax
-        );
-        // Se o peso for maior que 68kg, usa o último multiplicador
-        if (!multiplicadorObj && peso > 68) {
-            multiplicadorObj = EANM_MULTIPLICADORES[EANM_MULTIPLICADORES.length - 1];
+        let multiplicador = 1.0;
+
+        if (peso <= 70) {
+            const multiplicadorObj = EANM_MULTIPLICADORES.find(m => 
+                peso >= m.pesoMin && peso <= m.pesoMax
+            );
+            multiplicador = multiplicadorObj ? multiplicadorObj.mult : 1.0;
+        } else {
+            const ultimo = EANM_MULTIPLICADORES[EANM_MULTIPLICADORES.length - 1];
+            const anterior = EANM_MULTIPLICADORES[EANM_MULTIPLICADORES.length - 2];
+            if (ultimo) {
+                const faixaPeso = anterior && anterior.pesoMax ? Math.max(1, ultimo.pesoMax - anterior.pesoMax) : 1;
+                const faixaMult = anterior ? ultimo.mult - anterior.mult : 0;
+                const inclinacao = faixaPeso > 0 ? faixaMult / faixaPeso : 0;
+                multiplicador = Math.max(ultimo.mult + inclinacao * (peso - ultimo.pesoMax), ultimo.mult);
+            }
         }
-        const multiplicador = multiplicadorObj ? multiplicadorObj.mult : 1.0;
         
         // Calcula a dose em MBq
         let doseMBq = dadosEANM.basal * multiplicador;
@@ -4265,6 +4294,8 @@ function debounce(func, wait) {
     };
 }
 
+const autoSalvarDebounced = debounce(autoSalvar, 600);
+
 // ====== INICIAR AUTO-SAVE ======
 function iniciarAutoSave() {
     // ===== SALVAMENTO AUTOMÁTICO A CADA 2 HORAS =====
@@ -4273,7 +4304,7 @@ function iniciarAutoSave() {
     // ===== SALVA AO TROCAR DE ABA =====
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-            setTimeout(autoSalvar, 100);
+            autoSalvarDebounced();
         });
     });
 
@@ -4424,25 +4455,26 @@ function copiarEmailFallback(email) {
         alert('📧 Envie um email para: ' + email);
     }
 }
-    <!-- ====== ALERTA DE PERDA DE DADOS ====== -->
-    function temDadosParaPerder() {
-        const tbody = document.getElementById('corpoPacientes');
-        const temPacientes = tbody ? tbody.querySelectorAll('tr').length > 0 : false;
-        const temHistorico = typeof historicoPlanejamento !== 'undefined' && historicoPlanejamento.length > 0;
-        const resultadoPlanejamento = document.getElementById('resultadoPlanejamento');
-        const temCalculos = resultadoPlanejamento ? resultadoPlanejamento.style.display !== 'none' : false;
-        return temPacientes || temHistorico || temCalculos;
+
+// ====== ALERTA DE PERDA DE DADOS ======
+function temDadosParaPerder() {
+    const tbody = document.getElementById('corpoPacientes');
+    const temPacientes = tbody ? tbody.querySelectorAll('tr').length > 0 : false;
+    const temHistorico = typeof historicoPlanejamento !== 'undefined' && historicoPlanejamento.length > 0;
+    const resultadoPlanejamento = document.getElementById('resultadoPlanejamento');
+    const temCalculos = resultadoPlanejamento ? resultadoPlanejamento.style.display !== 'none' : false;
+    return temPacientes || temHistorico || temCalculos;
+}
+
+window.addEventListener('beforeunload', function(e) {
+    if (temDadosParaPerder()) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '⚠️ ATENÇÃO: Todos os dados da sessão atual serão perdidos ao recarregar a página. Deseja continuar?';
     }
+});
 
-    window.addEventListener('beforeunload', function(e) {
-        if (temDadosParaPerder()) {
-            e.preventDefault();
-            e.returnValue = '';
-            return '⚠️ ATENÇÃO: Todos os dados da sessão atual serão perdidos ao recarregar a página. Deseja continuar?';
-        }
-    });
-
-    console.log('✅ Alerta de perda de dados ativado!');
+console.log('✅ Alerta de perda de dados ativado!');
     </script>
 </body>
 </html>
