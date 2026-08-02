@@ -933,7 +933,6 @@
                     <thead>
                         <tr>
                             <th style="width: 25px;" data-translate="pac_col_num">#</th>
-                            <th style="min-width: 75px;" data-translate="pac_col_nome">Nome</th>
                             <th style="min-width: 55px;" data-translate="pac_col_id">ID</th>
                             <th style="min-width: 45px;" data-translate="pac_col_peso">Peso (kg)</th>
                             <th style="min-width: 60px;" data-translate="pac_col_dose_kg">Dose/kg (mCi/kg)</th>
@@ -3059,7 +3058,6 @@ function gerarExcelPacientes() {
     // Cabeçalho da tabela
     dados.push([
         '#', 
-        'Nome', 
         'ID', 
         'Peso (kg)', 
         'Dose/kg (mCi/kg)', 
@@ -3075,7 +3073,6 @@ function gerarExcelPacientes() {
     
     // Dados dos pacientes
     rows.forEach((row, idx) => {
-        const nome = document.getElementById(`nomePaciente_${idx}`)?.value || '-';
         const id = document.getElementById(`idPaciente_${idx}`)?.value || '-';
         const peso = parseFloat(document.getElementById(`pesoPaciente_${idx}`)?.value) || 0;
         const doseKg = parseFloat(document.getElementById(`doseKgPaciente_${idx}`)?.value) || 0;
@@ -3090,7 +3087,6 @@ function gerarExcelPacientes() {
         
         dados.push([
             idx + 1,
-            nome,
             id,
             peso,
             doseKg,
@@ -3123,7 +3119,6 @@ function gerarExcelPacientes() {
     // Ajusta largura das colunas
     ws['!cols'] = [
         { wch: 5 },   // #
-        { wch: 25 },  // Nome
         { wch: 15 },  // ID
         { wch: 12 },  // Peso
         { wch: 18 },  // Dose/kg
@@ -3354,7 +3349,6 @@ function adicionarPaciente() {
     tr.dataset.index = index;
     tr.innerHTML = `
         <td class="num-paciente">${index + 1}</td>
-<td><input type="text" id="nomePaciente_${index}" placeholder="${translations[currentLang].pac_col_nome}" value="Paciente ${index + 1}"></td>
 <td><input type="text" id="idPaciente_${index}" placeholder="${translations[currentLang].pac_col_id}" value="P-${String(10000 + index).padStart(5, '0')}"></td>
 <td><input type="number" id="pesoPaciente_${index}" value="" placeholder="kg" step="0.1" min="1"></td>
 <td><input type="number" id="doseKgPaciente_${index}" value="" placeholder="mCi/kg" step="0.01" min="0.01"></td>
@@ -3482,7 +3476,6 @@ function reordenarPacientes() {
     const dadosPacientes = [];
     rows.forEach((row) => {
         const idx = parseInt(row.dataset.index);
-        const nome = document.getElementById(`nomePaciente_${idx}`)?.value || '';
         const id = document.getElementById(`idPaciente_${idx}`)?.value || '';
         const peso = document.getElementById(`pesoPaciente_${idx}`)?.value || '';
         const doseKg = document.getElementById(`doseKgPaciente_${idx}`)?.value || '';
@@ -3492,7 +3485,7 @@ function reordenarPacientes() {
         const horaRejeito = document.getElementById(`horaRejeito_${idx}`)?.value || '';
         const doseCalculada = document.getElementById(`doseCalculada_${idx}`)?.textContent || '';
         const doseAdministrada = document.getElementById(`doseAdministrada_${idx}`)?.textContent || '';
-        dadosPacientes.push({ idx, nome, id, peso, doseKg, hora, doseMedida, rejeito, horaRejeito, doseCalculada, doseAdministrada });
+        dadosPacientes.push({ idx, id, peso, doseKg, hora, doseMedida, rejeito, horaRejeito, doseCalculada, doseAdministrada });
     });
     
     // Ordena por horário de injeção
@@ -3508,7 +3501,6 @@ function reordenarPacientes() {
         tr.dataset.index = novoIndex;
         tr.innerHTML = `
             <td class="num-paciente">${novoIndex + 1}</td>
-            <td><input type="text" id="nomePaciente_${novoIndex}" placeholder="${translations[currentLang].pac_col_nome}" value="${dado.nome}"></td>
             <td><input type="text" id="idPaciente_${novoIndex}" placeholder="${translations[currentLang].pac_col_id}" value="${dado.id}"></td>
             <td><input type="number" id="pesoPaciente_${novoIndex}" value="${dado.peso}" step="0.1" min="1"></td>
             <td><input type="number" id="doseKgPaciente_${novoIndex}" value="${dado.doseKg}" step="0.01" min="0.01"></td>
@@ -3855,7 +3847,6 @@ function salvarTodosOsDados() {
                 const idx = parseInt(row.dataset.index);
                 if (!isNaN(idx)) {
                     dados.pacientes.push({
-                        nome: document.getElementById(`nomePaciente_${idx}`)?.value || '',
                         id: document.getElementById(`idPaciente_${idx}`)?.value || '',
                         peso: document.getElementById(`pesoPaciente_${idx}`)?.value || '',
                         doseKg: document.getElementById(`doseKgPaciente_${idx}`)?.value || '',
@@ -4169,7 +4160,6 @@ function carregarTodosOsDados() {
                     tr.dataset.index = index;
                     tr.innerHTML = `
                         <td class="num-paciente">${index + 1}</td>
-                        <td><input type="text" id="nomePaciente_${index}" placeholder="Nome" value="${paciente.nome || `Paciente ${index + 1}`}"></td>
                         <td><input type="text" id="idPaciente_${index}" placeholder="ID" value="${paciente.id || `P-${String(10000 + index).padStart(5, '0')}`}"></td>
                         <td><input type="number" id="pesoPaciente_${index}" value="${paciente.peso || ''}" placeholder="kg" step="0.1" min="1"></td>
                         <td><input type="number" id="doseKgPaciente_${index}" value="${paciente.doseKg || ''}" placeholder="mCi/kg" step="0.01" min="0.01"></td>
