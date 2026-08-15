@@ -150,7 +150,7 @@
         <button class="tab-btn" onclick="trocarAba('pediatrica')" data-translate="aba_pediatrica">👶 Dose Pediátrica</button>
     </div>
 
-    <!-- ===== ABA 1: PLANEJAMENTO OTIMIZADO ===== -->
+       <!-- ===== ABA 1: PLANEJAMENTO OTIMIZADO ===== -->
     <div id="aba-planejamento" class="tab-content active">
         <div class="card">
             <h3 class="card-title" style="color: #ff6b9d;" data-translate="plan_title">📋 Planejamento de Atividade</h3>
@@ -164,6 +164,62 @@
                     ⚡ Otimizado para sobra mínima
                 </span>
             </p>
+
+            <!-- ===== CALCULADORA DE MÚLTIPLAS ELUIÇÕES (DENTRO DO CARD) ===== -->
+            <div id="calculadora-multi-eluicoes" style="margin-top: 20px; margin-bottom: 30px; border: 1px solid rgba(155, 89, 182, 0.3); border-radius: 12px; padding: 20px; background: rgba(155, 89, 182, 0.05);">
+                <h3 style="color: #9b59b6; margin-bottom: 10px;">🔄 Calculadora de Múltiplas Eluições</h3>
+                <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">
+                    Calcule a atividade de <strong style="color: #00d2ff;">Tc-99m</strong> disponível para uma <strong style="color: #ffd700;">nova eluição</strong>, 
+                    considerando o tempo de recrescimento após a <strong style="color: #ff6b6b;">última eluição</strong> realizada.
+                </p>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+
+                    <!-- Coluna 1: Dados do Gerador -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 10px;">
+                        <h4 style="margin-top: 0; color: #00d2ff; font-size: 0.95rem;">📦 Dados do Gerador</h4>
+                        <div class="input-group">
+                            <label style="color: #ccc; font-size: 0.85rem;">Atividade nominal do Mo-99 (mCi):</label>
+                            <select id="atividade-nominal-multi" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
+                                <option value="2000">2000 mCi</option>
+                                <option value="1500">1500 mCi</option>
+                                <option value="1000" selected>1000 mCi</option>
+                                <option value="750">750 mCi</option>
+                                <option value="500">500 mCi</option>
+                                <option value="250">250 mCi</option>
+                            </select>
+                            <small style="color: #888; font-size: 0.75rem;">Atividade do Mo-99 no momento da calibração</small>
+                        </div>
+                        <div class="input-group" style="margin-top: 12px;">
+                            <label style="color: #ccc; font-size: 0.85rem;">Data/Hora da calibração:</label>
+                            <input type="datetime-local" id="data-calibracao-multi" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff;">
+                            <small style="color: #888; font-size: 0.75rem;">Data e hora fornecidas pelo fabricante</small>
+                        </div>
+                    </div>
+
+                    <!-- Coluna 2: Última e Nova Eluição -->
+                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 10px;">
+                        <h4 style="margin-top: 0; color: #ffd700; font-size: 0.95rem;">⏰ Eluições</h4>
+                        <div class="input-group">
+                            <label style="color: #ccc; font-size: 0.85rem;">Data/Hora da Última Eluição:</label>
+                            <input type="datetime-local" id="data-ultima-eluicao-multi" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff;">
+                            <small style="color: #888; font-size: 0.75rem;">Quando você eluiu pela última vez</small>
+                        </div>
+                        <div class="input-group" style="margin-top: 12px;">
+                            <label style="color: #ccc; font-size: 0.85rem;">Data/Hora da Nova Eluição:</label>
+                            <input type="datetime-local" id="data-nova-eluicao-multi" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff;">
+                            <small style="color: #888; font-size: 0.75rem;">Quando você quer eluir agora</small>
+                        </div>
+                        <button onclick="calcularMultiEluicao()" style="margin-top: 15px; padding: 12px 20px; background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 1em; font-weight: bold; transition: 0.3s;">
+                            ⚡ Calcular Nova Eluição
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Resultados -->
+                <div id="resultado-multi-eluicoes" style="margin-top: 20px;"></div>
+            </div>
 
             <!-- Seletor de modo -->
             <div class="mode-selector" id="modeSelector">
@@ -184,7 +240,7 @@
                     <div class="input-group">
                         <label data-translate="plan_isotopo">Isótopo</label>
                         <select id="planIsotopo" onchange="calcularPlanejamento()">
-                            <option value="tc">🔵 Tc-99m (meia-vida: 362 min)</option>
+                            <option value="tc" selected>🔵 Tc-99m (meia-vida: 362 min)</option>
                             <option value="f18">🟢 F-18 (meia-vida: 109.77 min)</option>
                             <option value="i123">🟡 I-123 (meia-vida: 792 min)</option>
                         </select>
@@ -239,7 +295,7 @@
                     <div class="input-group">
                         <label data-translate="plan_isotopo">Isótopo</label>
                         <select id="planIsotopoAgenda" onchange="calcularPlanejamento()">
-                            <option value="tc">🔵 Tc-99m (meia-vida: 362 min)</option>
+                            <option value="tc" selected>🔵 Tc-99m (meia-vida: 362 min)</option>
                             <option value="f18">🟢 F-18 (meia-vida: 109.77 min)</option>
                             <option value="i123">🟡 I-123 (meia-vida: 792 min)</option>
                         </select>
@@ -396,16 +452,18 @@
                 </div>
             </div>
 
-           <div class="info-box planejamento" style="margin-top: 15px; text-align: left !important;">
-    <strong style="color: #ff6b9d; display: block;" data-translate="plan_exemplo">📌 Exemplo Prático:</strong>
-    <span style="color: #aaa; font-size: 0.85rem; display: block;" data-translate="plan_exemplo_texto">
-        <strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>
-        Tc-99m (meia-vida: 362 min) · Margem: 10%<br>
-        → Atividade de marcação otimizada: <strong style="color: #ffd700;">~405 mCi</strong> (sobra mínima!)
-    </span>
-</div>
-        </div>
-    </div>
+            <div class="info-box planejamento" style="margin-top: 15px; text-align: left !important;">
+                <strong style="color: #ff6b9d; display: block;" data-translate="plan_exemplo">📌 Exemplo Prático:</strong>
+                <span style="color: #aaa; font-size: 0.85rem; display: block;" data-translate="plan_exemplo_texto">
+                    <strong>15 pacientes</strong> · Dose: <strong>15 mCi</strong> cada · 1ª injeção: <strong>07:30</strong> · Última: <strong>14:30</strong><br>
+                    Tc-99m (meia-vida: 362 min) · Margem: 10%<br>
+                    → Atividade de marcação otimizada: <strong style="color: #ffd700;">~405 mCi</strong> (sobra mínima!)
+                </span>
+            </div>
+
+        </div>  
+    </div>      
+
 
     <!-- ===== ABA 2: MARCAÇÃO ===== -->
 <div id="aba-marcacao" class="tab-content">
@@ -505,23 +563,125 @@
             </button>
         </div>
 
-        <div id="resultadoMarcacaoContainer" class="resultado-box">
-            <div class="card">
-                <h3 class="card-title" data-translate="marc_resultado">📊 Resultados da Marcação</h3>
-                <div class="grid-3" id="resultadoMarcacaoInfo">
-                    <div class="stat-card destaque"><div class="rotulo" data-translate="marc_total_marcado">Atividade Total Marcada</div><div class="valor" id="totalMarcado">--</div></div>
-                    <div class="stat-card"><div class="rotulo" data-translate="marc_disponivel">Disponível</div><div class="valor" id="disponivelGerador">--</div></div>
-                    <div class="stat-card vermelho"><div class="rotulo" data-translate="marc_diferenca">Diferença</div><div class="valor" id="diferencaMarcacao">--</div></div>
-                </div>
-                <div class="info-box" id="infoBoxMarcacao">
-                    <strong data-translate="marc_atencao">⚠️ Atenção:</strong> <span id="infoTextoMarcacao" data-translate="marc_info_texto">A atividade de marcação deve estar em conformidade com as especificações técnicas do fabricante e as boas práticas de manipulação.
-</span>
-                </div>
+
+    </div>
+    <!-- ===== EFICIÊNCIA DE MARCAÇÃO ===== -->
+<div id="secaoEficienciaMarcacao" style="margin-top: 25px; border-top: 2px solid rgba(255,215,0,0.2); padding-top: 20px;">
+    <h4 style="color: #ffd700; margin-bottom: 15px;">🧪 Eficiência de Marcação</h4>
+    <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 15px;">
+        Calcule a pureza radioquímica do radiofármaco marcado com base nas atividades das frações cromatográficas.
+        <span style="display: inline-block; margin-left: 10px; background: rgba(0,210,255,0.1); padding: 2px 12px; border-radius: 12px; color: #00d2ff; font-size: 0.75rem;">
+            Referência: USP 40 e bulas dos fabricantes
+        </span>
+    </p>
+
+    <div class="grid-3" style="align-items: end;">
+        <div class="input-group">
+            <label style="color: #ccc; font-size: 0.85rem;">Radiofármaco / Kit</label>
+            <select id="kitMarcacao" onchange="atualizarCamposEficiencia()" style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
+                <option value="kardia">💚 KARDIA (MIBI)</option>
+                <option value="osteo">🦴 OSTEO (MDP)</option>
+                <option value="limpha">💧 LIMPHA (FITATO)</option>
+                <option value="reno">🫘 RENO (DMSA)</option>
+                <option value="nefro">🧬 NEFRO (DTPA)</option>
+                <option value="piro">🩸 PIRO</option>
+            </select>
+            <small style="color: #888; font-size: 0.75rem;">Selecione o kit para ver as fórmulas específicas</small>
+        </div>
+
+        <!-- ===== DADOS DA PLACA 1 ===== -->
+        <div style="background: rgba(46, 204, 113, 0.08); border: 1px solid rgba(46, 204, 113, 0.2); padding: 15px; border-radius: 8px;">
+            <h5 style="color: #2ecc71; margin: 0 0 10px 0; font-size: 0.9rem;">📊 Placa 1</h5>
+            <div class="input-group" style="margin-bottom: 8px;">
+                <label style="color: #ccc; font-size: 0.8rem;">Atividade Fração 1 (cpm/mCi)</label>
+                <input type="number" id="placa1Fracao1" value="95" step="any" min="0" oninput="calcularEficienciaMarcacao()" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+                <label style="color: #ccc; font-size: 0.8rem;">Atividade Fração 2 (cpm/mCi)</label>
+                <input type="number" id="placa1Fracao2" value="5" step="any" min="0" oninput="calcularEficienciaMarcacao()" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
             </div>
         </div>
 
-    </div> <!-- ⬅️ FECHA O CARD DA MARCAÇÃO -->
-</div> <!-- ⬅️ FECHA A ABA DE MARCAÇÃO -->
+        <!-- ===== DADOS DA PLACA 2 ===== -->
+        <div style="background: rgba(241, 196, 15, 0.08); border: 1px solid rgba(241, 196, 15, 0.2); padding: 15px; border-radius: 8px;">
+            <h5 style="color: #f1c40f; margin: 0 0 10px 0; font-size: 0.9rem;">📊 Placa 2</h5>
+            <div class="input-group" style="margin-bottom: 8px;">
+                <label style="color: #ccc; font-size: 0.8rem;">Atividade Fração 1 (cpm/mCi)</label>
+                <input type="number" id="placa2Fracao1" value="2" step="any" min="0" oninput="calcularEficienciaMarcacao()" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+                <label style="color: #ccc; font-size: 0.8rem;">Atividade Fração 2 (cpm/mCi)</label>
+                <input type="number" id="placa2Fracao2" value="98" step="any" min="0" oninput="calcularEficienciaMarcacao()" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #444; background: rgba(255,255,255,0.05); color: #fff; font-size: 0.95rem;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Calcular -->
+    <div style="margin-top: 15px;">
+        <button onclick="calcularEficienciaMarcacao()" style="padding: 12px 30px; background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; font-weight: bold; transition: 0.3s;">
+            🔬 Calcular Eficiência de Marcação
+        </button>
+        <button onclick="limparCamposEficiencia()" style="padding: 12px 20px; background: rgba(255,255,255,0.05); color: #888; border: 1px solid #444; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: 0.3s; margin-left: 10px;">
+            🗑️ Limpar
+        </button>
+    </div>
+
+    <!-- Resultados -->
+    <div id="resultadoEficienciaMarcacao" style="display: none; margin-top: 20px;">
+        <div style="background: rgba(255,255,255,0.03); border: 2px solid rgba(155, 89, 182, 0.3); padding: 20px; border-radius: 10px;">
+            <h4 style="margin-top: 0; color: #9b59b6;">✅ Resultado da Eficiência de Marcação</h4>
+
+            <!-- Cards de Resultado -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin: 15px 0;">
+                <div style="background: rgba(46, 204, 113, 0.15); padding: 20px; border-radius: 8px; border: 1px solid rgba(46, 204, 113, 0.2); text-align: center;">
+                    <strong style="color: #aaa;">Placa 1</strong><br>
+                    <span style="font-size: 2em; color: #2ecc71;" id="resultadoPlaca1">--%</span>
+                    <br><small id="placa1Detalhe" style="color: #888;">--</small>
+                </div>
+                <div style="background: rgba(241, 196, 15, 0.15); padding: 20px; border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.2); text-align: center;">
+                    <strong style="color: #aaa;">Placa 2</strong><br>
+                    <span style="font-size: 2em; color: #f1c40f;" id="resultadoPlaca2">--%</span>
+                    <br><small id="placa2Detalhe" style="color: #888;">--</small>
+                </div>
+                <div style="background: rgba(0, 210, 255, 0.15); padding: 20px; border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.2); text-align: center;">
+                    <strong style="color: #aaa;">🧪 Pureza Radioquímica</strong><br>
+                    <span style="font-size: 2em; color: #00d2ff;" id="resultadoPureza">--%</span>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div id="statusEficienciaContainer" style="margin-top: 15px; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71; background: rgba(46, 204, 113, 0.05);">
+                <strong id="statusEficienciaTitulo" style="color: #2ecc71;">✅ APROVADO</strong>
+                <span id="statusEficienciaTexto" style="color: #aaa; font-size: 0.9rem; margin-left: 10px;">
+                    A pureza radioquímica está dentro dos padrões exigidos.
+                </span>
+            </div>
+
+            <!-- Informações do Kit -->
+            <div style="background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.1); padding: 15px; border-radius: 8px; margin-top: 10px;">
+                <strong style="color: #00d2ff;">📋 Detalhes do Cálculo:</strong><br>
+                <span style="color: #aaa; font-size: 0.9rem;">
+                    • Kit: <strong id="kitNomeResultado" style="color: #fff;">--</strong><br>
+                    • Fórmula: <span id="formulaEficiencia" style="color: #ffd700;">--</span>
+                </span>
+            </div>
+
+            <!-- Referência -->
+            <div style="margin-top: 10px; color: #666; font-size: 0.7rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+                Referência: USP 40 – Technetium Tc 99m e bulas dos fabricantes
+            </div>
+        </div>
+    </div>
+
+    <!-- Informações do Kit (Fórmulas) -->
+    <div id="infoKitEficiencia" style="margin-top: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 8px;">
+        <strong style="color: #ffd700;">📌 Fórmula do Kit Selecionado:</strong><br>
+        <span id="infoKitTexto" style="color: #aaa; font-size: 0.9rem;">
+            KARDIA (MIBI): Placa 1 = (Fração 2 / Fração 1 + 2) × 100 | Placa 2 = (Fração 1 / Fração 1 + 2) × 100 | Pureza ≥ 90%
+        </span>
+    </div>
+</div>
+</div>
 
     <!-- ===== ABA 3: PACIENTES ===== -->
     <div id="aba-pacientes" class="tab-content">
@@ -956,6 +1116,8 @@
     <div class="footer-pdf">RadioCalc &bull; Ferramenta para planejamento de radiofármacos em medicina nuclear</div>
 </div>
 
+<!-- ... todo o conteúdo da página ... -->
+
 <script src="assets/js/config.js"></script>
 <script src="assets/js/traducoes.js"></script>
 <script src="assets/js/utils.js"></script>
@@ -968,4 +1130,37 @@
 <script src="assets/js/historico.js"></script>
 <script src="assets/js/graficos.js"></script>
 <script src="assets/js/main.js"></script>
+
+<!-- ===== FORÇAR Tc-99m COMO PADRÃO ===== -->
+<script>
+    (function() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', forcarTc99m);
+        } else {
+            forcarTc99m();
+        }
+        
+        function forcarTc99m() {
+            setTimeout(function() {
+                var selectSimp = document.getElementById('planIsotopo');
+                if (selectSimp) {
+                    selectSimp.value = 'tc';
+                    console.log('✅ Tc-99m definido como padrão no Simplificado');
+                }
+                
+                var selectAgenda = document.getElementById('planIsotopoAgenda');
+                if (selectAgenda) {
+                    selectAgenda.value = 'tc';
+                    console.log('✅ Tc-99m definido como padrão na Agenda');
+                }
+                
+                if (typeof calcularPlanejamento === 'function') {
+                    calcularPlanejamento();
+                }
+            }, 300);
+        }
+    })();
+</script>
+
+</body>
 </html>
