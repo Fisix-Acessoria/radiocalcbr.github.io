@@ -387,7 +387,6 @@ function calcularPacientes() {
         <div class="stat-card"><div class="rotulo">Dose Média Calculada</div><div class="valor" style="font-size: 1.2rem;">${doseMedia.toFixed(2)} mCi</div></div>
         <div class="stat-card verde"><div class="rotulo">Dose Média Administrada</div><div class="valor" style="font-size: 1.2rem;">${doseAdminMedia.toFixed(2)} mCi</div></div>
         <div class="stat-card"><div class="rotulo">Pacientes</div><div class="valor" style="font-size: 1.2rem;">${nPacientes}</div></div>
-        <div class="stat-card destaque" style="grid-column: span 2;"><div class="rotulo">Soma das Doses Medidas</div><div class="valor" style="color: #00d2ff;">${somaDosesMedidas.toFixed(2)} mCi</div></div>
     `;
     
     document.getElementById('meiaVidaDisplay').textContent = `${meiaVida} min`;
