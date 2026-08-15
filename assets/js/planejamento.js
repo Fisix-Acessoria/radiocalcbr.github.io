@@ -991,3 +991,150 @@ function atualizarContadorAgenda() {
     const count = tbody.querySelectorAll('tr').length;
     document.getElementById('totalPacientesAgenda').textContent = count;
 }
+// ==========================================
+// CALCULADORA DE MÚLTIPLAS ELUIÇÕES
+// ==========================================
+// CALCULADORA DE MÚLTIPLAS ELUIÇÕES - CORRIGIDA
+// ==========================================
+window.calcularMultiEluicao = function() {
+    // 1. Obter dados do gerador (em mCi)
+    const A_Mo_nominal_mCi = parseFloat(document.getElementById('atividade-nominal-multi').value);
+    const dataCalib = new Date(document.getElementById('data-calibracao-multi').value);
+    const dataUltimaEluicao = new Date(document.getElementById('data-ultima-eluicao-multi').value);
+    const dataNovaEluicao = new Date(document.getElementById('data-nova-eluicao-multi').value);
+
+    // 2. Validações
+    if (!A_Mo_nominal_mCi || isNaN(dataCalib) || isNaN(dataUltimaEluicao) || isNaN(dataNovaEluicao)) {
+        alert('⚠️ Preencha todos os campos corretamente!');
+        return;
+    }
+
+    if (dataNovaEluicao <= dataUltimaEluicao) {
+        alert('⚠️ A nova eluição deve ser após a última eluição!');
+        return;
+    }
+
+    if (dataUltimaEluicao <= dataCalib) {
+        alert('⚠️ A última eluição deve ser após a data de calibração!');
+        return;
+    }
+
+    // 3. Constantes físicas (meia-vida: Mo-99 = 66h, Tc-99m = 6.02h)
+    const lambda_Mo = 0.01050223; // h⁻¹ (ln2/66)
+    const lambda_Tc = 0.114886273; // h⁻¹ (ln2/6.02)
+
+    // 4. Calcular tempos decorridos (em horas) a partir da calibração
+    const t_ultima = (dataUltimaEluicao - dataCalib) / (1000 * 60 * 60);
+    const t_nova = (dataNovaEluicao - dataCalib) / (1000 * 60 * 60);
+    const deltaT = t_nova - t_ultima; // Tempo entre as eluições
+
+    // 5. Atividade do Mo-99 no momento da NOVA eluição (em mCi)
+    const A_Mo_nova = A_Mo_nominal_mCi * Math.exp(-lambda_Mo * t_nova);
+
+    // 6. Atividade do Mo-99 no momento da ÚLTIMA eluição (necessário para o cálculo)
+    const A_Mo_ultima = A_Mo_nominal_mCi * Math.exp(-lambda_Mo * t_ultima);
+
+    // 7. Cálculo da atividade de Tc-99m disponível para eluição (TEÓRICA)
+    // Fórmula correta para atividade de Tc-99m em equilíbrio com Mo-99
+    const A_Tc_disponivel = A_Mo_ultima * (lambda_Tc / (lambda_Tc - lambda_Mo)) * 
+                            (Math.exp(-lambda_Mo * deltaT) - Math.exp(-lambda_Tc * deltaT));
+
+    // 8. Eficiência prática de eluição (perdas no processo)
+    const eficienciaEluicao = 0.90;
+    const A_Tc_eluida = A_Tc_disponivel * eficienciaEluicao;
+
+    // 9. Cálculo do equilíbrio transiente (~95% do Mo-99 após 24h)
+    const A_Tc_equilibrio = A_Mo_ultima * 0.95 * (1 - Math.exp(-lambda_Tc * deltaT));
+    
+    // 10. Índice de recuperação (quanto % do equilíbrio foi alcançado)
+    const indiceRecuperacao = A_Tc_equilibrio > 0 ? (A_Tc_disponivel / A_Tc_equilibrio) : 0;
+
+    // 11. Exibir resultados
+    exibirResultadoMultiEluicao({
+        A_Mo_nova: A_Mo_nova,
+        A_Mo_ultima: A_Mo_ultima,
+        A_Tc_disponivel: A_Tc_disponivel,      // Teórico (100% eficiência)
+        A_Tc_eluida: A_Tc_eluida,              // Prático (com 90% eficiência)
+        A_Tc_equilibrio: A_Tc_equilibrio,      // Máximo possível (~95% do Mo)
+        deltaT: deltaT,
+        indiceRecuperacao: indiceRecuperacao,
+        eficienciaEluicao: eficienciaEluicao,
+        dataUltimaEluicao: dataUltimaEluicao,
+        dataNovaEluicao: dataNovaEluicao,
+        A_Mo_nominal_mCi: A_Mo_nominal_mCi,
+        dataCalib: dataCalib
+    });
+};
+
+function exibirResultadoMultiEluicao(dados) {
+    const div = document.getElementById('resultado-multi-eluicoes');
+
+    div.innerHTML = `
+        <div style="background: rgba(255,255,255,0.03); border: 2px solid rgba(155, 89, 182, 0.3); padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <h4 style="margin-top: 0; color: #9b59b6;">✅ Resultado da Nova Eluição</h4>
+
+            <!-- APENAS 2 CARDS: DISPONÍVEL e ELUÍDA -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                <div style="background: rgba(46, 204, 113, 0.15); padding: 20px; border-radius: 8px; border: 1px solid rgba(46, 204, 113, 0.2); text-align: center;">
+                    <strong style="color: #aaa;">🧪 Tc-99m disponível</strong><br>
+                    <span style="font-size: 2.2em; color: #2ecc71;">${dados.A_Tc_disponivel.toFixed(1)} mCi</span>
+                    <br><small style="color: #888;">teórico (100% eficiência)</small>
+                </div>
+                <div style="background: rgba(0, 210, 255, 0.15); padding: 20px; border-radius: 8px; border: 1px solid rgba(0, 210, 255, 0.2); text-align: center;">
+                    <strong style="color: #aaa;">💉 Atividade ELUÍDA</strong><br>
+                    <span style="font-size: 2.2em; color: #00d2ff;">${dados.A_Tc_eluida.toFixed(1)} mCi</span>
+                    <br><small style="color: #888;">${(dados.eficienciaEluicao * 100)}% eficiência</small>
+                </div>
+            </div>
+
+            <!-- INFORMAÇÃO ADICIONAL COMPACTA (sem % do equilíbrio) -->
+            <div style="background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.1); padding: 10px; border-radius: 8px; margin-top: 5px; text-align: center;">
+                <span style="color: #aaa; font-size: 0.85rem;">
+                    ⏱️ ${dados.deltaT.toFixed(1)}h desde a última eluição
+                </span>
+            </div>
+
+            <!-- DATA/HORA DA NOVA ELUIÇÃO -->
+            <div style="margin-top: 10px; color: #666; font-size: 0.8rem; text-align: center;">
+                ${dados.dataNovaEluicao.toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })}
+            </div>
+        </div>
+    `;
+}
+
+// ==========================================
+// INICIALIZAÇÃO - Preencher datas com valores padrão
+// ==========================================
+
+// Aguarda o DOM carregar para preencher os campos
+document.addEventListener('DOMContentLoaded', function() {
+    // Preencher data/hora atual nos campos da calculadora multi-eluicao
+    const agora = new Date();
+    const agoraStr = agora.toISOString().slice(0, 16);
+    
+    const camposData = [
+        'data-calibracao-multi',
+        'data-ultima-eluicao-multi',
+        'data-nova-eluicao-multi'
+    ];
+    
+    camposData.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo && !campo.value) {
+            campo.value = agoraStr;
+        }
+    });
+
+    // Sincronizar a data de calibração com a calculadora principal (se existir)
+    const calibPrincipal = document.getElementById('planHorarioMarcacao');
+    const calibMulti = document.getElementById('data-calibracao-multi');
+    if (calibPrincipal && calibPrincipal.value && calibMulti) {
+        calibMulti.value = calibPrincipal.value;
+    }
+});
