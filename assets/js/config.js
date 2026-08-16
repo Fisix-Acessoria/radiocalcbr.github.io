@@ -18,3 +18,14 @@ const COR_ISOTOPO = {
 };
 
 const MAX_PACIENTES = 30;
+
+// 🔥 CONFIGURAÇÃO DO FIREBASE
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCW0JSVhwXezcWSvRsyxUowr_m9MyiG2gw",  // 
+    authDomain: "radiocalcbr.firebaseapp.com",
+    projectId: "radiocalcbr",
+    storageBucket: "radiocalcbr.firebasestorage.app",
+    messagingSenderId: "344287399849",
+    appId: "1:344287399849:web:2fb6b6761162c4be4c7eb8",
+    measurementId: "G-ZMDMQGN6E0"
+};
