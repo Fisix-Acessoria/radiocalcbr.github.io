@@ -18,13 +18,6 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 console.log('✅ Firebase conectado!');
 
-// ===== INICIALIZA O APP CHECK =====
-const appCheck = firebase.appCheck();
-appCheck.activate(
-    '6LcKIIgtAAAAABk4GaDtBGjpNUIyKB3I_aS2myde', // ← SUA SITE KEY
-    true
-);
-console.log('✅ App Check ativado!');
 
 // ==========================================
 // FUNÇÕES DE AUTENTICAÇÃO
