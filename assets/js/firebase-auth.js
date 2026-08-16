@@ -3,21 +3,19 @@
 // ==========================================
 
 // ===== CONFIGURAÇÃO DO FIREBASE =====
-const firebaseConfig = {
-    apiKey: "AIzaSyCNta9gB0betWjrjIf3216QzFdVYmqwNt0",
-    authDomain: "radiocalcbr.firebaseapp.com",
-    projectId: "radiocalcbr",
-    storageBucket: "radiocalcbr.firebasestorage.app",
-    messagingSenderId: "344287399849",
-    appId: "1:344287399849:web:2fb6b6761162c4be4c7eb8",
-    measurementId: "G-ZMDMQGN6E0"
-};
+// Usa o config.js que está no servidor
+const firebaseConfig = FIREBASE_CONFIG;
+
+// Verifica se a config existe
+if (!firebaseConfig || !firebaseConfig.apiKey) {
+    console.error('❌ Firebase não configurado!');
+    alert('⚠️ Erro de configuração. Contate o administrador.');
+}
 
 // ===== INICIALIZA O FIREBASE =====
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 console.log('✅ Firebase conectado!');
-
 
 // ==========================================
 // FUNÇÕES DE AUTENTICAÇÃO
@@ -115,31 +113,22 @@ document.addEventListener('keydown', function(e) {
         const emailInput = document.getElementById('emailLogin');
         const senhaInput = document.getElementById('senhaLogin');
         
-        // Verifica se o Enter foi pressionado dentro dos campos de login
         if (document.activeElement === emailInput || document.activeElement === senhaInput) {
             fazerLogin();
         }
     }
 });
 
-// ===== EXPORTA FUNÇÕES PARA USO GLOBAL =====
-window.fazerLogin = fazerLogin;
-window.fazerLogout = fazerLogout;
-window.auth = auth;
-
-console.log('✅ Módulo de autenticação carregado!');
 // ==========================================
 // FUNÇÕES DE CADASTRO
 // ==========================================
 
-// ===== FUNÇÃO PARA CADASTRO =====
 async function fazerCadastro() {
     const email = document.getElementById('emailCadastro').value.trim();
     const senha = document.getElementById('senhaCadastro').value.trim();
     const confirmarSenha = document.getElementById('confirmarSenhaCadastro').value.trim();
     const erroEl = document.getElementById('erroCadastro');
     
-    // Validações
     if (!email || !senha || !confirmarSenha) {
         erroEl.textContent = '⚠️ Preencha todos os campos!';
         erroEl.style.display = 'block';
@@ -159,18 +148,11 @@ async function fazerCadastro() {
     }
     
     try {
-        // Tenta criar o usuário no Firebase
-        const resultado = await auth.createUserWithEmailAndPassword(email, senha);
+        await auth.createUserWithEmailAndPassword(email, senha);
         erroEl.style.display = 'none';
-        
-        // Cadastro bem-sucedido!
         alert('✅ Conta criada com sucesso! Agora você pode fazer login.');
-        
-        // Volta para a tela de login
         mostrarLogin();
-        
         console.log('✅ Usuário cadastrado:', email);
-        
     } catch (error) {
         let mensagem = '⚠️ ';
         switch (error.code) {
@@ -191,7 +173,6 @@ async function fazerCadastro() {
     }
 }
 
-// ===== FUNÇÕES PARA MOSTRAR/ESCONDER TELAS =====
 function mostrarCadastro() {
     document.getElementById('telaLogin').style.display = 'none';
     document.getElementById('telaCadastro').style.display = 'flex';
@@ -204,19 +185,11 @@ function mostrarLogin() {
     document.getElementById('erroCadastro').style.display = 'none';
 }
 
-// ===== EXPORTA FUNÇÕES =====
-window.fazerCadastro = fazerCadastro;
-window.mostrarCadastro = mostrarCadastro;
-window.mostrarLogin = mostrarLogin;
-
-console.log('✅ Módulo de cadastro carregado!');
-// ===== FUNÇÃO PARA ESQUECI A SENHA =====
 async function esqueciSenha() {
     const email = prompt('📧 Digite seu email para receber o link de redefinição de senha:');
     
-    if (!email) return; // Usuário cancelou
+    if (!email) return;
     
-    // Validação simples
     if (!email.includes('@') || !email.includes('.')) {
         alert('⚠️ Por favor, digite um email válido.');
         return;
@@ -242,5 +215,13 @@ async function esqueciSenha() {
     }
 }
 
-// ===== EXPORTA A FUNÇÃO =====
+// ===== EXPORTA FUNÇÕES =====
+window.fazerLogin = fazerLogin;
+window.fazerLogout = fazerLogout;
+window.fazerCadastro = fazerCadastro;
+window.mostrarCadastro = mostrarCadastro;
+window.mostrarLogin = mostrarLogin;
 window.esqueciSenha = esqueciSenha;
+window.auth = auth;
+
+console.log('✅ Módulo de autenticação carregado!');
