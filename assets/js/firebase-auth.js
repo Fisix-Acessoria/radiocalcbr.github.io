@@ -210,3 +210,37 @@ window.mostrarCadastro = mostrarCadastro;
 window.mostrarLogin = mostrarLogin;
 
 console.log('✅ Módulo de cadastro carregado!');
+// ===== FUNÇÃO PARA ESQUECI A SENHA =====
+async function esqueciSenha() {
+    const email = prompt('📧 Digite seu email para receber o link de redefinição de senha:');
+    
+    if (!email) return; // Usuário cancelou
+    
+    // Validação simples
+    if (!email.includes('@') || !email.includes('.')) {
+        alert('⚠️ Por favor, digite um email válido.');
+        return;
+    }
+    
+    try {
+        await auth.sendPasswordResetEmail(email);
+        alert('✅ Email de redefinição enviado! Verifique sua caixa de entrada.');
+        console.log('✅ Email de redefinição enviado para:', email);
+    } catch (error) {
+        let mensagem = '⚠️ ';
+        switch (error.code) {
+            case 'auth/user-not-found':
+                mensagem += 'Usuário não encontrado. Verifique o email digitado.';
+                break;
+            case 'auth/invalid-email':
+                mensagem += 'Email inválido.';
+                break;
+            default:
+                mensagem += error.message;
+        }
+        alert(mensagem);
+    }
+}
+
+// ===== EXPORTA A FUNÇÃO =====
+window.esqueciSenha = esqueciSenha;
