@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioCalc - Planejamento de Radiofármacos</title>
-    <!-- FAVICON CORRIGIDO - sem caracteres especiais na URL -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90' fill='%23ffd700'%3ER%3C/text%3E%3C/svg%3E">
     
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-DPC2HP7XXF"></script>
@@ -19,24 +18,220 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
-    <head>
-    <meta charset="UTF-8">
-    <title>RadioCalc</title>
+    <!-- ===== BIBLIOTECAS DO FIREBASE ===== -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     
- <head>
-    <meta charset="UTF-8">
-    <title>RadioCalc</title>
-    
+    <!-- ===== CSS ===== -->
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
-</head>
-</head>
 <body>
+    <body>
 
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="telaLogin" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,215,0,0.15);
+        border-radius: 24px;
+        padding: 40px 50px;
+        max-width: 400px;
+        width: 90%;
+    ">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 4rem;">☢️🩺</div>
+            <h1 style="color: #ffd700;">RadioCalc BR</h1>
+            <p style="color: #888;">Sistema de Planejamento de Radiofármacos</p>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="color: #aaa; display: block; margin-bottom: 5px;">📧 Email</label>
+            <input type="email" id="emailLogin" placeholder="seu@email.com" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid #333;
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 1rem;
+            ">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: #aaa; display: block; margin-bottom: 5px;">🔑 Senha</label>
+            <input type="password" id="senhaLogin" placeholder="Digite sua senha" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid #333;
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 1rem;
+            " onkeypress="if(event.key==='Enter') fazerLogin()">
+        </div>
+        
+        <button onclick="fazerLogin()" style="
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ffd700, #f7971e);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            🔓 Entrar
+        </button>
+        
+        <div id="erroLogin" style="color: #ff6b6b; text-align: center; margin-top: 15px; display: none;"></div>
+        <!-- Link para criar conta -->
+<div style="margin-top: 15px; text-align: center;">
+    <span style="color: #555; font-size: 0.85rem;">
+        Não tem uma conta?
+        <a href="#" onclick="mostrarCadastro()" style="color: #ffd700; text-decoration: none; font-weight: bold;">
+            📝 Criar conta
+        </a>
+    </span>
+</div>
+        <div style="margin-top: 20px; text-align: center; font-size: 0.7rem; color: #555;">
+            🔒 Acesso restrito
+        </div>
+    </div>
+</div>
+<!-- ===== TELA DE CADASTRO ===== -->
+<div id="telaCadastro" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a1a, #1a1a2e);
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+">
+    <div style="
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,215,0,0.15);
+        border-radius: 24px;
+        padding: 40px 50px;
+        max-width: 400px;
+        width: 90%;
+    ">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div style="font-size: 4rem;">📝</div>
+            <h1 style="color: #ffd700;">Criar Conta</h1>
+            <p style="color: #888; font-size: 0.9rem;">Preencha os dados para se cadastrar</p>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="color: #aaa; display: block; margin-bottom: 5px;">📧 Email</label>
+            <input type="email" id="emailCadastro" placeholder="seu@email.com" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid #333;
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 1rem;
+            ">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="color: #aaa; display: block; margin-bottom: 5px;">🔑 Senha</label>
+            <input type="password" id="senhaCadastro" placeholder="Mínimo 6 caracteres" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid #333;
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 1rem;
+            ">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: #aaa; display: block; margin-bottom: 5px;">🔑 Confirmar Senha</label>
+            <input type="password" id="confirmarSenhaCadastro" placeholder="Digite a senha novamente" style="
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: 1px solid #333;
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 1rem;
+            ">
+        </div>
+        
+        <button onclick="fazerCadastro()" style="
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ffd700, #f7971e);
+            border: none;
+            border-radius: 10px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            📝 Criar Conta
+        </button>
+        
+        <div id="erroCadastro" style="color: #ff6b6b; text-align: center; margin-top: 15px; display: none;"></div>
+        
+        <div style="margin-top: 15px; text-align: center; font-size: 0.85rem;">
+            <span style="color: #555;">Já tem uma conta?</span>
+            <a href="#" onclick="mostrarLogin()" style="color: #ffd700; text-decoration: none;">Fazer login</a>
+        </div>
+    </div>
+</div>
+<!-- ===== CONTEÚDO PRINCIPAL (começo) ===== -->
+<div id="conteudoPrincipal" style="display: none;">
+     <!-- Banner do usuário -->
+    <div style="
+        background: rgba(255,215,0,0.05);
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,215,0,0.1);
+        margin: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+    ">
+        <span style="color: #aaa;">
+            👤 <strong id="nomeUsuarioLogado" style="color: #ffd700;">Carregando...</strong>
+        </span>
+        <button onclick="fazerLogout()" style="
+            background: rgba(255,107,107,0.1);
+            border: 1px solid rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+        ">
+            🚪 Sair
+        </button>
+    </div>
+<!-- ===== HEADER (CABEÇALHO) ===== -->
 <header class="header">
     <div class="container">
         <h1>
-            <!-- ===== NOVO LOGO - OPÇÃO 3: ☢️ + 🩺 ===== -->
             <div class="logo-container">
                 <span class="logo-icon">
                     <span class="radiation">☢️</span>
@@ -50,80 +245,80 @@
             </div>
         </h1>
         <p class="subtitle" data-translate="subtitulo">Planejamento de Radiofármacos · Tc-99m · F-18 · I-123</p>
- <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
-    <!-- BOTÃO SALVAR DADOS -->
-    <button onclick="salvarTodosOsDados()" style="
-        background: rgba(0,210,255,0.15);
-        border: 1px solid rgba(0,210,255,0.3);
-        color: #00d2ff;
-        padding: 6px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: 600;
-        transition: 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    " onmouseover="this.style.background='rgba(0,210,255,0.25)'" onmouseout="this.style.background='rgba(0,210,255,0.15)'">
-        💾 Salvar Dados
-    </button>
-    
-    <!-- NOVO BOTÃO LIMPAR DADOS -->
-    <button onclick="limparDadosSalvos()" style="
-        background: rgba(255,107,107,0.15);
-        border: 1px solid rgba(255,107,107,0.3);
-        color: #ff6b6b;
-        padding: 6px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        font-weight: 600;
-        transition: 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    " onmouseover="this.style.background='rgba(255,107,107,0.25)'" onmouseout="this.style.background='rgba(255,107,107,0.15)'">
-        🗑️ Limpar Dados
-    </button>
-    
-    <!-- BOTÃO SOBRE -->
-    <button onclick="abrirSobre()" style="
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: #aaa;
-        padding: 4px 14px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.75rem;
-        transition: 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,215,0,0.3)'" onmouseout="this.style.color='#aaa';this.style.borderColor='rgba(255,255,255,0.1)'">
-        ℹ️ Sobre
-    </button>
-    
-    <!-- BOTÃO IDIOMA -->
-    <button onclick="toggleLanguage()" style="
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,215,0,0.3);
-        color: #ffd700;
-        padding: 4px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-        transition: 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    " onmouseover="this.style.background='rgba(255,215,0,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
-        🌐 <span id="langLabel">PT</span> <span style="font-size: 0.6rem; opacity: 0.6;">▼</span>
-    </button>
-</div>
-
-<div class="container">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 8px; flex-wrap: wrap;">
+            <!-- BOTÃO SALVAR DADOS -->
+            <button onclick="salvarTodosOsDados()" style="
+                background: rgba(0,210,255,0.15);
+                border: 1px solid rgba(0,210,255,0.3);
+                color: #00d2ff;
+                padding: 6px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 0.75rem;
+                font-weight: 600;
+                transition: 0.3s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            " onmouseover="this.style.background='rgba(0,210,255,0.25)'" onmouseout="this.style.background='rgba(0,210,255,0.15)'">
+                💾 Salvar Dados
+            </button>
+            
+            <!-- BOTÃO LIMPAR DADOS -->
+            <button onclick="limparDadosSalvos()" style="
+                background: rgba(255,107,107,0.15);
+                border: 1px solid rgba(255,107,107,0.3);
+                color: #ff6b6b;
+                padding: 6px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 0.75rem;
+                font-weight: 600;
+                transition: 0.3s;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            " onmouseover="this.style.background='rgba(255,107,107,0.25)'" onmouseout="this.style.background='rgba(255,107,107,0.15)'">
+                🗑️ Limpar Dados
+            </button>
+            
+            <!-- BOTÃO SOBRE -->
+            <button onclick="abrirSobre()" style="
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.1);
+                color: #aaa;
+                padding: 4px 14px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 0.75rem;
+                transition: 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,215,0,0.3)'" onmouseout="this.style.color='#aaa';this.style.borderColor='rgba(255,255,255,0.1)'">
+                ℹ️ Sobre
+            </button>
+            
+            <!-- BOTÃO IDIOMA -->
+            <button onclick="toggleLanguage()" style="
+                background: rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,215,0,0.3);
+                color: #ffd700;
+                padding: 4px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 0.8rem;
+                font-weight: 600;
+                transition: 0.3s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            " onmouseover="this.style.background='rgba(255,215,0,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                🌐 <span id="langLabel">PT</span> <span style="font-size: 0.6rem; opacity: 0.6;">▼</span>
+            </button>
+        </div>
+    </div>
+</header>
 
     <!-- DISCLAIMER -->
     <div class="disclaimer-box" id="disclaimerBox">
@@ -868,7 +1063,9 @@
             <a href="#">Voltar ao topo</a>
         </p>
     </footer>
+
 </div>
+<!-- ===== CONTEÚDO PRINCIPAL (fim) ===== -->
 
 <!-- ===== MODAL SOBRE ===== -->
 <div class="modal-sobre-overlay" id="modalSobre" onclick="fecharSobreExterno(event)">
@@ -1130,6 +1327,7 @@
 <script src="assets/js/historico.js"></script>
 <script src="assets/js/graficos.js"></script>
 <script src="assets/js/main.js"></script>
+<script src="assets/js/firebase-auth.js"></script>
 
 <!-- ===== FORÇAR Tc-99m COMO PADRÃO ===== -->
 <script>
