@@ -201,6 +201,13 @@ function aplicarPlanejamento() {
 // ==========================================
 
 const KITS_MARCACAO = {
+    eluato: {
+        nome: 'Eluato',
+        formula: 'Placa = (F1/F1+F2)×100',
+        purezaMinima: 95,
+        descricao: 'Análise de pureza do eluato | Pureza ≥ 95%',
+        apenasUmaPlaca: true
+    },
     kardia: {
         nome: 'KARDIA (MIBI)',
         formula: 'Placa 1 = (F2/F1+F2)×100 | Placa 2 = (F1/F1+F2)×100',
@@ -289,13 +296,13 @@ function calcularEficienciaMarcacao() {
         pureza = 100 - (placa1 + placa2);
         console.log('📌 KARDIA - Placa1:', placa1, 'Placa2:', placa2, 'Pureza:', pureza);
     }
-    // ====== CÁLCULO PARA LIMPHA ======
-    else if (kit === 'limpha') {
-        // LIMPHA: PLACA = (F1/F1+F2)×100 | Pureza = 100 - placa
+    // ====== CÁLCULO PARA ELUATO E LIMPHA ======
+    else if (kit === 'limpha' || kit === 'eluato') {
+        // LIMPHA e ELUATO: PLACA = (F1/F1+F2)×100 | Pureza = 100 - placa
         if (totalPlaca1 > 0) placa1 = (p1f1 / totalPlaca1) * 100;
         placa2 = 0;
         pureza = 100 - placa1;
-        console.log('📌 LIMPHA - Placa1:', placa1, 'Pureza:', pureza);
+        console.log('📌 ELUATO/LIMPHA - Placa1:', placa1, 'Pureza:', pureza);
     }
     // ====== CÁLCULO PARA OSTEO, RENO, NEFRO, PIRO ======
     else {
@@ -321,7 +328,7 @@ function calcularEficienciaMarcacao() {
     const resultadoDiv = document.getElementById('resultadoEficienciaMarcacao');
     resultadoDiv.style.display = 'block';
     document.getElementById('resultadoPlaca1').textContent = placa1 + '%';
-    document.getElementById('resultadoPlaca2').textContent = (kit === 'limpha' ? '---' : placa2 + '%');
+    document.getElementById('resultadoPlaca2').textContent = (kit === 'limpha' || kit === 'eluato' ? '---' : placa2 + '%');
     document.getElementById('resultadoPureza').textContent = pureza + '%';
     document.getElementById('resultadoPureza').style.color = aprovado ? '#2ecc71' : '#ff6b6b';
     
@@ -353,6 +360,7 @@ function calcularEficienciaMarcacao() {
     
     console.log('✅ Resultado exibido com sucesso!');
 }
+
 
 function limparCamposEficiencia() {
     document.getElementById('placa1Fracao1').value = '';
